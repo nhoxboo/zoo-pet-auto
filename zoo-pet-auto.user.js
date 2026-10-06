@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.0.1
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Câu Cá Tuyệt Đối 100%, Auto Săn Boss & Quét Toàn Map, Bất Tử Toàn Diện, Tăng Điểm Kinh Nghiệm EXP Siêu Tốc, Nút Kết Nối Lại 1-Click, Auto Farm, Chuyển Hành Tinh Nhanh, Smart Quests.
+// @version      3.0.2
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Câu Cá Đầy Đủ Cơ Chế Kéo Cần Mượt Mà, Auto Săn Boss & Quét Toàn Map, Bất Tử Toàn Diện, Tăng Điểm Kinh Nghiệm EXP Siêu Tốc, Nút Kết Nối Lại 1-Click.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -862,29 +862,64 @@
                 }
             }
 
-            // 2. Kéo cá lên khi cá cắn câu (Tự động kéo 100% mọi loại cá, không hủy cần)
-            if (fishing.phase === 'bite' || fishing.phase === 'hook' || fishing.phase === 'hooked') {
-                if (typeof fishing.hook === 'function' && fishing.phase !== 'hooked') {
+            // 2. Giai đoạn cá cắn câu (Bite) -> Giật cần để cắn lưỡi câu (Hook)
+            if (fishing.phase === 'bite') {
+                if (typeof fishing.hook === 'function') {
                     try { fishing.hook(); } catch (_) {}
+                } else if (typeof fishing.press === 'function') {
+                    try { fishing.press(); } catch (_) {}
                 }
-                if (typeof fishing.finish === 'function' && fishing.interest) {
-                    const catchId = fishing.catchId || (fishing.interest ? fishing.interest.species : null);
-                    const isRare = isRareOrLegendFish(catchId, fishing.prize);
-                    let fishName = catchId || 'Cá';
-                    try {
-                        if (window.W && window.W[catchId]) fishName = window.W[catchId].name;
-                    } catch (_) {}
+                return;
+            }
 
-                    try {
-                        fishing.finish(true);
-                        stats.fishCount++;
-                        updateStatsUI();
+            // 3. Giai đoạn kéo cá (Hooked / Reeling) -> Giữ cần, kéo cá và kiểm soát lực căng dây mượt mà
+            if (fishing.phase === 'hooked') {
+                const reelBtn = document.querySelector('#reel');
+                if (reelBtn) reelBtn.classList.add('down');
 
-                        if (isRare) {
-                            showToast(`🌟 [CÂU CÁ VIP] Bạn đã câu trúng <b>${fishName}</b> (Hiếm / Huyền Thoại)!`, 4000);
+                // Kiểm soát lực căng dây thông minh (Tug-of-War Auto Reel):
+                if (fishing.tension >= 0.85) {
+                    // Dây quá căng -> Nhả nhẹ một nhịp để không đứt dây
+                    if (typeof fishing.release === 'function') {
+                        try { fishing.release(); } catch (_) {}
+                    }
+                    fishing.holding = false;
+                } else {
+                    // Dây an toàn -> Giữ và kéo cần liên tục
+                    if (typeof fishing.press === 'function') {
+                        try { fishing.press(); } catch (_) {}
+                    }
+                    fishing.holding = true;
+                }
+
+                // Nếu bật Ultra Fishing -> Tăng tốc độ kéo cần mượt mà, đầy đủ hiệu ứng
+                if (CFG.cheats.ultraFishing) {
+                    fishing.holding = true;
+                    fishing.progress = Math.min(1, (fishing.progress || 0) + 0.05);
+                    fishing.tension = Math.min(0.5, fishing.tension || 0);
+                }
+
+                // Khi tiến trình kéo đạt 100% (progress >= 1) -> Thu cá lên bờ thành công
+                if (fishing.progress >= 1) {
+                    if (typeof fishing.finish === 'function' && fishing.interest) {
+                        const catchId = fishing.catchId || (fishing.interest ? fishing.interest.species : null);
+                        const isRare = isRareOrLegendFish(catchId, fishing.prize);
+                        let fishName = catchId || 'Cá';
+                        try {
+                            if (window.W && window.W[catchId]) fishName = window.W[catchId].name;
+                        } catch (_) {}
+
+                        try {
+                            fishing.finish(true);
+                            stats.fishCount++;
+                            updateStatsUI();
+
+                            if (isRare) {
+                                showToast(`🌟 [CÂU CÁ VIP] Bạn đã câu trúng <b>${fishName}</b> (Hiếm / Huyền Thoại)!`, 4000);
+                            }
+                        } catch (err) {
+                            console.error('[ZooPetAuto] Lỗi finish fishing:', err);
                         }
-                    } catch (err) {
-                        console.error('[ZooPetAuto] Lỗi finish fishing:', err);
                     }
                 }
             }

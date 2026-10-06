@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.2.1
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Tự Động Kết Nối Đa Tầng Bất Khả Xâm Phạm (Triple-Resilient Auto-Connect), Bắt Dính Engine Ngay Lập Tức Ở Mọi Map & Hầm Ngục, Chống Văng Hầm Ngục Solo, Vô Hạn Lượt Đi Ải, Auto Câu Cá Chuẩn Kéo Cần, Auto Săn Boss Toàn Map, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
+// @version      3.3.0
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Săn Sạch 100% Tất Cả Boss Trên Map Mới Chuyển Hành Tinh, Hút Sạch Vật Phẩm & Rương Rơi Trước Khi Bay, Tự Động Kết Nối Đa Tầng Bất Khả Xâm Phạm, Chống Văng Hầm Ngục Solo, Vô Hạn Lượt Đi Ải, Auto Câu Cá Chuẩn Kéo Cần, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -568,9 +568,17 @@
     function isBossEntity(enemy) {
         if (!enemy) return false;
         if (enemy.boss === true || enemy.isBoss === true) return true;
-        if (enemy.def && (enemy.def.boss || enemy.def.titan || enemy.def.sboss || enemy.def.worldBoss)) return true;
-        if (enemy.type && /boss|titan|bear|cake|yeti|dragon|golem|treant|croc|mammoth|gingerbread/i.test(enemy.type)) return true;
-        if (enemy.def && enemy.def.name && /vua|chúa|yeti|rồng|ma mút|golem|titan|khổng lồ|đại thụ/i.test(enemy.def.name)) return true;
+        if (enemy.def) {
+            if (enemy.def.boss || enemy.def.titan || enemy.def.sboss || enemy.def.worldBoss || enemy.def.kind === 'boss' || enemy.def.kind === 'titan') return true;
+        }
+        const BOSS_TYPES = [
+            'bear', 'cake', 'yeti', 'treant', 'croc', 'gingerbread', 'mammoth', 'dragon', 'golem',
+            'mushking', 'jellyqueen', 'frostowl', 'robot', 'gorilla', 'leviathan', 'phoenix', 'shadowlord',
+            'titan_turtle', 'titan_hydra', 'titan_crystal', 'titan_scorpion', 'titan_clock', 'titan_flower',
+            'titan_kraken', 'titan_whale', 'titan_eye', 'sb_colossus', 'dg_boss'
+        ];
+        if (enemy.type && (BOSS_TYPES.includes(enemy.type) || enemy.type.startsWith('titan_') || enemy.type.startsWith('sb_') || enemy.type.includes('boss'))) return true;
+        if (enemy.def && enemy.def.name && /vua|chúa|yeti|rồng|ma mút|golem|titan|khổng lồ|đại thụ|nữ hoàng|bóng tối|cổ vương|robot/i.test(enemy.def.name)) return true;
         return false;
     }
 
@@ -586,6 +594,35 @@
         if (enemy.alive === false || (enemy.hp !== undefined && enemy.hp <= 0)) return false;
         if (enemy.state === 'dead') return false;
         return true;
+    }
+
+    function getAllAliveBossesOnPlanet() {
+        if (!G || !G.enemies) return [];
+        const res = [];
+        const seen = new Set();
+
+        // 1. Quét Boss Titan / World Boss từ G.enemies.titan
+        if (G.enemies.titan && isAttackable(G.enemies.titan)) {
+            const titan = G.enemies.titan;
+            if (!CFG.boss.skipTitans || !isTitanBoss(titan)) {
+                res.push(titan);
+                seen.add(titan);
+            }
+        }
+
+        // 2. Quét toàn bộ danh sách G.enemies.list
+        const enemies = G.enemies.list || [];
+        for (let enemy of enemies) {
+            if (!enemy || seen.has(enemy)) continue;
+            if (!isAttackable(enemy)) continue;
+            if (!isBossEntity(enemy)) continue;
+            if (CFG.boss.skipTitans && isTitanBoss(enemy)) continue;
+
+            res.push(enemy);
+            seen.add(enemy);
+        }
+
+        return res;
     }
 
     function findBestTarget() {
@@ -722,13 +759,14 @@
         return Math.sqrt(dx * dx + dz * dz);
     }
 
-    // --- MODULE 4: AUTO DU HÀNH SĂN BOSS CHUẨN XÁC (KHÔNG BỊ CHUYỂN LIÊN TỤC) ---
+    // --- MODULE 4: AUTO DU HÀNH SĂN BOSS CHUẨN XÁC & LỤM SẠCH ĐỒ TRƯỚC KHI CHUYỂN ---
     let hopperState = {
         currentPlanet: null,
         planetEnterTime: 0,
-        stage: 'INIT', // 'WAIT_SPAWN' | 'FIGHTING' | 'LOOTING' | 'CHECK_QUESTS' | 'READY_TO_JUMP'
-        targetBoss: null,
-        bossKilledThisVisit: false,
+        stage: 'INIT', // 'SCANNING_WAIT' | 'FIGHTING' | 'LOOTING' | 'CHECK_QUESTS' | 'READY_TO_JUMP'
+        currentTarget: null,
+        bossesKilledOnPlanet: 0,
+        lootStartTime: 0,
         lootEndTime: 0,
         statusText: 'Đang chờ kích hoạt'
     };
@@ -743,62 +781,112 @@
         if (hopperState.currentPlanet !== currentPlanet) {
             hopperState.currentPlanet = currentPlanet;
             hopperState.planetEnterTime = now;
-            hopperState.stage = 'WAIT_SPAWN';
-            hopperState.targetBoss = null;
-            hopperState.bossKilledThisVisit = false;
+            hopperState.stage = 'SCANNING_WAIT';
+            hopperState.currentTarget = null;
+            hopperState.bossesKilledOnPlanet = 0;
+            hopperState.lootStartTime = 0;
             hopperState.lootEndTime = 0;
-            updateHopperStatusUI(`🌍 Vừa đáp xuống <b>${PLANET_DATA[currentPlanet]?.name || currentPlanet}</b>, đang quét quái & Boss...`);
+            updateHopperStatusUI(`🌍 Vừa đáp xuống <b>${PLANET_DATA[currentPlanet]?.name || currentPlanet}</b>, đang quét Boss...`);
             return;
         }
 
-        const enemies = G.enemies.list || [];
         const timeOnPlanet = (now - hopperState.planetEnterTime) / 1000;
+        const aliveBosses = getAllAliveBossesOnPlanet();
 
-        // 2. GIAI ĐOẠN 1: Chờ quái & Boss xuất hiện đầy đủ (Chờ tối thiểu 6s)
-        if (hopperState.stage === 'WAIT_SPAWN') {
-            const activeBoss = enemies.find(e => isAttackable(e) && isBossEntity(e) && (!CFG.boss.skipTitans || !isTitanBoss(e)));
+        // 2. GIAI ĐOẠN 1: Quét Boss trên hành tinh
+        if (hopperState.stage === 'SCANNING_WAIT') {
+            if (aliveBosses.length > 0) {
+                // Tìm Boss gần nhất để mở màn
+                let nearest = null;
+                let minDist = Infinity;
+                for (let b of aliveBosses) {
+                    const d = getDistance(G.player.pos, b.pos);
+                    if (d < minDist) {
+                        minDist = d;
+                        nearest = b;
+                    }
+                }
 
-            if (activeBoss) {
                 hopperState.stage = 'FIGHTING';
-                hopperState.targetBoss = activeBoss;
-                updateHopperStatusUI(`⚔️ Phát hiện Boss: <b>${activeBoss.def?.name || activeBoss.type || 'Boss'}</b> (HP: ${Math.round(activeBoss.hp)}). Đang tiến đánh!`);
-            } else if (timeOnPlanet >= 10) {
-                // Nếu sau 10s không có boss (ví dụ map Home hoặc Boss chưa hồi):
-                if (currentPlanet === 'home' || !PLANET_DATA[currentPlanet]?.boss || PLANET_DATA[currentPlanet]?.boss.includes('Không')) {
-                    updateHopperStatusUI(`ℹ️ ${PLANET_DATA[currentPlanet]?.name} không có Boss. Chuẩn bị chuyển hành tinh tiếp theo...`);
+                hopperState.currentTarget = nearest;
+                updateHopperStatusUI(`⚔️ Phát hiện <b>${aliveBosses.length} Boss</b> trên map! Đang tấn công <b>${nearest.def?.name || nearest.type || 'Boss'}</b>...`);
+                return;
+            }
+
+            // Nếu sau 8s quét không có Boss (hoặc Boss chưa hồi):
+            if (timeOnPlanet >= 8) {
+                // Kiểm tra xem có đồ rơi trên đất không trước khi chuyển
+                const hasDrops = (G.drops?.items?.length > 0 || G.drops?.bags?.length > 0);
+                if (hasDrops) {
+                    hopperState.stage = 'LOOTING';
+                    hopperState.lootStartTime = now;
+                    hopperState.lootEndTime = now + 5000;
+                    updateHopperStatusUI(`ℹ️ Không có Boss trên map. Đang hút nốt vật phẩm còn sót lại...`);
+                } else {
+                    updateHopperStatusUI(`⏳ Không còn Boss trên ${PLANET_DATA[currentPlanet]?.name || currentPlanet}. Chuẩn bị chuyển hành tinh...`);
                     hopperState.stage = 'READY_TO_JUMP';
-                    hopperState.lootEndTime = now + 4000;
-                } else if (timeOnPlanet >= 20) {
-                    updateHopperStatusUI(`⏳ Boss chưa hồi sau 20s. Chuẩn bị chuyển hành tinh kế tiếp...`);
-                    hopperState.stage = 'READY_TO_JUMP';
-                    hopperState.lootEndTime = now + 3000;
                 }
             } else {
-                updateHopperStatusUI(`🔍 Đang quét tìm Boss trên ${PLANET_DATA[currentPlanet]?.name} (${Math.round(10 - timeOnPlanet)}s)...`);
+                updateHopperStatusUI(`🔍 Đang quét toàn bộ Boss trên ${PLANET_DATA[currentPlanet]?.name || currentPlanet} (${Math.round(8 - timeOnPlanet)}s)...`);
             }
             return;
         }
 
-        // 3. GIAI ĐOẠN 2: Đang chiến đấu với Boss (TUYỆT ĐỐI KHÔNG CHUYỂN MAP TRONG KHI ĐÁNH)
+        // 3. GIAI ĐOẠN 2: CHIẾN ĐẤU - Tiêu diệt LẦN LƯỢT TẤT CẢ BOSS TRÊN MAP
         if (hopperState.stage === 'FIGHTING') {
-            const boss = hopperState.targetBoss;
+            let target = hopperState.currentTarget;
 
-            // Kiểm tra Boss còn sống không
-            if (boss && boss.alive && boss.hp > 0 && enemies.includes(boss)) {
-                // Gán target chuẩn cho player (game engine tự động di chuyển tới Boss)
-                G.player.target = { type: 'enemy', enemy: boss, point: boss.pos.clone(), auto: true };
+            // Nếu target hiện tại đã chết hoặc không hợp lệ -> tìm Boss còn sống khác trên map
+            if (!target || !isAttackable(target)) {
+                if (target) {
+                    stats.bossesKilled++;
+                    hopperState.bossesKilledOnPlanet++;
+                    updateStatsUI();
+                    showToast(`🎉 Đã tiêu diệt ${target.def?.name || 'Boss'}!`, 3000);
+                }
+
+                if (aliveBosses.length > 0) {
+                    // Còn Boss khác trên map -> chuyển sang mục tiêu tiếp theo ngay lập tức!
+                    let nextBoss = null;
+                    let minDist = Infinity;
+                    for (let b of aliveBosses) {
+                        const d = getDistance(G.player.pos, b.pos);
+                        if (d < minDist) {
+                            minDist = d;
+                            nextBoss = b;
+                        }
+                    }
+                    hopperState.currentTarget = nextBoss;
+                    target = nextBoss;
+                    updateHopperStatusUI(`⚔️ Tiếp tục săn Boss: <b>${nextBoss.def?.name || nextBoss.type || 'Boss'}</b> (Còn lại: ${aliveBosses.length} Boss)...`);
+                } else {
+                    // ĐÃ DIỆT SẠCH TẤT CẢ BOSS TRÊN MAP!
+                    hopperState.currentTarget = null;
+                    hopperState.stage = 'LOOTING';
+                    hopperState.lootStartTime = now;
+                    // Thời gian chờ hút đồ: tối thiểu CFG.boss.hopDelay (hoặc 8s)
+                    hopperState.lootEndTime = now + Math.max(8000, (CFG.boss.hopDelay || 8) * 1000);
+                    showToast(`🏆 Đã quét sạch toàn bộ Boss trên ${PLANET_DATA[currentPlanet]?.name}! Đang hút sạch trang bị...`, 4000);
+                    updateHopperStatusUI(`🎁 Đã diệt sạch Boss! Đang hút sạch vật phẩm & phần thưởng...`);
+                    return;
+                }
+            }
+
+            // Đang tấn công target hiện tại
+            if (target && isAttackable(target)) {
+                G.player.target = { type: 'enemy', enemy: target, point: target.pos.clone(), auto: true };
 
                 try {
-                    G.player.facing = Math.atan2(boss.pos.x - G.player.pos.x, boss.pos.z - G.player.pos.z);
+                    G.player.facing = Math.atan2(target.pos.x - G.player.pos.x, target.pos.z - G.player.pos.z);
                 } catch (_) {}
 
-                const dist = getDistance(G.player.pos, boss.pos);
-                const attackRange = (boss.def ? boss.def.radius : 1.5) + (G.player.weapon?.range || 1.2) * 1.2;
+                const dist = getDistance(G.player.pos, target.pos);
+                const attackRange = (target.def ? target.def.radius : 1.5) + (G.player.weapon?.range || 1.2) * 1.3;
 
                 if (dist <= attackRange) {
                     try {
                         if (G.player.cd) G.player.cd.atk = 0;
-                        if (typeof G.player.attack === 'function') G.player.attack(boss);
+                        if (typeof G.player.attack === 'function') G.player.attack(target);
                     } catch (_) {}
 
                     if (typeof G.player.useSkill === 'function') {
@@ -811,30 +899,36 @@
                         }
                     }
                 }
-                updateHopperStatusUI(`⚔️ Đang tiêu diệt Boss: <b>${boss.def?.name || boss.type || 'Boss'}</b> (HP còn: ${Math.round(boss.hp)})...`);
-                return;
-            } else {
-                // Boss ĐÃ CHẾT!
-                hopperState.bossKilledThisVisit = true;
-                hopperState.stage = 'LOOTING';
-                hopperState.lootEndTime = now + (CFG.boss.hopDelay * 1000 || 8000);
-                stats.bossesKilled++;
-                updateStatsUI();
-                showToast(`🎉 Boss trên ${PLANET_DATA[currentPlanet]?.name} đã bị tiêu diệt! Đang hút phần thưởng...`, 4000);
-                updateHopperStatusUI(`🎁 Đã diệt xong Boss! Đang hút sạch trang bị & phần thưởng (${CFG.boss.hopDelay}s)...`);
-                return;
+                const bossHp = Math.max(0, Math.round(target.hp || 0));
+                updateHopperStatusUI(`⚔️ Đang tiêu diệt: <b>${target.def?.name || target.type || 'Boss'}</b> (HP: ${bossHp}). Còn lại: <b>${aliveBosses.length} Boss</b> trên map.`);
             }
+            return;
         }
 
-        // 4. GIAI ĐOẠN 3: Hút phần thưởng sau khi diệt Boss
+        // 4. GIAI ĐOẠN 3: LỤM ĐỒ & HÚT PHẦN THƯỞNG (ĐẢM BẢO KHÔNG BỎ SÓT BẤT KỲ ĐỒ NÀO)
         if (hopperState.stage === 'LOOTING') {
-            // Kích hoạt hút đồ
+            // Hút toàn bộ rương và vật phẩm về phía player
             runLootVacuum();
 
-            const remaining = Math.max(0, Math.ceil((hopperState.lootEndTime - now) / 1000));
-            updateHopperStatusUI(`🎁 Đang hút sạch phần thưởng rơi (còn <b>${remaining}s</b>)...`);
+            const itemsOnGround = G.drops?.items?.length || 0;
+            const bagsOnGround = G.drops?.bags?.length || 0;
+            const totalDrops = itemsOnGround + bagsOnGround;
 
-            if (now >= hopperState.lootEndTime) {
+            const remainingSec = Math.max(0, Math.ceil((hopperState.lootEndTime - now) / 1000));
+
+            // Nếu vẫn còn đồ trên đất -> tiếp tục hút và hiển thị số lượng
+            if (totalDrops > 0) {
+                updateHopperStatusUI(`🎁 Đang hút <b>${totalDrops} vật phẩm/túi đồ rơi</b> (Chờ thêm: ${remainingSec}s)...`);
+                // Nếu đã hết thời gian loot cơ bản nhưng vẫn còn đồ, gia hạn thêm 3s (tối đa 20s tổng)
+                if (now >= hopperState.lootEndTime && (now - hopperState.lootStartTime) < 20000) {
+                    hopperState.lootEndTime = now + 3000;
+                }
+            } else {
+                updateHopperStatusUI(`✅ Đã thu gom sạch toàn bộ trang bị & túi đồ! Chuẩn bị bay (${remainingSec}s)...`);
+            }
+
+            // Chỉ chuyển map khi: ĐÃ HẾT ĐỒ HOẶC HẾT THỜI GIAN CHỜ TỐI ĐA
+            if (now >= hopperState.lootEndTime || (totalDrops === 0 && (now - hopperState.lootStartTime) >= 5000)) {
                 if (CFG.boss.waitForQuests) {
                     hopperState.stage = 'CHECK_QUESTS';
                 } else {

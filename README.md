@@ -1,21 +1,21 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.2.1
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.3.0
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật Lớn v3.2.1 (Sửa Triệt Để Lỗi Mất Kết Nối Khi Đổi Map)
+## 🌟 Bản Cập Nhật Lớn v3.3.0 (Chuẩn Hóa Tuyệt Đối Quy Trình Săn Boss & Hút Đồ Trước Khi Chuyển Hành Tinh)
 
-* **⚡ Bắt Dính Game Engine Ngay Tại Dòng Đầu Tiên:**
-  - **Phát hiện cốt lõi:** Ở các phiên bản trước, đoạn mã regex hook cũ chứa chuỗi escape không khớp (`localhost|127\\.0\\.0\\.1`) nằm ở đầu file đã chạy trước và làm sai lệch cờ `Pb` của game gốc khiến `window.game = $` không được thực thi.
-  - **Khắc phục trên v3.2.1:** Đại tu và thống nhất toàn bộ hệ thống hook vào một khối duy nhất đặt ngay đầu tệp (dòng 35), hỗ trợ tất cả các phương thức RegExp (`test`, `exec`), String (`match`, `search`) và Property Trap `window.game`. Đảm bảo Game Engine tự động kết nối $100\%$ ngay khi chuyển bất kỳ hành tinh nào hoặc vào hầm ngục.
-* **🔄 Bộ Quét Kiên Trì 5 Giây:**
-  - Khi chuyển cảnh, nếu tài nguyên 3D đang tải, tool tự động nhận biết `🟡 Đang tải map 3D...` và chuyển sang `🟢 Đã kết nối (<Tên Map>)` ngay khi nhân vật xuất hiện.
+* **⚔️ Tiêu Diệt Lần Lượt 100% TẤT CẢ Boss Trên Map:**
+  - **Khắc phục triệt để:** Không nhảy hành tinh khi Boss chưa chết hoặc khi map vẫn còn các Boss khác (như Titan, Mini-Boss, Boss phụ).
+  - Tự động nhận diện toàn bộ 68 loại Boss trong game (`Df`), quét sạch từng Boss một trên toàn bộ bản đồ trước khi chuyển sang giai đoạn nhặt đồ.
+* **🎁 Hút Sạch 100% Trang Bị & Hũ Đồ Rơi:**
+  - Sau khi toàn bộ Boss trên map ngã xuống, tool tự động chuyển sang chế độ **Looting Mode**.
+  - Kích hoạt Nam Châm kéo toàn bộ vật phẩm (`G.drops.items`) và hũ đồ (`G.drops.bags`) vào vị trí nhân vật, chỉ cho phép phi thuyền khởi hành khi số lượng đồ trên đất về $0$ (hoặc hoàn tất thời gian nhặt an toàn).
+* **⚡ Bắt Dính Game Engine Ngay Lập Tức:**
+  - Hook Dev Engine đa tầng tại dòng 35 đảm bảo `window.game` tự động kết nối $100\%$ ngay khi chuyển bất kỳ hành tinh nào hoặc vào hầm ngục.
 * **🏰 Hầm Ngục Cổ Đại Solo 1 Người & Vô Hạn Lượt:**
   - Chống văng map (`Anti-dgGone`) vĩnh viễn cho đến khi phá đảo 5 Ải.
-* **⚡ Tự Động Vượt 5 Ải & Bước Qua Cổng:**
-  - Tự động diệt quái, gọi Trùm và hạ gục 5 Boss Hầm Ngục (Ải 1 $\rightarrow$ Ải 2 $\rightarrow$ Ải 3 $\rightarrow$ Ải 4 $\rightarrow$ Ải 5 - Trùm Cuối Cổ Vương).
-  - Tự động bước vào Cổng Dịch Chuyển ngay khi Boss ải ngã xuống.
 * **🎣 Cơ Chế Kéo Cần Câu Cá Mượt Mà:**
   - Đầy đủ hoạt ảnh quăng cần, giật cá, uốn cần kéo cá và cá nhảy lên bờ.
 * **👑 Trọn Bộ VIP Cheats:**
@@ -29,11 +29,12 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 
 | Module | Tính Năng | Mô Tả |
 | :--- | :--- | :--- |
+| **Chiến Đấu** | **⚔️ Auto Săn Sạch Boss** | Diệt lần lượt 100% tất cả Boss trên map rồi mới chuyển hành tinh |
+| **Thu Thập** | **🎁 Hút Sạch Đồ & Rương** | Tự động hút sạch trang bị, túi quà trước khi nhảy map |
 | **Kết Nối** | **⚡ Universal Engine Hook** | Bắt dính Game Engine 100% ở mọi map và hầm ngục ngay khi tải trang |
 | **Du Hành & Đi Ải** | **🏰 Hầm Ngục Cổ Đại Solo** | Vào 5 Ải hầm ngục 1 mình ngay lập tức, chống văng map, không giới hạn lượt |
 | **Du Hành & Đi Ải** | **🚀 Chuyển Nhanh 9 Hành Tinh** | Dịch chuyển tức thì đến bất kỳ hành tinh nào chỉ với 1 click |
 | **Câu Cá** | **🎣 Auto Câu Cá Mọi Hồ** | Tự tìm hồ nước, quăng câu, giật cá và kéo cần mượt mà chống đứt dây |
-| **Chiến Đấu** | **⚔️ Auto Săn Boss Toàn Map** | Tự động quét và diệt Boss trên toàn bộ bề mặt hành tinh |
 | **VIP Cheats** | **🛡️ Bất Tử Toàn Diện** | Miễn nhiễm $100\%$ sát thương quái, độc, lửa, dung nham và gai |
 | **VIP Cheats** | **⭐ Nhân EXP ($1\times \to 50\times$)** | Tăng hệ số nhận kinh nghiệm giúp thăng cấp siêu tốc |
 | **VIP Cheats** | **🧲 Nam Châm Hút Đồ** | Hút toàn bộ rương, túi quà, đá sao và vật phẩm rơi về vị trí nhân vật |

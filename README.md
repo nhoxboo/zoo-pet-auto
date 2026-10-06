@@ -1,29 +1,29 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.5
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.6
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Tính Năng Mới Bản v2.5 (An Toàn & Khắc Phục Lỗi Máy Chủ)
+## 🌟 Tính Năng Mới Bản v2.6
 
-### 1. 🛡️ Khắc Phục Triệt Để Lỗi "Tài Khoản + Số Bất Thường"
-* Loại bỏ toàn bộ các can thiệp giá trị ảo/nhảy vọt số liệu vào tệp lưu đám mây.
-* Chuyển đổi sang cơ chế **Auto Quest 100% Tự Nhiên**: Tự động thu hoạch, gieo hạt, săn quái, câu cá, tưới nước để tích lũy tiến độ thật.
-* Khi nhiệm vụ đủ điều kiện, tool tự động nhận thưởng theo đúng quy trình chuẩn của máy chủ, đảm bảo tài khoản đồng bộ an toàn $100\%$ không bao giờ bị báo lỗi 409 hay từ chối lưu.
+### 1. ⚙️ Mặc Định Toàn Bộ Tính Năng Ở Trạng Thái TẮT (Default OFF)
+* Tất cả công tắc Auto, Săn Boss, Du Hành, Hack & Mod đều mặc định ở trạng thái `Tắt (OFF)` khi tải trang.
+* Người dùng hoàn toàn chủ động lựa chọn bật từng tính năng theo nhu cầu mà không lo bị kích hoạt tự động ngoài ý muốn.
 
-### 2. 🧲 Thu Thập Nguyên Liệu Thật Siêu Tốc (Anti-Ban Free Gathering)
-* Không can thiệp sửa đổi ảo vào số lượng trong túi đồ để tránh xung đột với server khi rèn/chế tạo.
-* Thay vào đó, tích hợp **Nam Châm Hút Đồ Toàn Bản Đồ**: Tự động gom sạch toàn bộ nguyên liệu, vương miện, đá quý, hũ đồ rơi từ quái/Boss trên toàn bản đồ.
-* Kết hợp cùng **⚡ Hồi Chiêu 0s** và **⚔️ Tăng Sát Thương 5.0x (One-Hit)** để người chơi quét sạch quái và gom hàng trăm nguyên liệu thật trong vài phút, chế tạo an toàn và hợp lệ $100\%$.
+### 2. 🚀 Chuyển Hành Tinh Nhanh (1-Click Fast Travel)
+* Bổ sung bảng chọn 9 Hành Tinh trực quan:
+  * `[🌱 Mầm Xanh]` `[🧸 Đồ Chơi]` `[🍭 Kẹo Ngọt]`
+  * `[🌿 Rừng Rậm]` `[❄️ Băng Giá]` `[🌊 Đại Dương]`
+  * `[🌋 Dung Nham]` `[☁️ Mây Trời]` `[🌑 Bóng Tối]`
+* Kèm menu danh sách chọn theo cấp độ + nút **"Bay Ngay"** giúp phi thuyền dịch chuyển tức thì sang bất kỳ hành tinh nào trong 1 cú nhấp chuột.
 
-### 3. 💡 Làm Sáng Hành Tinh Bóng Tối (Shadow Night Vision)
-* Ẩn màn che bóng tối `#dark2`, triệt tiêu sương mù 3D `scene.fog`.
-* Bật tầm nhìn phát hiện $100\%$ quái vật, Boss và vật phẩm trong bóng tối.
-* Tự động kích hoạt hồi phục $3\%$ máu/giây khắp bản đồ Bóng Tối.
-
-### 4. 🚀 Du Hành Săn Boss Xuyên Hành Tinh (Planet Boss Hopper)
-* Tự động quét và tiêu diệt sạch Boss thường trên hành tinh hiện tại.
-* Đếm ngược thời gian nhặt sạch đồ rơi rồi tự động bay sang hành tinh tiếp theo theo vòng lặp vô tận.
+### 3. 🛡️ Sửa Triệt Để Lỗi Săn Boss Đa Hành Tinh Bị Chuyển Map Liên Tục
+* Khắc phục triệt để lỗi nhảy map liên tục: Tool sẽ kiểm tra chuẩn xác trạng thái Boss trên hành tinh.
+* **Chỉ chuyển map khi:**
+  1. Đã tìm thấy và **TIÊU DIỆT XONG BOSS** trên hành tinh đó.
+  2. Kích hoạt nam châm gom sạch trang bị, vương miện, đá quý rơi ra.
+  3. Hoàn thành xong nhiệm vụ hành tinh (nếu bật tùy chọn *Chờ xong nhiệm vụ*).
+* Hiển thị thanh tiến trình thời gian thực chi tiết từng giai đoạn: *Đang quét Boss $\rightarrow$ Đang tiêu diệt Boss [Tên Boss / Máu] $\rightarrow$ Đang hút phần thưởng $\rightarrow$ Khởi hành sang hành tinh kế tiếp*.
 
 ---
 
@@ -31,9 +31,11 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 * **⚡ Hồi chiêu 0s (No Cooldown):** Xả 4 chiêu Q-W-E-R và chong chóng liên tục không ngừng.
 * **🛡️ Chế độ Bất Tử (God Mode):** Khóa máu $100\%$, miễn nhiễm mọi sát thương và debuff.
 * **🎣 Câu Cá Siêu Tốc 0.1s (Ultra Fishing):** Hỗ trợ toàn bộ các map (bao gồm rạn san hô Hành Tinh Đại Dương), cá cắn câu và kéo lên tức thì.
+* **💡 Làm Sáng Hành Tinh Bóng Tối:** Ẩn màn che `#dark2`, tắt sương mù, bật tầm nhìn $100\%$ quái vật và tự hồi máu.
 * **🏃 Tăng Tốc Chạy (1.0x - 2.5x) & ⚔️ Tăng Sát Thương (1.0x - 5.0x).**
-* **🌾 Auto Nông Trại:** Tự thu hoạch cây chín, gieo hạt theo cấp, thu sản phẩm thú nuôi, tưới nước/trộm nông sản bạn bè.
-* **🛡️ Bộ Lọc Boss:** Tự động né các Boss Titan siêu trâu máu > 1500 (Rùa núi, Mãng xà 3 đầu, Nhện đồng hồ, Hoa tử thần...).
+* **🌾 Auto Nông Trại:** Tự thu hoạch cây chín, gieo hạt theo cấp, thu sản phẩm thú nuôi.
+* **📜 Auto Nhiệm Vụ 100% An Toàn:** Tự động hoàn thành nhiệm vụ theo hành động thật, tự nhận thưởng Daily, Weekly, Bounty không bị báo lỗi số bất thường.
+* **🛡️ Bộ Lọc Boss:** Tự động né các Boss Titan siêu trâu máu > 2500 (Rùa núi, Mãng xà 3 đầu, Nhện đồng hồ...).
 * **💤 Chạy Ẩn Nền Khi Hạ Tab:** Sử dụng Web Worker 100ms độc lập và Anti-Throttle.
 
 ---
@@ -44,5 +46,5 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 2. Mở link cài đặt trực tiếp:  
 👉 **[https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js](https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js)**
 3. Bấm **Install** (hoặc **Update**).
-4. Vào game [https://zoo-pet.store/](https://zoo-pet.store/) và trải nghiệm!
+4. Vào game [https://zoo-pet.store/](https://zoo-pet.store/) (hoặc link CloudFront CDN) và trải nghiệm!
 5. Phím tắt ẩn/hiện menu: **F2** hoặc click nút 🤖 ở góc dưới màn hình.

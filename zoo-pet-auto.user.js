@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.1.1
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Chống Văng Hầm Ngục Solo (Anti-Kick Dungeon), Đi Ải 1 Người Không Cần Chờ, Vô Hạn Lượt Đi Ải Mỗi Ngày, Auto Câu Cá Chuẩn Hoạt Ảnh Kéo Cần, Auto Săn Boss Toàn Map, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
+// @version      3.2.0
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Tự Động Kết Nối Đa Tầng Bất Khả Xâm Phạm (Triple-Resilient Auto-Connect), Bắt Dính Engine Ngay Lập Tức Ở Mọi Map & Hầm Ngục, Chống Văng Hầm Ngục Solo, Vô Hạn Lượt Đi Ải, Auto Câu Cá Chuẩn Kéo Cần, Auto Săn Boss Toàn Map, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -226,93 +226,182 @@
         }
     } catch (_) {}
 
-    // --- HOOK ENGINE GAME NATIVE AN TOÀN 100% (ZERO SIDE-EFFECTS) ---
+    // --- HOOK ENGINE GAME NATIVE ĐA TẦNG (TRIPLE-RESILIENT AUTO-CONNECT) ---
     // Game gốc chỉ tự gán `window.game = $` khi Pb = true (/localhost|127.0.0.1/.test(location.hostname)).
-    // Trên domain chính `https://zoo-pet.store/`, Pb = false.
-    // Hook này can thiệp trực tiếp hàm regex test để kích hoạt Pb = true một cách tự nhiên,
-    // giúp Game Engine NATIVELY tự gán `window.game = $` mà KHÔNG đụng chạm Object.prototype!
+    // Hook can thiệp toàn bộ các phương thức regex/string test để Pb luôn là true ở mọi hoàn cảnh,
+    // đồng thời đặt trap getter/setter trên `window.game` để bắt dính Game Instance ngay mili-giây đầu tiên!
+
+    let _capturedGame = null;
 
     try {
-        const origRegExpTest = RegExp.prototype.test;
+        const isTargetRegex = (src) => {
+            if (!src || typeof src !== 'string') return false;
+            return src.includes('localhost') || src.includes('127') || src.includes('::1');
+        };
+
+        const origTest = RegExp.prototype.test;
         RegExp.prototype.test = function (str) {
-            if (this.source && this.source.includes('localhost') && this.source.includes('127')) {
-                return true; // Kích hoạt Pb = true cho game engine!
+            if (this.source && isTargetRegex(this.source)) {
+                return true;
             }
-            return origRegExpTest.apply(this, arguments);
+            return origTest.apply(this, arguments);
+        };
+
+        const origExec = RegExp.prototype.exec;
+        RegExp.prototype.exec = function (str) {
+            if (this.source && isTargetRegex(this.source)) {
+                const res = ['localhost'];
+                res.index = 0;
+                res.input = str;
+                return res;
+            }
+            return origExec.apply(this, arguments);
+        };
+
+        const origMatch = String.prototype.match;
+        String.prototype.match = function (matcher) {
+            if (matcher && matcher.source && isTargetRegex(matcher.source)) {
+                return ['localhost'];
+            }
+            return origMatch.apply(this, arguments);
+        };
+
+        const origSearch = String.prototype.search;
+        String.prototype.search = function (matcher) {
+            if (matcher && matcher.source && isTargetRegex(matcher.source)) {
+                return 0;
+            }
+            return origSearch.apply(this, arguments);
         };
     } catch (_) {}
 
-    function onGameConnected(gameObj) {
-        if (!gameObj) return;
-        if (gameObj.player && gameObj.world) {
-            G = gameObj;
-            window.game = gameObj;
-
-            // Hook Game Net onMsg để chặn triệt để dgGone ở tầng Engine
-            if (G.net && !G.net._hookedMsg) {
-                G.net._hookedMsg = true;
-                const origOnMsg = G.net.onMsg;
-                if (typeof origOnMsg === 'function') {
-                    G.net.onMsg = function (msg) {
-                        if (msg && msg.t === 'dgGone') {
-                            console.log('[ZooPetAuto] 🛡️ Đã chặn G.net.onMsg(dgGone)!');
-                            return;
-                        }
-                        return origOnMsg.apply(this, arguments);
-                    };
+    // Trap setter trên window.game để kích hoạt ngay khi game gốc gán `window.game = $`
+    try {
+        Object.defineProperty(window, 'game', {
+            configurable: true,
+            enumerable: true,
+            get() {
+                return _capturedGame;
+            },
+            set(val) {
+                _capturedGame = val;
+                if (val) {
+                    onGameConnected(val);
                 }
             }
+        });
+    } catch (_) {}
 
-            console.log('%c[ZooPet Auto]%c Đã kết nối với Game Engine thành công!', 'color:#10B981;font-weight:bold', 'color:#334155');
-            updateStatusBadge(true);
+    function getPlanetDisplayName() {
+        if (!G) return '';
+        try {
+            if (G.planet && (G.planet.stage !== undefined || (G.planet.constructor && G.planet.constructor.name === 'Pv'))) {
+                return `Hầm Ngục Ải ${(G.planet.stage || 0) + 1}`;
+            }
+            if (G.save && G.save.planet) {
+                return PLANET_DATA[G.save.planet]?.name || G.save.planet;
+            }
+        } catch (_) {}
+        return '';
+    }
+
+    function onGameConnected(gameObj) {
+        if (!gameObj) return;
+        _capturedGame = gameObj;
+        G = gameObj;
+
+        // Hook Game Net onMsg để chặn triệt để dgGone ở tầng Engine
+        if (G.net && !G.net._hookedMsg) {
+            G.net._hookedMsg = true;
+            const origOnMsg = G.net.onMsg;
+            if (typeof origOnMsg === 'function') {
+                G.net.onMsg = function (msg) {
+                    if (msg && msg.t === 'dgGone') {
+                        console.log('[ZooPetAuto] 🛡️ Đã chặn G.net.onMsg(dgGone)!');
+                        return;
+                    }
+                    return origOnMsg.apply(this, arguments);
+                };
+            }
+        }
+
+        if (G.player && G.world) {
+            const pName = getPlanetDisplayName();
+            updateStatusBadge(true, pName ? `🟢 Đã kết nối (${pName})` : '🟢 Đã kết nối');
             initEngine();
+        } else {
+            updateStatusBadge(false, '🟡 Đang tải map 3D...');
         }
     }
 
-    function reconnectGame() {
-        if (window.game && window.game.player && window.game.world) {
-            G = window.game;
-            updateStatusBadge(true);
-            initEngine();
-            return true;
-        }
+    // Quét tìm kiếm Game Instance sâu (Deep Scanner)
+    function findGameInstance() {
+        if (_capturedGame && _capturedGame.player && _capturedGame.world) return _capturedGame;
+        if (window.game && window.game.player && window.game.world) return window.game;
 
-        // Deep scan tìm kiếm instance Game trên window
         try {
             const keys = Object.getOwnPropertyNames(window);
             for (let k of keys) {
                 try {
                     const obj = window[k];
                     if (obj && typeof obj === 'object' && obj.player && obj.world && obj.scene) {
-                        window.game = obj;
-                        G = obj;
-                        updateStatusBadge(true);
-                        initEngine();
-                        return true;
+                        _capturedGame = obj;
+                        return obj;
                     }
                 } catch (_) {}
             }
         } catch (_) {}
 
-        if (window.game) {
-            G = window.game;
-            updateStatusBadge(true);
-            initEngine();
-            return true;
-        }
+        return _capturedGame || window.game || null;
+    }
 
-        updateStatusBadge(false, '🟡 Chưa vào map');
-        return false;
+    // Hàm kết nối lại cưỡng bức và quét liên tục trong 5 giây (Resilient Scanner)
+    function forceReconnectGame(callback) {
+        let attempts = 0;
+        const maxAttempts = 25; // 25 lần * 200ms = 5 giây
+
+        const scan = () => {
+            attempts++;
+            const found = findGameInstance();
+            if (found && found.player && found.world) {
+                onGameConnected(found);
+                if (callback) callback(true, found);
+                return;
+            }
+
+            if (found && found.save) {
+                updateStatusBadge(false, '🟡 Đang tải tài nguyên map...');
+            } else {
+                updateStatusBadge(false, `🟡 Đang tìm Engine (${attempts}/${maxAttempts})...`);
+            }
+
+            if (attempts < maxAttempts) {
+                setTimeout(scan, 200);
+            } else {
+                if (callback) callback(false, null);
+            }
+        };
+
+        scan();
     }
 
     function checkGameHook() {
-        if (G && G.player && G.world) return;
-        if (window.game && window.game.player && window.game.world) {
-            onGameConnected(window.game);
+        const found = findGameInstance();
+        if (found) {
+            if (found.player && found.world) {
+                if (!G || G !== found || !G.player) {
+                    onGameConnected(found);
+                } else {
+                    const pName = getPlanetDisplayName();
+                    updateStatusBadge(true, pName ? `🟢 Đã kết nối (${pName})` : '🟢 Đã kết nối');
+                }
+            } else if (found.save) {
+                updateStatusBadge(false, '🟡 Đang tải map 3D...');
+            }
         }
     }
 
-    const hookInterval = setInterval(checkGameHook, 100);
+    const hookInterval = setInterval(checkGameHook, 200);
 
     // --- MODULE 1: CHEATS & HACKS ENGINE ---
     let origTakeDamage = null;
@@ -1988,23 +2077,26 @@
         bindCheck('cfg-fish-luck', CFG.fish, 'luckBuff');
         bindCheck('cfg-fish-ultra', CFG.cheats, 'ultraFishing');
 
-        // Nút kết nối lại thủ công (Manual Reconnect)
+        // Nút kết nối lại thủ công (Manual Reconnect) với cơ chế quét kiên trì 5s
         const reconnectBtn = document.getElementById('zp-reconnect-btn');
         if (reconnectBtn) {
             reconnectBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 reconnectBtn.textContent = '⏳ Đang quét...';
                 reconnectBtn.style.opacity = '0.7';
-                const success = reconnectGame();
-                setTimeout(() => {
-                    reconnectBtn.textContent = success ? '✅ Đã kết nối' : '🔄 Kết nối lại';
+                forceReconnectGame((success) => {
                     reconnectBtn.style.opacity = '1';
-                    if (success) showToast('🟢 Đã kết nối với Game Engine thành công!');
-                    else showToast('⚠️ Chưa tìm thấy Game Engine. Hãy đảm bảo bạn đã vào bản đồ game!');
+                    if (success) {
+                        reconnectBtn.textContent = '✅ Đã kết nối';
+                        showToast('🟢 Đã kết nối thành công với Game Engine!');
+                    } else {
+                        reconnectBtn.textContent = '❌ Thử lại';
+                        showToast('⚠️ Chưa tìm thấy Game Engine. Hãy đảm bảo bạn đã vào bản đồ game!');
+                    }
                     setTimeout(() => {
                         reconnectBtn.textContent = '🔄 Kết nối lại';
                     }, 2500);
-                }, 400);
+                });
             });
         }
 

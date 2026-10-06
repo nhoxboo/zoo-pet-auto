@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.5.0
+// @version      2.5.1
 // @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Farm, Boss Hopper, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing, Background Worker.
 // @author       Beso & Antigravity
 // @match        https://zoo-pet.store/*
+// @match        https://*.zoo-pet.store/*
 // @match        http://localhost:*/*
+// @match        http://127.0.0.1:*/*
 // @icon         https://zoo-pet.store/favicon.ico
 // @grant        none
 // @run-at       document-start
@@ -16,7 +18,18 @@
 (function () {
     'use strict';
 
-    console.log('%c[ZooPet Auto Pro v2.5.0]%c Khởi tạo engine Auto & VIP Mod An Toàn 100% Anti-Detection...', 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
+    console.log('%c[ZooPet Auto Pro v2.5.1]%c Khởi tạo engine Auto & VIP Mod...', 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
+
+    // --- HOOK DEV ENGINE NGAY TỪ ĐẦU (ĐẢM BẢO window.game = $) ---
+    try {
+        const origTest = RegExp.prototype.test;
+        RegExp.prototype.test = function (str) {
+            if (this.source && this.source.includes('localhost|127\\.0\\.0\\.1') && typeof str === 'string' && str.includes('zoo-pet.store')) {
+                return true;
+            }
+            return origTest.apply(this, arguments);
+        };
+    } catch (_) {}
 
     // --- CẤU HÌNH MẶC ĐỊNH (DEFAULT CONFIG) ---
     const DEFAULT_CFG = {
@@ -64,8 +77,7 @@
             autoClaimWeekly: true,
             autoClaimBounty: true,
             autoClaimStory: true,
-            autoClaimPass: true,
-            smartQuestBot: true
+            autoClaimPass: true
         },
         fish: {
             enabled: true,
@@ -108,15 +120,22 @@
         itemsLooted: 0
     };
 
-    // --- HOOK GAME ENGINE SẠCH SẼ & AN TOÀN ---
-    const hookCheckInterval = setInterval(() => {
+    // --- HOOK ENGINE GAME BẢO ĐẢM 100% NHẬN GAME ---
+    function checkGameHook() {
         if (window.game && window.game.player && window.game.world) {
-            G = window.game;
-            clearInterval(hookCheckInterval);
-            console.log('%c[ZooPet Auto]%c Đã kết nối thành công với Game Engine!', 'color:#10B981;font-weight:bold', 'color:#334155');
-            initEngine();
+            if (!G) {
+                G = window.game;
+                console.log('%c[ZooPet Auto]%c Đã kết nối thành công với Game Engine!', 'color:#10B981;font-weight:bold', 'color:#334155');
+                const badge = document.querySelector('.zp-status-badge');
+                if (badge) {
+                    badge.textContent = '🟢 Đã kết nối';
+                    badge.style.background = '#DCFCE7';
+                    badge.style.color = '#166534';
+                }
+            }
         }
-    }, 200);
+    }
+    const hookCheckInterval = setInterval(checkGameHook, 200);
 
     // --- BACKGROUND TIMER WORKER (Bypass Throttle khi hạ tab) ---
     function initBackgroundWorker() {
@@ -276,7 +295,6 @@
                     q.claim?.(idx);
                     stats.questsClaimed++;
                     updateStatUI();
-                    console.log(`[ZooPet Auto] ✅ Đã nhận thưởng Nhiệm vụ Ngày #${idx + 1}`);
                 }
             });
             if (q.s.quests.all && !q.s.quests.allDone) {
@@ -291,7 +309,6 @@
                     q.claimWeek?.(idx);
                     stats.questsClaimed++;
                     updateStatUI();
-                    console.log(`[ZooPet Auto] ✅ Đã nhận thưởng Nhiệm vụ Tuần #${idx + 1}`);
                 }
             });
             if (q.s.week.p >= q.s.week.n && !q.s.week.done) {
@@ -306,7 +323,6 @@
                 q.claimBounty?.();
                 stats.questsClaimed++;
                 updateStatUI();
-                console.log('[ZooPet Auto] 🎯 Đã nhận thưởng Lệnh Truy Nã!');
             }
         }
 
@@ -412,7 +428,6 @@
 
             const nextIndex = (PLANET_ORDER.indexOf(currentPlanet) + 1) % PLANET_ORDER.length;
             hopperState.targetPlanet = PLANET_ORDER[nextIndex];
-            console.log(`[ZooPet Auto] 🚀 Đã dọn sạch Boss trên ${currentPlanet}. Chuẩn bị bay sang ${hopperState.targetPlanet} sau ${CFG.boss.hopDelay}s...`);
             updateHopperStatusUI(`Đang chờ hút đồ -> Bay tới <b>${hopperState.targetPlanet}</b> (${CFG.boss.hopDelay}s)`);
         }
 
@@ -426,7 +441,6 @@
 
     async function travelToPlanet(targetPlanet) {
         if (!G || !G.save) return;
-        console.log(`[ZooPet Auto] 🚀 Đang kích hoạt phi thuyền bay sang hành tinh: ${targetPlanet}`);
         G.save.planet = targetPlanet;
         sessionStorage.setItem('zp-flight', JSON.stringify({ to: targetPlanet, t: Date.now() }));
         sessionStorage.setItem('zp-target-planet', JSON.stringify({ to: targetPlanet, t: Date.now() }));
@@ -579,13 +593,12 @@
     }
 
     // --- GIAO DIỆN ĐIỀU KHIỂN (WHITE-BLUE MODERN UI) ---
-    function initEngine() {
-        initBackgroundWorker();
-        createUI();
-    }
-
     function createUI() {
         if (document.getElementById('zp-auto-panel')) return;
+        if (!document.body) {
+            setTimeout(createUI, 100);
+            return;
+        }
 
         const panel = document.createElement('div');
         panel.id = 'zp-auto-panel';
@@ -624,9 +637,9 @@
                     align-items: center;
                     gap: 6px;
                 }
-                .zp-badge {
-                    background: #E0F2FE;
-                    color: #0369A1;
+                .zp-status-badge {
+                    background: #FEF3C7;
+                    color: #92400E;
                     font-size: 10px;
                     font-weight: 600;
                     padding: 2px 6px;
@@ -796,7 +809,7 @@
 
             <div class="zp-header" id="zp-drag-handle">
                 <div class="zp-title">
-                    🐾 Zoo Pet Auto <span class="zp-badge">v2.5 Pro</span>
+                    🐾 Zoo Pet Auto <span class="zp-status-badge">🟡 Đang kết nối...</span>
                 </div>
                 <div style="cursor:pointer;color:#94A3B8;font-size:16px;" id="zp-close-btn">✕</div>
             </div>
@@ -1034,7 +1047,6 @@
     }
 
     function bindUIEvents(panel) {
-        // Tab switching
         panel.querySelectorAll('.zp-tab').forEach(tab => {
             tab.onclick = () => {
                 panel.querySelectorAll('.zp-tab').forEach(t => t.classList.remove('active'));
@@ -1046,19 +1058,16 @@
             };
         });
 
-        // Close button
         panel.querySelector('#zp-close-btn').onclick = () => {
             panel.style.display = 'none';
         };
 
-        // Keyboard F2 shortcut
         window.addEventListener('keydown', e => {
             if (e.key === 'F2') {
                 panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
             }
         });
 
-        // Drag handle
         const handle = panel.querySelector('#zp-drag-handle');
         let isDragging = false, dragX = 0, dragY = 0;
         handle.onmousedown = e => {
@@ -1074,7 +1083,6 @@
             document.onmouseup = () => { isDragging = false; document.onmousemove = null; };
         };
 
-        // Form bindings
         const bind = (id, obj, key, type = 'check') => {
             const el = panel.querySelector(id);
             if (!el) return;
@@ -1123,6 +1131,17 @@
             el.style.display = 'block';
             el.innerHTML = text;
         }
+    }
+
+    // --- KHỞI TẠO GIAO DIỆN NGAY KHI TRANG TẢI ---
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            createUI();
+            initBackgroundWorker();
+        });
+    } else {
+        createUI();
+        initBackgroundWorker();
     }
 
 })();

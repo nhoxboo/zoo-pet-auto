@@ -1,23 +1,20 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.9.1
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.9.2
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật v2.9.1: Fix Triệt Để Quăng Cần Thu Về Bậy & Auto Săn Boss
+## 🌟 Bản Cập Nhật v2.9.2: Đại Tu Auto Câu Cá 100% & Săn Boss
 
-### 1. 🎣 Sửa Lỗi Quăng Cần Ra Tự Thu Về (Cần Thu Ngay Sau Khi Quăng)
-* **Nguyên nhân chính xác được phát hiện:**
-  1. **Can thiệp sớm trong giai đoạn `phase === 'cast'`:** Khi vừa quăng cần (0.5s đầu tiên phao đang bay trên không), hàm Ultra Catch và Rare Hunter cũ can thiệp gán `phase = 'bite'` và gọi `fishing.finish(true)`. Do cá chưa bơi tới phao (`interest` chưa có), `finish(true)` văng lỗi và kích hoạt `fishing.cancel(true)` khiến **phao vừa chạm nước đã lập tức bị giật thu cần về**.
-  2. **Hủy câu cá thường khi chưa cắn câu:** Bộ lọc cá hiếm cũ hủy câu ngay từ lúc cá bơi tới (`approach`), khiến $95\%$ số lần quăng đều bị hủy ngay trong 0.2s.
-* **Khắc phục trong v2.9.1:**
-  * ✅ Giữ nguyên trạng thái `phase === 'cast'` để phao bay và rơi chạm nước tự nhiên.
-  * ✅ Chỉ kích hoạt cắn câu siêu tốc (Ultra Catch) khi phao đã chạm nước (`phase === 'wait'`).
-  * ✅ Chỉ kéo cá khi cá đã cắn câu (`phase === 'bite'`) và có đối tượng cá hợp lệ, giúp phao câu tồn tại $100\%$ ổn định, không còn hiện tượng thu cần bậy!
+### 1. 🎣 Đại Tu Toàn Diện Auto Câu Cá (100% Mọi Hồ & Mọi Map)
+* **Gỡ bỏ cơ chế lọc cá gây hủy cần:** Theo yêu cầu từ người dùng, toàn bộ logic tự hủy cần khi gặp cá thường đã được loại bỏ hoàn toàn.
+* **Tự Động Tính Điểm Bờ & Quăng Phao Chuẩn Xác:** Tích hợp hàm `fishing.plan()` của game engine để nhân vật tự đi tới vị trí đứng bờ (`shore`) và quăng phao vào lòng hồ (`cast`) chuẩn xác $100\%$.
+* **Độc Lập & Chống Xung Đột State:** Khi đang câu cá (`fishing.active`), toàn bộ các module khác (Combat, Boss Hunt, Farm) tạm dừng can thiệp vào `player.target`, `player.state` hoặc di chuyển của nhân vật để không bao giờ làm đứt dây hay ngắt trạng thái câu.
+* **Kéo Cá Tự Động 100%:** Khi cá cắn câu (`phase === 'bite'`), tool tự động giật cần (`hook`) và hoàn thành kéo cá (`finish`) liên tục, sau đó tự quăng mồi mới.
 
-### 2. ⚔️ Kích Hoạt Auto Săn Boss Chuẩn Xác 100%
-* **Tự Động Kích Hoạt khi bật "Chỉ Giết Boss":** Trước đây nếu chưa bật nút "Tự Động Đánh Quái" thì bật "Chỉ Giết Boss" không chạy. Bản v2.9.1 tự động kích hoạt chế độ săn Boss ngay khi bật `Chỉ Giết Boss` hoặc `Auto Du Hành`.
-* **Điều Hướng Native Không Giật Lag:** Sử dụng cơ chế nhắm mục tiêu chuẩn của game engine `{ type: 'enemy', enemy: boss, point: boss.pos.clone(), auto: true }`, nhân vật tự động tìm và bơi/chạy thẳng đến vị trí Boss mượt mà, sau đó xả combo 4 chiêu `spin`, `dash`, `slam`, `special` liên tục.
+### 2. ⚔️ Auto Săn Boss Chuẩn Xác Toàn Map
+* **Tự Động Kích Hoạt khi bật "Chỉ Giết Boss":** Gạt bật nút `Chỉ Giết Boss` hoặc `Auto Du Hành` là tool tự động quét và đi săn Boss ngay lập tức không cần phụ thuộc nút đánh quái thường.
+* **Tự Động Di Chuyển & Tấn Công:** Nếu ở xa ngoài tầm đánh, nhân vật tự chạy mượt mà tới vị trí Boss. Khi đã áp sát tầm đánh, nhân vật tự target Boss, đánh thường và xả liên hoàn 4 chiêu `spin`, `dash`, `slam`, `special`.
 
 ---
 
@@ -28,7 +25,7 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 * **🏃 Tăng Tốc Chạy (Speed Boost):** Di chuyển siêu tốc qua các vùng đất.
 * **💡 Sáng Bản Đồ Bóng Tối:** Xóa bỏ màn đen tối và sương mù.
 * **🌾 Auto Nông Trại:** Tự động thu hoạch cây chín và gieo hạt giống cấp cao nhất.
-* **🎣 Câu Cá Siêu Tốc & Săn Cá Hiếm:** Lọc bỏ cá rác, săn cá Rồng Vàng, Bạch Tuộc, Cá Voi.
+* **🎣 Auto Câu Cá & Ultra Catch:** Tự tìm hồ, quăng cần, cắn câu siêu tốc và kéo cá liên tục.
 * **🚀 Chuyển Hành Tinh Nhanh 1-Click:** 9 nút bấm trực quan trên menu.
 * **📜 Auto Nhiệm Vụ An Toàn:** Tự nhận thưởng Daily, Weekly, Bounty không sợ bị lỗi server.
 

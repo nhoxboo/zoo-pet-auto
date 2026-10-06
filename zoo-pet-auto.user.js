@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.9.1
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Sửa Lỗi Quăng Cần Không Thu Về Bậy, Auto Săn Boss Chuẩn Xác 100%, Auto Farm, Săn Cá Hiếm & Huyền Thoại, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
+// @version      2.9.2
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Câu Cá Tuyệt Đối 100% Mọi Hồ Không Lỗi, Auto Săn Boss Chuẩn Xác Toàn Map, Auto Farm, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -386,6 +386,7 @@
         // Tự động kích hoạt khi bật Tự Động Đánh HOẶC Chỉ Giết Boss
         const isCombatWanted = CFG.combat.enabled || CFG.combat.bossOnly;
         if (!isCombatWanted || !G || !G.enemies || !G.player || !G.player.alive) return;
+        if (G.fishing && G.fishing.active) return; // Không can thiệp khi đang câu cá
         if (Date.now() < combatCooldown) return;
 
         const player = G.player;
@@ -406,11 +407,12 @@
             player.facing = Math.atan2(target.pos.x - player.pos.x, target.pos.z - player.pos.z);
         } catch (_) {}
 
-        // Gán target chuẩn xác cho engine game (game engine tự động di chuyển nhân vật tới gần quái/boss)
-        player.target = { type: 'enemy', enemy: target, point: target.pos.clone(), auto: true };
-
-        if (dist <= attackRange) {
-            // Đã trong tầm đánh -> Đánh thường & xả combo skill chuẩn xác
+        // Nếu ở ngoài tầm đánh -> Di chuyển tới mục tiêu
+        if (dist > attackRange) {
+            walkTo(target.pos);
+        } else {
+            // Đã trong tầm đánh -> Gán target và Đánh thường + Xả combo skill
+            player.target = { type: 'enemy', enemy: target, point: target.pos.clone(), auto: true };
             try {
                 if (player.cd) player.cd.atk = 0;
                 if (typeof player.attack === 'function') {
@@ -642,7 +644,7 @@
         }, 500);
     }
 
-    // --- MODULE 5: AUTO CÂU CÁ & SĂN CÁ HIẾM / HUYỀN THOẠI (TOÀN DIỆN MỌI HÀNH TINH) ---
+    // --- MODULE 5: AUTO CÂU CÁ TOÀN DIỆN 100% MỌI HỒ & HÀNH TINH ---
     let fishCastCooldown = 0;
     let isWalkingToWater = false;
 
@@ -673,7 +675,6 @@
     function ensureRodEquipped() {
         if (!G || !G.player || !G.save || !G.save.equip) return;
         try {
-            // Nếu đã là cần câu thì KHÔNG LÀM GÌ CẢ (tránh reset trang bị làm cancel fishing)
             if (G.player.weapon && G.player.weapon.kind === 'rod') {
                 return;
             }
@@ -704,9 +705,6 @@
         const fishing = G.fishing;
         const player = G.player;
 
-        // Đảm bảo có cần câu (chỉ gọi 1 lần khi chưa có)
-        ensureRodEquipped();
-
         // Tự động kích hoạt Buff may mắn câu cá nếu bật
         if (CFG.fish.luckBuff && player) {
             player.luck = Math.max(player.luck || 0, 5.0);
@@ -715,12 +713,12 @@
         if (fishing.active) {
             fishCastCooldown = Date.now() + 1000;
 
-            // Đang trong giai đoạn quăng phao (cast) -> KHÔNG ĐƯỢC CAN THIỆP, chờ phao rơi xuống nước
+            // Đang trong giai đoạn quăng phao (cast) -> Chờ phao rơi xuống nước tự nhiên
             if (fishing.phase === 'cast') {
                 return;
             }
 
-            // Đảm bảo hồ nước luôn có cá (tự spawn nếu hết sạch cá)
+            // Đảm bảo hồ nước luôn có cá
             if (fishing.w && typeof fishing.addFish === 'function') {
                 const fishesInWater = (fishing.fish || []).filter(f => f.w === fishing.w);
                 if (fishesInWater.length === 0) {
@@ -731,34 +729,20 @@
             // 1. Kích hoạt cắn câu siêu tốc (Ultra Catch) khi phao đã chạm nước
             if (CFG.cheats.ultraFishing) {
                 if (fishing.phase === 'wait' || fishing.phase === 'approach' || fishing.phase === 'nibble') {
-                    const targetFish = fishing.interest || ((fishing.fish && fishing.fish.length > 0) ? (fishing.fish.find(f => f.w === fishing.w && f.state === 'swim') || fishing.fish[0]) : null);
-                    if (targetFish) {
-                        fishing.interest = targetFish;
+                    fishing.waitT = 0;
+                    if (!fishing.interest && typeof fishing.attract === 'function') {
+                        try { fishing.attract(); } catch (_) {}
+                    }
+                    if (fishing.interest) {
                         if (typeof fishing.startBite === 'function' && fishing.phase !== 'bite') {
-                            try { fishing.startBite(targetFish); } catch (_) {}
+                            try { fishing.startBite(fishing.interest); } catch (_) {}
                         }
                         fishing.phase = 'bite';
                     }
                 }
             }
 
-            // 2. Chế độ CHỈ CÂU CÁ HIẾM: Chỉ kiểm tra khi cá ĐÃ CẮN CÂU (phase === 'bite')
-            if (CFG.fish.rareOnly && fishing.phase === 'bite') {
-                const catchId = fishing.catchId || (fishing.interest ? fishing.interest.species : null);
-                if (catchId) {
-                    const isRare = isRareOrLegendFish(catchId, fishing.prize);
-                    if (!isRare) {
-                        // Cá thường / rác -> HỦY CÂU để quăng lại
-                        if (typeof fishing.cancel === 'function') {
-                            fishing.cancel(true);
-                            fishCastCooldown = Date.now() + 300;
-                            return;
-                        }
-                    }
-                }
-            }
-
-            // 3. Giật cần kéo cá lên khi cá cắn câu
+            // 2. Kéo cá lên khi cá cắn câu (Tự động kéo 100% mọi loại cá, không hủy cần)
             if (fishing.phase === 'bite' || fishing.phase === 'hook' || fishing.phase === 'hooked') {
                 if (typeof fishing.hook === 'function' && fishing.phase !== 'hooked') {
                     try { fishing.hook(); } catch (_) {}
@@ -781,7 +765,6 @@
                         }
                     } catch (err) {
                         console.error('[ZooPetAuto] Lỗi finish fishing:', err);
-                        if (typeof fishing.cancel === 'function') fishing.cancel(true);
                     }
                 }
             }
@@ -789,7 +772,7 @@
             // Khi chưa quăng cần -> Tự tìm hồ nước gần nhất và quăng câu
             if (Date.now() > fishCastCooldown) {
                 castAtNearestWater();
-                fishCastCooldown = Date.now() + 1200;
+                fishCastCooldown = Date.now() + 1000;
             }
         }
     }
@@ -801,9 +784,6 @@
 
         const player = G.player;
         const fishing = G.fishing;
-
-        // Đảm bảo có cần câu
-        ensureRodEquipped();
 
         // 1. Tìm điểm nước / rạn san hô gần nhất
         let nearestWater = null;
@@ -819,57 +799,44 @@
 
         if (!nearestWater) return;
 
-        // 2. Xử lý di chuyển đến gần vùng nước nếu đang ở quá xa (> w.r + 2.5m)
-        const shoreDist = minDist - nearestWater.r;
-        if (shoreDist > 2.5) {
-            if (!isWalkingToWater || !player.target || player.target.type !== 'move') {
-                const dirX = (nearestWater.x - player.pos.x) / minDist;
-                const dirZ = (nearestWater.z - player.pos.z) / minDist;
-                const targetX = nearestWater.x - dirX * (nearestWater.r + 0.5);
-                const targetZ = nearestWater.z - dirZ * (nearestWater.r + 0.5);
-                walkTo({ x: targetX, z: targetZ });
-                isWalkingToWater = true;
-            }
+        // 2. Tính toán điểm đứng bờ (shore) và điểm quăng phao (cast) chuẩn xác bằng native plan của game
+        let plan = null;
+        if (typeof fishing.plan === 'function') {
+            try {
+                let centerPoint = player.pos.clone();
+                centerPoint.x = nearestWater.x;
+                centerPoint.z = nearestWater.z;
+                centerPoint.y = 0;
+                plan = fishing.plan(nearestWater, centerPoint);
+            } catch (_) {}
+        }
+
+        const shorePos = plan ? plan.shore : { x: nearestWater.x, y: 0, z: nearestWater.z };
+        const castPos = plan ? plan.cast : player.pos.clone();
+
+        const distToShore = Math.hypot(player.pos.x - shorePos.x, player.pos.z - shorePos.z);
+        if (distToShore > 2.0) {
+            walkTo(shorePos);
+            isWalkingToWater = true;
             return;
         }
 
         isWalkingToWater = false;
 
-        // 3. Khi đã ở trong phạm vi câu -> Dừng di chuyển
-        if (player.target && player.target.type === 'move') {
-            player.target = null;
-            if (player.vel) player.vel.set(0, 0, 0);
-        }
+        // 3. Đã đứng sát mép nước -> Dừng di chuyển và bắt đầu câu
+        player.target = null;
+        if (player.vel) player.vel.set(0, 0, 0);
+
+        // Đảm bảo trang bị cần câu
+        ensureRodEquipped();
 
         // Triệu hồi bóng cá bí ẩn phát sáng nếu bật
         if (CFG.fish.summonMystery && typeof fishing.callMystery === 'function') {
             try { fishing.callMystery(); } catch (_) {}
         }
 
-        // 4. Tạo Vector3 hợp lệ cho điểm quăng phao (cast point)
-        let castVec = null;
-        if (player.pos && typeof player.pos.clone === 'function') {
-            castVec = player.pos.clone();
-        } else {
-            castVec = { x: nearestWater.x, y: 0, z: nearestWater.z, clone: function() { return Object.assign({}, this); } };
-        }
-
-        // Quăng phao hướng về tâm hồ / rạn san hô
-        const toCenterX = nearestWater.x - player.pos.x;
-        const toCenterZ = nearestWater.z - player.pos.z;
-        const centerDist = Math.hypot(toCenterX, toCenterZ);
-        if (centerDist > 0.1) {
-            const castDepth = Math.min(centerDist * 0.7, nearestWater.r * 0.8);
-            castVec.x = player.pos.x + (toCenterX / centerDist) * castDepth;
-            castVec.z = player.pos.z + (toCenterZ / centerDist) * castDepth;
-        } else {
-            castVec.x = nearestWater.x;
-            castVec.z = nearestWater.z;
-        }
-        castVec.y = 0;
-
         try {
-            fishing.start(nearestWater, castVec);
+            fishing.start(nearestWater, castPos);
         } catch (err) {
             console.error('[ZooPetAuto] Lỗi start fishing:', err);
         }
@@ -959,10 +926,17 @@
         try {
             if (G) {
                 initCheatsEngine();
-                runFarmEngine();
-                runCombatEngine();
-                runPlanetBossHopper();
-                runFishingEngine();
+
+                // Nếu đang trong tiến trình câu cá -> ưu tiên câu cá, không để combat/farm xen vào làm ngắt trạng thái câu
+                if (CFG.fish.enabled && G.fishing && G.fishing.active) {
+                    runFishingEngine();
+                } else {
+                    runFarmEngine();
+                    runCombatEngine();
+                    runPlanetBossHopper();
+                    runFishingEngine();
+                }
+
                 runQuestEngine();
 
                 if (CFG.cheats.globalMagnet || CFG.loot.enabled) {
@@ -1517,7 +1491,7 @@
                     <div class="zp-row">
                         <div>
                             <div class="zp-label">🎣 Tự động câu cá (Auto Fish)</div>
-                            <div class="zp-desc">Tự tìm hồ nước, quăng cần và kéo cá lên khi cắn câu</div>
+                            <div class="zp-desc">Tự tìm hồ nước, quăng cần chuẩn xác và kéo cá lên 100%</div>
                         </div>
                         <label class="zp-switch">
                             <input type="checkbox" id="cfg-fish-en" ${CFG.fish.enabled ? 'checked' : ''}>
@@ -1526,11 +1500,11 @@
                     </div>
                     <div class="zp-row">
                         <div>
-                            <div class="zp-label">🌟 CHỈ CÂU CÁ HIẾM & HUYỀN THOẠI</div>
-                            <div class="zp-desc">Tự hủy cá thường/giày cũ, chỉ kéo Cá Rồng Vàng, Cá Voi, Kraken, Cá Kiếm, Cá Cầu Vồng, Siêu Khổng Lồ</div>
+                            <div class="zp-label">⚡ Câu cá siêu tốc (Ultra Catch)</div>
+                            <div class="zp-desc">Tự động thu hút cá và giật cần tức thì trong 0.1s</div>
                         </div>
                         <label class="zp-switch">
-                            <input type="checkbox" id="cfg-fish-rare" ${CFG.fish.rareOnly ? 'checked' : ''}>
+                            <input type="checkbox" id="cfg-fish-ultra" ${CFG.cheats.ultraFishing ? 'checked' : ''}>
                             <span class="zp-slider"></span>
                         </label>
                     </div>
@@ -1551,16 +1525,6 @@
                         </div>
                         <label class="zp-switch">
                             <input type="checkbox" id="cfg-fish-luck" ${CFG.fish.luckBuff ? 'checked' : ''}>
-                            <span class="zp-slider"></span>
-                        </label>
-                    </div>
-                    <div class="zp-row">
-                        <div>
-                            <div class="zp-label">⚡ Câu cá siêu tốc (Ultra Catch)</div>
-                            <div class="zp-desc">Cá cắn câu tức thì trong 0.1s không cần chờ</div>
-                        </div>
-                        <label class="zp-switch">
-                            <input type="checkbox" id="cfg-fish-ultra" ${CFG.cheats.ultraFishing ? 'checked' : ''}>
                             <span class="zp-slider"></span>
                         </label>
                     </div>
@@ -1686,7 +1650,6 @@
 
         // Tab Fish
         bindCheck('cfg-fish-en', CFG.fish, 'enabled');
-        bindCheck('cfg-fish-rare', CFG.fish, 'rareOnly');
         bindCheck('cfg-fish-mystery', CFG.fish, 'summonMystery');
         bindCheck('cfg-fish-luck', CFG.fish, 'luckBuff');
         bindCheck('cfg-fish-ultra', CFG.cheats, 'ultraFishing');

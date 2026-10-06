@@ -1,13 +1,16 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.5.1
+// @version      2.5.2
 // @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Farm, Boss Hopper, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing, Background Worker.
 // @author       Beso & Antigravity
+// @match        https://*.cloudfront.net/*
+// @match        https://d173ysgpwor2n4.cloudfront.net/*
 // @match        https://zoo-pet.store/*
 // @match        https://*.zoo-pet.store/*
 // @match        http://localhost:*/*
 // @match        http://127.0.0.1:*/*
+// @match        *://*/*
 // @icon         https://zoo-pet.store/favicon.ico
 // @grant        none
 // @run-at       document-start
@@ -18,13 +21,22 @@
 (function () {
     'use strict';
 
-    console.log('%c[ZooPet Auto Pro v2.5.1]%c Khởi tạo engine Auto & VIP Mod...', 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
+    // Chỉ chạy trên các trang Zoo Pet hoặc CloudFront CDN của game
+    const isZooPetPage = location.hostname.includes('zoo-pet.store') || 
+                         location.hostname.includes('cloudfront.net') || 
+                         location.hostname.includes('localhost') || 
+                         location.hostname.includes('127.0.0.1') ||
+                         document.title.toLowerCase().includes('zoo pet');
+
+    if (!isZooPetPage) return;
+
+    console.log('%c[ZooPet Auto Pro v2.5.2]%c Khởi tạo engine Auto & VIP Mod trên: ' + location.href, 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
 
     // --- HOOK DEV ENGINE NGAY TỪ ĐẦU (ĐẢM BẢO window.game = $) ---
     try {
         const origTest = RegExp.prototype.test;
         RegExp.prototype.test = function (str) {
-            if (this.source && this.source.includes('localhost|127\\.0\\.0\\.1') && typeof str === 'string' && str.includes('zoo-pet.store')) {
+            if (this.source && this.source.includes('localhost|127\\.0\\.0\\.1') && typeof str === 'string') {
                 return true;
             }
             return origTest.apply(this, arguments);

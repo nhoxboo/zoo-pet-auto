@@ -1,19 +1,20 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.3.0
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.3.1
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật Lớn v3.3.0 (Chuẩn Hóa Tuyệt Đối Quy Trình Săn Boss & Hút Đồ Trước Khi Chuyển Hành Tinh)
+## 🌟 Bản Cập Nhật Lớn v3.3.1 (Khắc Phục Dứt Điểm Lỗi Kết Nối & Tự Động Lụm Sạch Đồ Khi Đánh Quái/Boss)
 
+* **⚡ Native Main-World Injection (Sửa Dứt Điểm Lỗi "Đang kết nối..."):**
+  - **Nguyên nhân gốc rễ:** Trên các trình duyệt hiện đại (Chrome/Edge Manifest V3), Tampermonkey chạy Userscript trong môi trường cô lập (`Isolated World`), khiến các hook prototype không chạm tới được module chính của game trong `Main World`. Do đó `Pb` luôn bằng `false` và game không bao giờ xuất `window.game`.
+  - **Khắc phục triệt để v3.3.1:** Bổ sung `@grant unsafeWindow` và cơ chế tiêm mã trực tiếp (Native Main-World Injection) vào `Document` ngay tại `document-start`. Game tự gán `window.game = $` $100\%$ ngay khi nạp trang, chuyển map, hoặc vào hầm ngục, không còn hiện tượng kẹt ở "Đang kết nối...".
+* **🎁 Tự Động Lụm Sạch Đồ Khi Đánh Quái & Boss:**
+  - Tích hợp Nam Châm hút đồ tự động ngay trong chu trình chiến đấu `runCombatEngine()`.
+  - Quét và hút sạch cả 3 nguồn rơi đồ: `drops.items` (vật phẩm), `drops.bags` (hũ/túi đồ), và `drops.world` (vật phẩm rơi từ máy chủ).
+  - Tự động mở khóa `item.lock = false` và cập nhật tuổi thọ `item.age > 0.6s` để nhân vật hấp thụ ngay lập tức vào túi đồ mà không bị rơi rớt lại phía sau.
 * **⚔️ Tiêu Diệt Lần Lượt 100% TẤT CẢ Boss Trên Map:**
-  - **Khắc phục triệt để:** Không nhảy hành tinh khi Boss chưa chết hoặc khi map vẫn còn các Boss khác (như Titan, Mini-Boss, Boss phụ).
-  - Tự động nhận diện toàn bộ 68 loại Boss trong game (`Df`), quét sạch từng Boss một trên toàn bộ bản đồ trước khi chuyển sang giai đoạn nhặt đồ.
-* **🎁 Hút Sạch 100% Trang Bị & Hũ Đồ Rơi:**
-  - Sau khi toàn bộ Boss trên map ngã xuống, tool tự động chuyển sang chế độ **Looting Mode**.
-  - Kích hoạt Nam Châm kéo toàn bộ vật phẩm (`G.drops.items`) và hũ đồ (`G.drops.bags`) vào vị trí nhân vật, chỉ cho phép phi thuyền khởi hành khi số lượng đồ trên đất về $0$ (hoặc hoàn tất thời gian nhặt an toàn).
-* **⚡ Bắt Dính Game Engine Ngay Lập Tức:**
-  - Hook Dev Engine đa tầng tại dòng 35 đảm bảo `window.game` tự động kết nối $100\%$ ngay khi chuyển bất kỳ hành tinh nào hoặc vào hầm ngục.
+  - Nhận diện toàn bộ 68 loại Boss trong game (`Df`), quét sạch từng Boss một trên toàn bộ bản đồ trước khi chuyển sang giai đoạn nhặt đồ.
 * **🏰 Hầm Ngục Cổ Đại Solo 1 Người & Vô Hạn Lượt:**
   - Chống văng map (`Anti-dgGone`) vĩnh viễn cho đến khi phá đảo 5 Ải.
 * **🎣 Cơ Chế Kéo Cần Câu Cá Mượt Mà:**
@@ -29,9 +30,9 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 
 | Module | Tính Năng | Mô Tả |
 | :--- | :--- | :--- |
-| **Chiến Đấu** | **⚔️ Auto Săn Sạch Boss** | Diệt lần lượt 100% tất cả Boss trên map rồi mới chuyển hành tinh |
-| **Thu Thập** | **🎁 Hút Sạch Đồ & Rương** | Tự động hút sạch trang bị, túi quà trước khi nhảy map |
-| **Kết Nối** | **⚡ Universal Engine Hook** | Bắt dính Game Engine 100% ở mọi map và hầm ngục ngay khi tải trang |
+| **Kết Nối** | **⚡ Main-World Native Hook** | Bắt dính Game Engine 100% không lỗi kết nối trên mọi trình duyệt và mọi map |
+| **Chiến Đấu** | **⚔️ Auto Đánh & Săn Boss** | Đánh quái / Boss toàn map và tự động hút sạch đồ rơi vào túi |
+| **Thu Thập** | **🎁 Hút Sạch Đồ & Rương** | Mở khóa và hút toàn bộ vật phẩm, hũ báu vật rơi ngay lập tức |
 | **Du Hành & Đi Ải** | **🏰 Hầm Ngục Cổ Đại Solo** | Vào 5 Ải hầm ngục 1 mình ngay lập tức, chống văng map, không giới hạn lượt |
 | **Du Hành & Đi Ải** | **🚀 Chuyển Nhanh 9 Hành Tinh** | Dịch chuyển tức thì đến bất kỳ hành tinh nào chỉ với 1 click |
 | **Câu Cá** | **🎣 Auto Câu Cá Mọi Hồ** | Tự tìm hồ nước, quăng câu, giật cá và kéo cần mượt mà chống đứt dây |

@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.3.0
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Săn Sạch 100% Tất Cả Boss Trên Map Mới Chuyển Hành Tinh, Hút Sạch Vật Phẩm & Rương Rơi Trước Khi Bay, Tự Động Kết Nối Đa Tầng Bất Khả Xâm Phạm, Chống Văng Hầm Ngục Solo, Vô Hạn Lượt Đi Ải, Auto Câu Cá Chuẩn Kéo Cần, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
+// @version      3.3.1
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Tự Động Kết Nối MAIN WORLD 100% Không Lỗi, Lụm Sạch Đồ & Rương Sau Khi Đánh Quái/Boss, Săn Sạch Boss Mới Chuyển Map, Chống Văng Hầm Ngục Solo, Vô Hạn Lượt Đi Ải, Auto Câu Cá Chuẩn Kéo Cần, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -12,7 +12,9 @@
 // @match        http://127.0.0.1:*/*
 // @match        *://*/*
 // @icon         https://zoo-pet.store/favicon.ico
-// @grant        none
+// @grant        unsafeWindow
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @run-at       document-start
 // @updateURL    https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js
 // @downloadURL  https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js
@@ -30,63 +32,89 @@
 
     if (!isZooPetPage) return;
 
-    console.log('%c[ZooPet Auto Pro v3.2.1]%c Khởi tạo engine Auto & VIP Mod trên: ' + location.href, 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
+    console.log('%c[ZooPet Auto Pro v3.3.1]%c Khởi tạo engine Auto & VIP Mod trên: ' + location.href, 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
 
-    // --- HOOK DEV ENGINE NGAY TỪ ĐẦU (ĐẢM BẢO Pb = true VÀ BẮT DÍNH window.game = $) ---
+    // --- CƠ CHẾ TIÊM HOOK MAIN WORLD TRỰC TIẾP (ZERO-FAIL NATIVE INJECTION) ---
+    // Tampermonkey trên Chrome/Edge Manifest V3 chạy trong Isolated World.
+    // Tiêm trực tiếp một thẻ <script> đồng bộ vào Document để patch RegExp trong MAIN WORLD của trang web,
+    // đảm bảo khi game module load thì Pb = true 100% và game tự gán window.game = $.
+    try {
+        const mainScript = document.createElement('script');
+        mainScript.textContent = `(${function () {
+            let _realGame = null;
+            try {
+                const isTargetRegex = (src) => {
+                    if (!src || typeof src !== 'string') return false;
+                    return src.includes('localhost') || src.includes('127') || src.includes('::1');
+                };
+
+                const origTest = RegExp.prototype.test;
+                RegExp.prototype.test = function (str) {
+                    if (this.source && isTargetRegex(this.source)) {
+                        return true;
+                    }
+                    return origTest.apply(this, arguments);
+                };
+
+                const origExec = RegExp.prototype.exec;
+                RegExp.prototype.exec = function (str) {
+                    if (this.source && isTargetRegex(this.source)) {
+                        const res = ['localhost'];
+                        res.index = 0;
+                        res.input = str;
+                        return res;
+                    }
+                    return origExec.apply(this, arguments);
+                };
+
+                const origMatch = String.prototype.match;
+                String.prototype.match = function (matcher) {
+                    if (matcher && matcher.source && isTargetRegex(matcher.source)) {
+                        return ['localhost'];
+                    }
+                    return origMatch.apply(this, arguments);
+                };
+
+                const origSearch = String.prototype.search;
+                String.prototype.search = function (matcher) {
+                    if (matcher && matcher.source && isTargetRegex(matcher.source)) {
+                        return 0;
+                    }
+                    return origSearch.apply(this, arguments);
+                };
+
+                // Trap setter trên window.game ở MAIN WORLD
+                Object.defineProperty(window, 'game', {
+                    configurable: true,
+                    enumerable: true,
+                    get() {
+                        return _realGame || window.__zp_game;
+                    },
+                    set(val) {
+                        _realGame = val;
+                        window.__zp_game = val;
+                        try {
+                            window.dispatchEvent(new CustomEvent('zp-game-ready', { detail: val }));
+                        } catch (_) {}
+                    }
+                });
+            } catch (e) {
+                console.error('[ZooPet MainWorld Hook Error]:', e);
+            }
+        }.toString()})();`;
+        (document.head || document.documentElement).appendChild(mainScript);
+        mainScript.remove();
+    } catch (_) {}
+
+    const globalWin = (typeof unsafeWindow !== 'undefined' && unsafeWindow) ? unsafeWindow : window;
     let _capturedGame = null;
 
     try {
-        const isTargetRegex = (src) => {
-            if (!src || typeof src !== 'string') return false;
-            return src.includes('localhost') || src.includes('127') || src.includes('::1');
-        };
-
-        const origTest = RegExp.prototype.test;
-        RegExp.prototype.test = function (str) {
-            if (this.source && isTargetRegex(this.source)) {
-                return true;
-            }
-            return origTest.apply(this, arguments);
-        };
-
-        const origExec = RegExp.prototype.exec;
-        RegExp.prototype.exec = function (str) {
-            if (this.source && isTargetRegex(this.source)) {
-                const res = ['localhost'];
-                res.index = 0;
-                res.input = str;
-                return res;
-            }
-            return origExec.apply(this, arguments);
-        };
-
-        const origMatch = String.prototype.match;
-        String.prototype.match = function (matcher) {
-            if (matcher && matcher.source && isTargetRegex(matcher.source)) {
-                return ['localhost'];
-            }
-            return origMatch.apply(this, arguments);
-        };
-
-        const origSearch = String.prototype.search;
-        String.prototype.search = function (matcher) {
-            if (matcher && matcher.source && isTargetRegex(matcher.source)) {
-                return 0;
-            }
-            return origSearch.apply(this, arguments);
-        };
-
-        // Trap getter/setter trên window.game để kích hoạt ngay khi game gốc gán window.game = $
-        Object.defineProperty(window, 'game', {
-            configurable: true,
-            enumerable: true,
-            get() {
-                return _capturedGame;
-            },
-            set(val) {
-                _capturedGame = val;
-                if (val && typeof onGameConnected === 'function') {
-                    onGameConnected(val);
+        globalWin.addEventListener('zp-game-ready', (e) => {
+            if (e && e.detail) {
+                _capturedGame = e.detail;
+                if (typeof onGameConnected === 'function') {
+                    onGameConnected(e.detail);
                 }
             }
         });
@@ -318,16 +346,32 @@
         }
     }
 
-    // Quét tìm kiếm Game Instance sâu (Deep Scanner)
+    // Quét tìm kiếm Game Instance sâu (Deep Scanner trên cả Main World và Userscript World)
     function findGameInstance() {
         if (_capturedGame && _capturedGame.player && _capturedGame.world) return _capturedGame;
-        if (window.game && window.game.player && window.game.world) return window.game;
+
+        const candidates = [
+            _capturedGame,
+            globalWin.game,
+            globalWin.__zp_game,
+            globalWin.zooPetGame,
+            window.game,
+            window.__zp_game,
+            window.zooPetGame
+        ];
+
+        for (let c of candidates) {
+            if (c && c.player && c.world) {
+                _capturedGame = c;
+                return c;
+            }
+        }
 
         try {
-            const keys = Object.getOwnPropertyNames(window);
+            const keys = Object.getOwnPropertyNames(globalWin);
             for (let k of keys) {
                 try {
-                    const obj = window[k];
+                    const obj = globalWin[k];
                     if (obj && typeof obj === 'object' && obj.player && obj.world && obj.scene) {
                         _capturedGame = obj;
                         return obj;
@@ -336,7 +380,7 @@
             }
         } catch (_) {}
 
-        return _capturedGame || window.game || null;
+        return _capturedGame || globalWin.game || window.game || null;
     }
 
     // Hàm kết nối lại cưỡng bức và quét liên tục trong 5 giây (Resilient Scanner)
@@ -678,6 +722,10 @@
         const isCombatWanted = CFG.combat.enabled || CFG.combat.bossOnly;
         if (!isCombatWanted || !G || !G.enemies || !G.player || !G.player.alive) return;
         if (G.fishing && G.fishing.active) return; // Không can thiệp khi đang câu cá
+
+        // Luôn chủ động hút và lụm sạch đồ rơi xung quanh người chơi
+        runLootVacuum();
+
         if (Date.now() < combatCooldown) return;
 
         const player = G.player;
@@ -1286,14 +1334,14 @@
         questCheckCooldown = Date.now() + 2000;
     }
 
-    // --- MODULE 7: NAM CHÂM HÚT ĐỒ (GLOBAL MAGNET) ---
+    // --- MODULE 7: NAM CHÂM HÚT ĐỒ TOÀN DIỆN (GLOBAL LOOT & REWARD VACUUM) ---
     function runLootVacuum() {
         if (!G || !G.drops || !G.player || !G.player.pos) return;
 
         const player = G.player;
         const drops = G.drops;
 
-        // 1. Hút các túi đồ (bags)
+        // 1. Hút các túi đồ / hũ báu vật (bags)
         if (drops.bags && drops.bags.length > 0) {
             for (let bag of drops.bags) {
                 if (bag) {
@@ -1307,14 +1355,42 @@
             }
         }
 
-        // 2. Hút các vật phẩm đơn lẻ (items)
+        // 2. Hút các vật phẩm rơi đơn lẻ (items) - Mở khóa lock & kích hoạt tuổi thọ để game nhặt ngay tức khắc
         if (drops.items && drops.items.length > 0) {
             for (let item of drops.items) {
-                if (item && item.obj && item.obj.position) {
-                    item.obj.position.x = player.pos.x;
-                    item.obj.position.z = player.pos.z;
+                if (item) {
+                    // Mở khóa item lock và đặt age > 0.6s để bộ lọc K_.update hấp thụ ngay vào túi đồ
+                    item.lock = false;
+                    if (typeof item.age === 'number') {
+                        item.age = Math.max(item.age, 0.7);
+                    }
+                    if (item.obj && item.obj.position) {
+                        item.obj.position.x = player.pos.x;
+                        item.obj.position.z = player.pos.z;
+                    }
                 }
             }
+        }
+
+        // 3. Hút các vật phẩm rơi từ Server / World Map (drops.world Map)
+        if (drops.world) {
+            try {
+                const worldItems = (typeof drops.world.values === 'function') ? Array.from(drops.world.values()) : Object.values(drops.world);
+                for (let wItem of worldItems) {
+                    if (wItem) {
+                        if (wItem.obj && wItem.obj.position) {
+                            wItem.obj.position.x = player.pos.x;
+                            wItem.obj.position.z = player.pos.z;
+                        }
+                        if (wItem.goal) {
+                            wItem.goal.x = player.pos.x;
+                            wItem.goal.z = player.pos.z;
+                        }
+                        wItem.x = player.pos.x;
+                        wItem.z = player.pos.z;
+                    }
+                }
+            } catch (_) {}
         }
     }
 
@@ -1400,7 +1476,7 @@
 
                 runQuestEngine();
 
-                if (CFG.cheats.globalMagnet || CFG.loot.enabled) {
+                if (CFG.cheats.globalMagnet || CFG.loot.enabled || CFG.combat.enabled || CFG.combat.bossOnly || CFG.boss.autoHopPlanets) {
                     runLootVacuum();
                 }
             }

@@ -1,14 +1,14 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.3.1
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.3.2
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật Lớn v3.3.1 (Khắc Phục Dứt Điểm Lỗi Kết Nối & Tự Động Lụm Sạch Đồ Khi Đánh Quái/Boss)
+## 🌟 Bản Cập Nhật Lớn v3.3.2 (Bẫy Đối Tượng Đa Tầng Triple-Fallback Trap: Bắt Dính Game Engine 100% Không Cần Ctrl+F5)
 
-* **⚡ Native Main-World Injection (Sửa Dứt Điểm Lỗi "Đang kết nối..."):**
-  - **Nguyên nhân gốc rễ:** Trên các trình duyệt hiện đại (Chrome/Edge Manifest V3), Tampermonkey chạy Userscript trong môi trường cô lập (`Isolated World`), khiến các hook prototype không chạm tới được module chính của game trong `Main World`. Do đó `Pb` luôn bằng `false` và game không bao giờ xuất `window.game`.
-  - **Khắc phục triệt để v3.3.1:** Bổ sung `@grant unsafeWindow` và cơ chế tiêm mã trực tiếp (Native Main-World Injection) vào `Document` ngay tại `document-start`. Game tự gán `window.game = $` $100\%$ ngay khi nạp trang, chuyển map, hoặc vào hầm ngục, không còn hiện tượng kẹt ở "Đang kết nối...".
+* **⚡ Triple-Fallback Object Trap (Khắc phục triệt để lỗi phải Ctrl+F5 mới nhận Engine):**
+  - **Nguyên nhân:** Khi chuyển hành tinh hoặc đổi map (`location.href = location.pathname`), trình duyệt tải trang từ Disk Cache / Memory Cache khiến module game khởi chạy trước khi Tampermonkey kịp hook `RegExp.prototype.test`. Do đó `Pb` nhận giá trị `false` và game không bao giờ tự gán `window.game`.
+  - **Giải pháp v3.3.2:** Cài đặt bẫy đối tượng đa tầng (**Triple-Fallback Property Trap**) trên `Object.prototype` (bẫy `.enemies`, `.drops`, `.fishing`). Ngay khi game khởi tạo các hệ thống con (`$.enemies = new V_()`), trap lập tức bắt trọn đối tượng Game Instance `$` trong Main World và truyền về Userscript $100\%$ độc lập với biến `Pb` và không phụ thuộc vào bộ nhớ đệm Cache.
 * **🎁 Tự Động Lụm Sạch Đồ Khi Đánh Quái & Boss:**
   - Tích hợp Nam Châm hút đồ tự động ngay trong chu trình chiến đấu `runCombatEngine()`.
   - Quét và hút sạch cả 3 nguồn rơi đồ: `drops.items` (vật phẩm), `drops.bags` (hũ/túi đồ), và `drops.world` (vật phẩm rơi từ máy chủ).
@@ -30,7 +30,7 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 
 | Module | Tính Năng | Mô Tả |
 | :--- | :--- | :--- |
-| **Kết Nối** | **⚡ Main-World Native Hook** | Bắt dính Game Engine 100% không lỗi kết nối trên mọi trình duyệt và mọi map |
+| **Kết Nối** | **⚡ Triple-Fallback Object Trap** | Bắt dính Game Engine 100% trên mọi lần chuyển map, không cần Ctrl+F5 |
 | **Chiến Đấu** | **⚔️ Auto Đánh & Săn Boss** | Đánh quái / Boss toàn map và tự động hút sạch đồ rơi vào túi |
 | **Thu Thập** | **🎁 Hút Sạch Đồ & Rương** | Mở khóa và hút toàn bộ vật phẩm, hũ báu vật rơi ngay lập tức |
 | **Du Hành & Đi Ải** | **🏰 Hầm Ngục Cổ Đại Solo** | Vào 5 Ải hầm ngục 1 mình ngay lập tức, chống văng map, không giới hạn lượt |

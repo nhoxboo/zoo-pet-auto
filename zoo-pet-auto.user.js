@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.2.1
+// @version      2.3.0
 // @description  Tool Auto toàn diện cho Zoo Pet (zoo-pet.store): Auto Nông trại, Auto Câu cá Chuẩn xác/Instant (Hỗ trợ Đại Dương & Mọi map), Auto Săn Boss Xuyên Hành Tinh cày cấp, Lọc Boss Titan, Tự làm & Nhận thưởng Nhiệm vụ/Bounty, Auto Chạy ngầm khi Hạ Tab.
 // @author       Antigravity & Nam Pro
 // @match        https://zoo-pet.store/*
@@ -16,7 +16,7 @@
 (function () {
     'use strict';
 
-    console.log('%c🐾 [Zoo Pet Auto Pro v2.2.1] Đang khởi tạo...', 'color: #0284c7; font-size: 16px; font-weight: bold;');
+    console.log('%c🐾 [Zoo Pet Auto Pro v2.3.0] Đang khởi tạo...', 'color: #0284c7; font-size: 16px; font-weight: bold;');
 
     // ==========================================
     // 0. BẢO VỆ CHẠY ẨN NỀN KHI HẠ TAB (ANTI-THROTTLE)
@@ -91,9 +91,19 @@
     // ==========================================
     // 2. CẤU HÌNH AUTO (CONFIG & SETTINGS)
     // ==========================================
-    const STORAGE_KEY = 'zp_auto_pro_cfg_v22';
+    const STORAGE_KEY = 'zp_auto_pro_cfg_v23';
     const DEFAULT_CFG = {
         enabled: true,
+
+        // 👑 PRO CHEATS & NÂNG CAO (VIP MOD)
+        cheats: {
+            noCooldown: true,        // ⚡ Hồi chiêu 0s (xả Q-W-E-R liên tục)
+            godMode: false,          // 🛡️ Bất tử không mất máu (100% HP, Kháng khống chế)
+            ultraFishing: false,     // 🎣 Câu cá siêu tốc 0.1s (Cá cắn câu tức thì & giật ngay)
+            globalMagnet: true,      // 🧲 Nam châm hút đồ & hũ rơi toàn bản đồ
+            speedBoost: 1.0,         // 🏃 Tăng tốc chạy (1.0x - 2.5x)
+            attackMultiplier: 1.0    // ⚔️ Tăng sát thương (1.0x - 5.0x)
+        },
 
         // 🚀 SĂN BOSS & DU HÀNH XUYÊN HÀNH TINH
         bossHopper: {
@@ -652,7 +662,30 @@
         // Nếu đang trong trạng thái câu cá
         if (fishing.active) {
             fishNavigating = false;
-            fishCastCooldown = Date.now() + 2000;
+            fishCastCooldown = Date.now() + 1500;
+
+            // ⚡ PRO CHEAT: Câu cá siêu tốc 0.1s (Cá cắn câu tức thì & kéo lên ngay)
+            if (CFG.cheats && CFG.cheats.ultraFishing) {
+                if (fishing.phase === 'wait' || fishing.phase === 'cast' || fishing.phase === 'nibble' || fishing.phase === 'approach') {
+                    const targetFish = (fishing.fish && fishing.fish.length > 0) ? fishing.fish[0] : (typeof fishing.addFish === 'function' && fishing.w ? fishing.addFish(fishing.w) : null);
+                    if (targetFish && typeof fishing.startBite === 'function') {
+                        fishing.interest = targetFish;
+                        fishing.startBite(targetFish);
+                    }
+                }
+                if (fishing.phase === 'bite') {
+                    if (typeof fishing.hook === 'function') fishing.hook();
+                }
+                if (fishing.phase === 'hooked') {
+                    fishing.progress = 1;
+                    if (fishing.interest && typeof fishing.finish === 'function') {
+                        fishing.finish(true);
+                        stats.fishCount++;
+                        updateStatUI();
+                    }
+                }
+                return;
+            }
 
             // 1. Cá cắn câu -> Giật cần ngay lập tức
             if (fishing.phase === 'bite') {
@@ -809,11 +842,60 @@
     // ==========================================
     // 5. MASTER TICK (CHẠY ĐƯỢC CẢ ẨN NỀN)
     // ==========================================
+
+    // --- MODULE 7: PRO CHEATS & HACKS ENGINE ---
+    function runCheatsEngine() {
+        if (!G || !G.player) return;
+        const player = G.player;
+
+        // 1. Hồi chiêu 0s (No Cooldown)
+        if (CFG.cheats && CFG.cheats.noCooldown) {
+            player.cd = { spin: 0, dash: 0, slam: 0, atk: 0, special: 0 };
+        }
+
+        // 2. Chế độ Bất Tử (God Mode)
+        if (CFG.cheats && CFG.cheats.godMode && player.alive) {
+            player.hp = player.maxHp;
+            player.invuln = 999999;
+            player.burnUntil = 0;
+            player.stunUntil = 0;
+            player.defDownUntil = 0;
+        }
+
+        // 3. Tăng Tốc Di Chuyển (Speed Boost)
+        if (CFG.cheats && CFG.cheats.speedBoost > 1.0) {
+            player.buffs = player.buffs || {};
+            player.buffs.speed = { v: (CFG.cheats.speedBoost - 1.0), until: player.time + 10 };
+        }
+
+        // 4. Siêu Sát Thương (Attack Multiplier)
+        if (CFG.cheats && CFG.cheats.attackMultiplier > 1.0) {
+            player.buffs = player.buffs || {};
+            player.buffs.atk = { v: (CFG.cheats.attackMultiplier - 1.0), until: player.time + 10 };
+        }
+
+        // 5. Nam Châm Hút Đồ Toàn Bản Đồ (Global Magnet)
+        if (CFG.cheats && CFG.cheats.globalMagnet) {
+            player.buffs = player.buffs || {};
+            player.buffs.magnet = { v: 999, until: player.time + 10 };
+
+            // Tự động thu thập mọi hũ đồ rơi khắp map
+            if (G.drops && G.drops.bags && G.drops.bags.length > 0) {
+                for (const bag of [...G.drops.bags]) {
+                    G.drops.pickupBag(bag);
+                    stats.itemsLooted++;
+                    updateStatUI();
+                }
+            }
+        }
+    }
+
     function masterTick() {
         G = getGameInstance();
         if (!G || !G.player || !G.save) return;
         if (!CFG.enabled) return;
 
+        runCheatsEngine();
         runPlanetBossHopper();
         runCombatEngine();
         runQuestsEngine();
@@ -1068,7 +1150,7 @@
             <div class="zp-header" id="zp-header-drag">
                 <div class="zp-title">
                     <span class="zp-status-dot"></span>
-                    <span>Zoo Pet Auto Pro v2.2</span>
+                    <span>Zoo Pet Auto Pro v2.3</span>
                 </div>
                 <div class="zp-btn-group">
                     <button class="zp-icon-btn" id="zp-btn-min" title="Thu nhỏ">_</button>
@@ -1077,7 +1159,8 @@
             </div>
 
             <div class="zp-tabs" id="zp-tabs-bar">
-                <button class="zp-tab active" data-tab="boss">🚀 Săn Boss</button>
+                <button class="zp-tab active" data-tab="cheats">👑 Hack & Mod</button>
+                <button class="zp-tab" data-tab="boss">🚀 Săn Boss</button>
                 <button class="zp-tab" data-tab="filter">🎯 Lọc Boss</button>
                 <button class="zp-tab" data-tab="quests">📜 Nhiệm Vụ</button>
                 <button class="zp-tab" data-tab="farm">🌾 Nông Trại</button>
@@ -1088,8 +1171,75 @@
             </div>
 
             <div class="zp-body" id="zp-body-content">
+                <!-- TAB 0: PRO CHEATS & HACKS -->
+                <div class="zp-tab-content active" data-tab-content="cheats">
+                    <div class="zp-row" style="background:#eff6ff;padding:6px 8px;border-radius:8px;border:1px solid #bfdbfe">
+                        <div>
+                            <b style="color:#0284c7">⚡ Hồi chiêu 0s (No Cooldown)</b>
+                            <div style="font-size:10px;color:#64748b">Xả skill Q-W-E-R và chong chóng liên tục không ngừng</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-cheat-cd" ${CFG.cheats && CFG.cheats.noCooldown ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="zp-row" style="background:#f0fdf4;padding:6px 8px;border-radius:8px;border:1px solid #bbf7d0">
+                        <div>
+                            <b style="color:#16a34a">🛡️ Chế độ Bất Tử (God Mode)</b>
+                            <div style="font-size:10px;color:#64748b">Máu luôn 100%, kháng mọi sát thương & debuff</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-cheat-god" ${CFG.cheats && CFG.cheats.godMode ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="zp-row" style="background:#faf5ff;padding:6px 8px;border-radius:8px;border:1px solid #e9d5ff">
+                        <div>
+                            <b style="color:#9333ea">🎣 Câu cá Siêu Tốc (0.1s / con)</b>
+                            <div style="font-size:10px;color:#64748b">Cá cắn câu tức thì ngay khi quăng mồi</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-cheat-fish" ${CFG.cheats && CFG.cheats.ultraFishing ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="zp-row" style="background:#fffbeb;padding:6px 8px;border-radius:8px;border:1px solid #fef3c7">
+                        <div>
+                            <b style="color:#d97706">🧲 Hút đồ & Hũ rơi Toàn Bản Đồ</b>
+                            <div style="font-size:10px;color:#64748b">Hút sạch đồ rơi, trang bị và hũ đồ ở bất cứ đâu</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-cheat-mag" ${CFG.cheats && CFG.cheats.globalMagnet ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="zp-row">
+                        <span>🏃 Tăng Tốc Chạy:</span>
+                        <select class="zp-select" id="cfg-cheat-speed">
+                            <option value="1.0" ${CFG.cheats && CFG.cheats.speedBoost === 1.0 ? 'selected' : ''}>1.0x (Mặc định)</option>
+                            <option value="1.5" ${CFG.cheats && CFG.cheats.speedBoost === 1.5 ? 'selected' : ''}>1.5x (Nhanh)</option>
+                            <option value="2.0" ${CFG.cheats && CFG.cheats.speedBoost === 2.0 ? 'selected' : ''}>2.0x (Siêu tốc)</option>
+                            <option value="2.5" ${CFG.cheats && CFG.cheats.speedBoost === 2.5 ? 'selected' : ''}>2.5x (Thần tốc)</option>
+                        </select>
+                    </div>
+
+                    <div class="zp-row">
+                        <span>⚔️ Tăng Sát Thương Công:</span>
+                        <select class="zp-select" id="cfg-cheat-atk">
+                            <option value="1.0" ${CFG.cheats && CFG.cheats.attackMultiplier === 1.0 ? 'selected' : ''}>1.0x (Mặc định)</option>
+                            <option value="2.0" ${CFG.cheats && CFG.cheats.attackMultiplier === 2.0 ? 'selected' : ''}>2.0x (+100% Công)</option>
+                            <option value="3.0" ${CFG.cheats && CFG.cheats.attackMultiplier === 3.0 ? 'selected' : ''}>3.0x (+200% Công)</option>
+                            <option value="5.0" ${CFG.cheats && CFG.cheats.attackMultiplier === 5.0 ? 'selected' : ''}>5.0x (One Hit Quái)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <!-- TAB 1: SĂN BOSS & DU HÀNH -->
-                <div class="zp-tab-content active" data-tab-content="boss">
+                <div class="zp-tab-content" data-tab-content="boss">
                     <div class="zp-card-box">
                         <div id="zp-boss-status" style="font-weight:600;color:#0284c7;">🚀 Đang quét Boss các hành tinh...</div>
                     </div>
@@ -1359,6 +1509,14 @@
             const el = document.getElementById(id);
             if (el) el.onchange = e => { fn(e.target.value); saveConfig(); };
         };
+
+        // Cheats
+        bindChk('cfg-cheat-cd', v => CFG.cheats.noCooldown = v);
+        bindChk('cfg-cheat-god', v => CFG.cheats.godMode = v);
+        bindChk('cfg-cheat-fish', v => CFG.cheats.ultraFishing = v);
+        bindChk('cfg-cheat-mag', v => CFG.cheats.globalMagnet = v);
+        bindVal('cfg-cheat-speed', v => CFG.cheats.speedBoost = Number(v) || 1.0);
+        bindVal('cfg-cheat-atk', v => CFG.cheats.attackMultiplier = Number(v) || 1.0);
 
         // Boss & Planets
         bindChk('cfg-boss-hopper', v => CFG.bossHopper.enabled = v);

@@ -1,22 +1,21 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.8.1
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.8.2
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Tính Năng Mới Bản v2.8.1
+## 🌟 Tính Năng Mới Bản v2.8.2
 
-### 1. 🌊 Khắc Phục Hoàn Toàn Lỗi Câu Cá Tại Hành Tinh Đại Dương (Ocean Planet)
-* **Nguyên nhân cốt lõi trong engine game:**
-  * Map Đại Dương không có bờ đất liền (`shore`) thông thường mà là các **vùng rạn san hô nước mở (`reef: true`)**.
-  * Tool phiên bản trước cố gắng tìm điểm bờ đất `plan.shore` vốn không tồn tại trên biển $\rightarrow$ khiến nhân vật bị kẹt vòng lặp bơi quanh rạn san hô mà không quăng cần.
-  * Khi nhân vật chưa trang bị Cần Câu hoặc đang cầm vũ khí đánh quái $\rightarrow$ engine game tự động cancel câu cá ngay tức thì (`weapon.kind !== 'rod'`).
-  * Điểm quăng phao (`castPos`) cần là một thực thể `Vector3` có hàm `.clone()` hợp lệ.
-* **Giải pháp trong v2.8.1:**
-  * ✅ **Auto-Equip Rod:** Tự động phát hiện và trang bị Cần Câu Vàng (`rod_gold` / `rod`) trước khi câu, tránh bị engine game hủy trạng thái câu.
-  * ✅ **Open-Sea Reef Navigation:** Tính toán bán kính tiếp cận rạn san hô trên biển (`w.r + 2.0m`), tự bơi đến mép rạn và dừng hẳn (`vel = 0`) để quăng câu chuẩn xác.
-  * ✅ **Direct Vector3 Casting:** Quăng phao trực tiếp vào lòng rạn san hô chứa 7 đàn cá bơi lội với tọa độ Vector3 chuẩn xác.
-  * ✅ **Reef Fish Binding:** Tự động bắt đúng đối tượng cá (`fishing.interest`) trong rạn san hô để kéo cá lên bờ $100\%$ không bị lỗi null.
+### 1. 🎣 Sửa Triệt Để Lỗi Tự Động Câu Cá (Cả Hồ Nước Thường & Hành Tinh Đại Dương)
+* **Nguyên nhân sâu xa được phát hiện:**
+  1. **Lỗi `refreshEquip()` chạy lặp vô tận:** Hàm `autoEquipRod` cũ kiểm tra biến `window.W` (vốn không tồn tại trên window do biến cục bộ), khiến tool hiểu nhầm chưa có Cần Câu và liên tục gọi `player.refreshEquip()` mỗi 100ms. Mỗi lần gọi `refreshEquip()` engine game lập tức xóa bỏ cần câu và HỦY lệnh câu cá (`fishing.cancel()`).
+  2. **Lỗi kẹt di chuyển `walkTo`:** Khi nhân vật ở cách hồ nước $> 2.5$m, hàm quăng câu liên tục tính lại tọa độ mục tiêu mỗi 100ms làm ngắt quãng bước đi của nhân vật.
+  3. **Hết cá trong hồ sau khi câu nhanh:** Khi dùng Ultra Catch câu hết cá trong hồ, hồ bị trống cá trong 15s khiến tool đứng chờ vô tận.
+* **Giải pháp hoàn thiện trong v2.8.2:**
+  * ✅ **`ensureRodEquipped()` an toàn:** Chỉ trang bị cần câu đúng 1 lần duy nhất khi `player.weapon.kind !== 'rod'`. Một khi đã cầm cần câu, tuyệt đối không chạm vào `refreshEquip()` giúp phao câu và dây câu tồn tại ổn định $100\%$.
+  * ✅ **Điều hướng mượt mà `isWalkingToWater`:** Khóa đích đến của bước đi khi đến gần hồ nước, không làm giật lag hay ngắt quãng nhân vật.
+  * ✅ **Auto Fish Respawn:** Khi hồ nước bị câu cạn sạch cá, tool tự động kích hoạt hồi sinh cá mới ngay lập tức để tiếp tục câu liên tục không bị gián đoạn.
+  * ✅ **Tương thích toàn diện:** Hoạt động hoàn hảo trên tất cả các hành tinh (Hành tinh Nhà, Đầm Lầy, Băng Giá, Rừng Rậm, Hành Tinh Đại Dương...).
 
 ### 2. 🌟 Chế Độ "CHỈ CÂU CÁ HIẾM & HUYỀN THOẠI" (Rare & Legend Fish Hunter)
 * **Tự Động Phân Loại Cá Thông Minh:**

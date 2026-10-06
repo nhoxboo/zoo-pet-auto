@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.3.2
+// @version      3.3.3
 // @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Tự Động Kết Nối MAIN WORLD 100% Không Lỗi, Lụm Sạch Đồ & Rương Sau Khi Đánh Quái/Boss, Săn Sạch Boss Mới Chuyển Map, Chống Văng Hầm Ngục Solo, Vô Hạn Lượt Đi Ải, Auto Câu Cá Chuẩn Kéo Cần, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
@@ -32,14 +32,15 @@
 
     if (!isZooPetPage) return;
 
-    console.log('%c[ZooPet Auto Pro v3.3.2]%c Khởi tạo engine Auto & VIP Mod trên: ' + location.href, 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
+    console.log('%c[ZooPet Auto Pro v3.3.3]%c Khởi tạo engine Auto & VIP Mod trên: ' + location.href, 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
 
     const globalWin = (typeof unsafeWindow !== 'undefined' && unsafeWindow) ? unsafeWindow : window;
     let _capturedGame = null;
 
     // --- CƠ CHẾ TIÊM HOOK MAIN WORLD TRỰC TIẾP (ZERO-FAIL NATIVE INJECTION) ---
-    // Khắc phục triệt để lỗi Isolated World của Tampermonkey trên Chrome/Edge Manifest V3:
-    // Tiêm trực tiếp script đồng bộ vào Document để patch RegExp và bẫy setter trong MAIN WORLD của trang web.
+    // Tiêm trực tiếp một thẻ <script> đồng bộ vào Document để patch RegExp trong MAIN WORLD của trang web,
+    // đảm bảo khi game module load thì Pb = true 100% và game tự gán window.game = $.
+    // Tuyệt đối KHÔNG can thiệp Object.prototype để tránh ảnh hưởng đến Three.js .clone().
     try {
         const mainScript = document.createElement('script');
         mainScript.textContent = `(${function () {
@@ -85,7 +86,7 @@
                     return origSearch.apply(this, arguments);
                 };
 
-                // Trap setter trên window.game ở MAIN WORLD
+                // Trap setter trên window.game ở MAIN WORLD (khi game chạy Pb && (window.game = $))
                 Object.defineProperty(window, 'game', {
                     configurable: true,
                     enumerable: true,
@@ -100,31 +101,6 @@
                         } catch (_) {}
                     }
                 });
-
-                // BẪY DỰ PHÒNG KHÔNG THỂ BỎ LỠ (TRIPLE-FALLBACK OBJECT TRAP):
-                // Bẫy setter trên Object.prototype cho các thuộc tính đặc trưng của Game Instance ($)
-                ['enemies', 'drops', 'fishing'].forEach(prop => {
-                    try {
-                        Object.defineProperty(Object.prototype, prop, {
-                            configurable: true,
-                            enumerable: true,
-                            get() {
-                                return this['__zp_' + prop];
-                            },
-                            set(val) {
-                                this['__zp_' + prop] = val;
-                                if (this && this.scene && this.camera && this.save) {
-                                    _realGame = this;
-                                    window.game = this;
-                                    window.__zp_game = this;
-                                    try {
-                                        window.dispatchEvent(new CustomEvent('zp-game-ready', { detail: this }));
-                                    } catch (_) {}
-                                }
-                            }
-                        });
-                    } catch (_) {}
-                });
             } catch (e) {
                 console.error('[ZooPet MainWorld Hook Error]:', e);
             }
@@ -133,30 +109,7 @@
         mainScript.remove();
     } catch (_) {}
 
-    // Bẫy tương tự trên Userscript Realm (nếu script chạy chung realm)
-    try {
-        ['enemies', 'drops', 'fishing'].forEach(prop => {
-            Object.defineProperty(Object.prototype, prop, {
-                configurable: true,
-                enumerable: true,
-                get() {
-                    return this['__zp_u_' + prop];
-                },
-                set(val) {
-                    this['__zp_u_' + prop] = val;
-                    if (this && this.scene && this.camera && this.save) {
-                        _capturedGame = this;
-                        globalWin.game = this;
-                        globalWin.__zp_game = this;
-                        if (typeof onGameConnected === 'function') {
-                            onGameConnected(this);
-                        }
-                    }
-                }
-            });
-        });
-    } catch (_) {}
-
+    // Bắt sự kiện kết nối từ Main World
     try {
         globalWin.addEventListener('zp-game-ready', (e) => {
             if (e && e.detail) {

@@ -1,14 +1,15 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.3.2
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.3.3
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật Lớn v3.3.2 (Bẫy Đối Tượng Đa Tầng Triple-Fallback Trap: Bắt Dính Game Engine 100% Không Cần Ctrl+F5)
+## 🌟 Bản Cập Nhật Lớn v3.3.3 (Khắc Phục Lỗi Tải Game .clone() & Tối Ưu Hóa Hook Kết Nối)
 
-* **⚡ Triple-Fallback Object Trap (Khắc phục triệt để lỗi phải Ctrl+F5 mới nhận Engine):**
-  - **Nguyên nhân:** Khi chuyển hành tinh hoặc đổi map (`location.href = location.pathname`), trình duyệt tải trang từ Disk Cache / Memory Cache khiến module game khởi chạy trước khi Tampermonkey kịp hook `RegExp.prototype.test`. Do đó `Pb` nhận giá trị `false` và game không bao giờ tự gán `window.game`.
-  - **Giải pháp v3.3.2:** Cài đặt bẫy đối tượng đa tầng (**Triple-Fallback Property Trap**) trên `Object.prototype` (bẫy `.enemies`, `.drops`, `.fishing`). Ngay khi game khởi tạo các hệ thống con (`$.enemies = new V_()`), trap lập tức bắt trọn đối tượng Game Instance `$` trong Main World và truyền về Userscript $100\%$ độc lập với biến `Pb` và không phụ thuộc vào bộ nhớ đệm Cache.
+* **🛡️ Sửa Dứt Điểm Lỗi "Lỗi tải game: Cannot read properties of undefined (reading 'clone')":**
+  - Đã loại bỏ hoàn toàn các can thiệp vào `Object.prototype`, đảm bảo hệ thống Three.js của game và các mô hình 3D (.glb) tải $100\%$ mượt mà không bị lỗi sao chép thuộc tính.
+* **⚡ Native Main-World Regex Hook & Window.game Setter:**
+  - Patch `RegExp.prototype.test` và bẫy setter trên `window.game` tại Main World, đảm bảo `Pb = true` và bắt dính `window.game = $` ngay khi game vừa nạp xong map.
 * **🎁 Tự Động Lụm Sạch Đồ Khi Đánh Quái & Boss:**
   - Tích hợp Nam Châm hút đồ tự động ngay trong chu trình chiến đấu `runCombatEngine()`.
   - Quét và hút sạch cả 3 nguồn rơi đồ: `drops.items` (vật phẩm), `drops.bags` (hũ/túi đồ), và `drops.world` (vật phẩm rơi từ máy chủ).
@@ -30,7 +31,7 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 
 | Module | Tính Năng | Mô Tả |
 | :--- | :--- | :--- |
-| **Kết Nối** | **⚡ Triple-Fallback Object Trap** | Bắt dính Game Engine 100% trên mọi lần chuyển map, không cần Ctrl+F5 |
+| **Kết Nối** | **⚡ Main-World Hook** | Bắt dính Game Engine 100% không lỗi nạp 3D và không xung đột Three.js |
 | **Chiến Đấu** | **⚔️ Auto Đánh & Săn Boss** | Đánh quái / Boss toàn map và tự động hút sạch đồ rơi vào túi |
 | **Thu Thập** | **🎁 Hút Sạch Đồ & Rương** | Mở khóa và hút toàn bộ vật phẩm, hũ báu vật rơi ngay lập tức |
 | **Du Hành & Đi Ải** | **🏰 Hầm Ngục Cổ Đại Solo** | Vào 5 Ải hầm ngục 1 mình ngay lập tức, chống văng map, không giới hạn lượt |

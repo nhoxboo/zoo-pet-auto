@@ -1,27 +1,23 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.1.0
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.1.1
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật Lớn v3.1.0 (Đi Ải Hầm Ngục Solo & Vô Hạn Lượt)
+## 🌟 Bản Cập Nhật v3.1.1 (Khắc Phục Triệt Để Lỗi Bị Văng Khỏi Hầm Ngục)
 
-* **🏰 Đi Ải Hầm Ngục Solo 1 Người (Không Cần Đợi Đủ 5 Người):**
-  * Game gốc bắt buộc phải ghép phòng đủ 5 người và đợi đếm ngược mới mở cổng.
-  * Bản **v3.1.0** tích hợp **Solo Dungeon Fast-Start**: Cho phép người chơi 1 mình bước thẳng vào **Hầm Ngục Cổ Đại (5 Ải)** bất cứ lúc nào, Ải 1 tự động khởi động ngay trong $0.1$ giây.
-* **♾️ Phá Bỏ Giới Hạn Lượt Đi (Vô Hạn Lần / Không Giới Hạn 2 Lượt/Ngày):**
-  * Game gốc giới hạn 2 lượt/ngày tại NPC Mầm Xanh.
-  * Tính năng Du Hành Hầm Ngục đưa bạn vào thẳng không gian phó bản độc lập, cho phép cày cuốc, săn Thú Cưng Trùm và Rương Cổ Đại liên tục không giới hạn.
-* **⚡ Tự Động Vượt 5 Ải & Bước Qua Cổng (Auto Dungeon Runner):**
-  * Tự động tiêu diệt quái thường và Boss từng ải (Ải 1 $\rightarrow$ Ải 2 $\rightarrow$ Ải 3 $\rightarrow$ Ải 4 $\rightarrow$ Ải 5 - Trùm Cuối Cổ Vương).
-  * Ngay khi Boss ải ngã xuống, nhân vật tự động bước vào cổng ma thuật để chuyển sang ải tiếp theo.
+* **🛡️ Chống Văng Hầm Ngục Solo (Anti-Dungeon-Kick):**
+  - **Nguyên nhân trước đây:** Khi vào hầm ngục solo mà không qua sảnh ghép đội của server, máy chủ WebSocket không tìm thấy phòng trên hệ thống nên đã gửi gói tin `dgGone` khiến game tự động đẩy nhân vật về Hành Tinh Mầm Xanh (`home`) sau vài giây.
+  - **Khắc phục trên v3.1.1:** Tích hợp bộ lọc chặn gói tin `dgGone` đa tầng (cả ở tầng mạng `WebSocket` lẫn tầng `G.net.onMsg` của Engine). Nhờ đó, nhân vật được bảo vệ và **ở lại trong hầm ngục vĩnh viễn** cho đến khi phá đảo 5 Ải hoặc tự chọn rời đi.
+* **🏰 Đi Ải Hầm Ngục Solo 1 Người & Vô Hạn Lượt:**
+  - Tự do đi Ải 1 mình bất kỳ lúc nào, không cần chờ ghép đội 5 người.
+  - Không bị giới hạn 2 lượt đi/ngày.
+* **⚡ Tự Động Vượt 5 Ải & Bước Qua Cổng:**
+  - Tự động diệt quái, gọi Trùm và hạ gục 5 Boss Hầm Ngục (Ải 1 $\rightarrow$ Ải 2 $\rightarrow$ Ải 3 $\rightarrow$ Ải 4 $\rightarrow$ Ải 5 - Trùm Cuối Cổ Vương).
+  - Tự động bước vào Cổng Dịch Chuyển ngay khi Boss ải ngã xuống để nhảy sang ải kế tiếp.
 * **🎣 Cơ Chế Kéo Cần Câu Cá Chuẩn Xác & Mượt Mà:**
-  * Tái hiện đầy đủ hoạt ảnh quăng cần, cá cắn giật cần, uốn cần kéo cá và cá nhảy lên bờ.
-  * Tích hợp bộ điều tiết lực căng dây (Tension Regulator) chống đứt dây tuyệt đối.
-* **👑 Kết Hợp Trọn Bộ VIP Cheats:**
-  * Bất Tử Toàn Diện (Kháng độc, nham thạch, gai).
-  * Tăng Điểm Kinh Nghiệm EXP ($2\times \to 50\times$).
-  * One-Hit Sát Thương & Không Thời Gian Hồi Chiêu.
+  - Tái hiện đầy đủ chuyển động quăng cần, giật cá, uốn cần kéo cá và cá nhảy lên bờ.
+  - Tích hợp kiểm soát lực căng dây chống đứt dây câu.
 
 ---
 
@@ -29,7 +25,7 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 
 | Module | Tính Năng | Mô Tả |
 | :--- | :--- | :--- |
-| **Du Hành & Đi Ải** | **🏰 Hầm Ngục Cổ Đại Solo** | Vào 5 Ải hầm ngục 1 mình ngay lập tức, không cần đợi đủ người, không giới hạn lượt |
+| **Du Hành & Đi Ải** | **🏰 Hầm Ngục Cổ Đại Solo** | Vào 5 Ải hầm ngục 1 mình ngay lập tức, chống văng map, không giới hạn lượt |
 | **Du Hành & Đi Ải** | **🚀 Chuyển Nhanh 9 Hành Tinh** | Dịch chuyển tức thì đến bất kỳ hành tinh nào chỉ với 1 click |
 | **Câu Cá** | **🎣 Auto Câu Cá Mọi Hồ** | Tự tìm hồ nước, quăng câu, giật cá và kéo cần mượt mà chống đứt dây |
 | **Chiến Đấu** | **⚔️ Auto Săn Boss Toàn Map** | Tự động quét và diệt Boss trên toàn bộ bề mặt hành tinh |

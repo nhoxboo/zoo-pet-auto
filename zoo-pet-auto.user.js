@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.1.0
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Đi Ải Hầm Ngục Solo 1 Người Không Cần Chờ Đủ Đội, Vô Hạn Lượt Đi Ải Mỗi Ngày, Auto Câu Cá Đầy Đủ Cơ Chế Kéo Cần, Auto Săn Boss Toàn Map, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
+// @version      3.1.1
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Chống Văng Hầm Ngục Solo (Anti-Kick Dungeon), Đi Ải 1 Người Không Cần Chờ, Vô Hạn Lượt Đi Ải Mỗi Ngày, Auto Câu Cá Chuẩn Hoạt Ảnh Kéo Cần, Auto Săn Boss Toàn Map, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -171,6 +171,61 @@
         dungeon: { name: '🏰 Hầm Ngục Cổ Đại (5 Ải Solo)', lvl: 1, boss: '5 Trùm Hầm Ngục & Cổ Vương' }
     };
 
+    // --- HOOK MẠNG WEBSOCKET: BẢO VỆ PHÒNG HẦM NGỤC SOLO (ANTI-DG-GONE) ---
+    // Ngăn chặn máy chủ gửi gói tin `dgGone` làm văng người chơi về Hành Tinh Mầm Xanh
+    try {
+        const _OrigWS = window.WebSocket;
+        if (_OrigWS) {
+            window.WebSocket = function (...args) {
+                const ws = new _OrigWS(...args);
+
+                const origAddEventListener = ws.addEventListener;
+                ws.addEventListener = function (type, listener, options) {
+                    if (type === 'message') {
+                        const wrappedListener = function (event) {
+                            try {
+                                if (event && typeof event.data === 'string') {
+                                    const data = JSON.parse(event.data);
+                                    if (data && data.t === 'dgGone') {
+                                        console.log('[ZooPetAuto] 🛡️ Đã chặn gói tin dgGone (Bảo vệ phòng Dungeon Solo không bị văng về Mầm Xanh)!');
+                                        return;
+                                    }
+                                }
+                            } catch (_) {}
+                            return listener.apply(this, arguments);
+                        };
+                        return origAddEventListener.call(this, type, wrappedListener, options);
+                    }
+                    return origAddEventListener.apply(this, arguments);
+                };
+
+                let _onmsg = null;
+                Object.defineProperty(ws, 'onmessage', {
+                    get() { return _onmsg; },
+                    set(fn) {
+                        _onmsg = function (event) {
+                            try {
+                                if (event && typeof event.data === 'string') {
+                                    const data = JSON.parse(event.data);
+                                    if (data && data.t === 'dgGone') {
+                                        console.log('[ZooPetAuto] 🛡️ Đã chặn ws.onmessage(dgGone)!');
+                                        return;
+                                    }
+                                }
+                            } catch (_) {}
+                            if (typeof fn === 'function') {
+                                return fn.apply(this, arguments);
+                            }
+                        };
+                    }
+                });
+
+                return ws;
+            };
+            window.WebSocket.prototype = _OrigWS.prototype;
+        }
+    } catch (_) {}
+
     // --- HOOK ENGINE GAME NATIVE AN TOÀN 100% (ZERO SIDE-EFFECTS) ---
     // Game gốc chỉ tự gán `window.game = $` khi Pb = true (/localhost|127.0.0.1/.test(location.hostname)).
     // Trên domain chính `https://zoo-pet.store/`, Pb = false.
@@ -192,6 +247,22 @@
         if (gameObj.player && gameObj.world) {
             G = gameObj;
             window.game = gameObj;
+
+            // Hook Game Net onMsg để chặn triệt để dgGone ở tầng Engine
+            if (G.net && !G.net._hookedMsg) {
+                G.net._hookedMsg = true;
+                const origOnMsg = G.net.onMsg;
+                if (typeof origOnMsg === 'function') {
+                    G.net.onMsg = function (msg) {
+                        if (msg && msg.t === 'dgGone') {
+                            console.log('[ZooPetAuto] 🛡️ Đã chặn G.net.onMsg(dgGone)!');
+                            return;
+                        }
+                        return origOnMsg.apply(this, arguments);
+                    };
+                }
+            }
+
             console.log('%c[ZooPet Auto]%c Đã kết nối với Game Engine thành công!', 'color:#10B981;font-weight:bold', 'color:#334155');
             updateStatusBadge(true);
             initEngine();
@@ -1086,14 +1157,36 @@
         const planet = G.planet;
         // Kiểm tra nếu đang ở map Dungeon (Hầm Ngục 5 Ải)
         if (planet.stage !== undefined || (planet.constructor && planet.constructor.name === 'Pv')) {
-            // 1. Tự động khởi động Ải ngay lập tức khi đang ở phase chờ (Solo Fast-Start, không cần chờ)
-            if (planet.phase === 'wait' && typeof planet.startStage === 'function') {
-                try {
-                    planet.startStage(0);
-                } catch (_) {}
+            // Ngăn chặn cờ leavingDg bị kích hoạt ngoài ý muốn khi chưa phá đảo
+            if (planet.phase !== 'done') {
+                G.leavingDg = false;
             }
 
-            // 2. Khi đã dọn sạch quái & Boss ải hiện tại (phase: clear) -> Tự động chạy tới cổng ải tiếp theo
+            // 1. Tự động khởi động Ải ngay lập tức khi đang ở phase chờ (Solo Fast-Start, không cần chờ)
+            if (planet.phase === 'wait') {
+                planet.expect = 1;
+                if (typeof planet.startStage === 'function') {
+                    try {
+                        planet.startStage(0);
+                    } catch (_) {}
+                }
+            }
+
+            // 2. Kích hoạt quái vật nếu chưa thức tỉnh
+            if (planet.phase === 'mobs' && planet.groups && planet.groups[planet.stage]) {
+                const curGroup = planet.groups[planet.stage];
+                if (curGroup.mobs && G.enemies && typeof G.enemies.wake === 'function') {
+                    for (let mob of curGroup.mobs) {
+                        if (mob && !mob.active && mob.alive) {
+                            try {
+                                G.enemies.wake(mob, mob.spawn || mob.pos);
+                            } catch (_) {}
+                        }
+                    }
+                }
+            }
+
+            // 3. Khi đã dọn sạch quái & Boss ải hiện tại (phase: clear) -> Tự động chạy tới cổng ải tiếp theo
             if (planet.phase === 'clear') {
                 const arena = planet.A || (planet.arenas ? planet.arenas[planet.stage] : null);
                 if (arena && G.player && G.player.alive) {
@@ -1107,6 +1200,12 @@
                         } catch (_) {}
                     }
                 }
+            }
+
+            // 4. Khi phá đảo Ải 5 (phase: done) -> Tự động hút rương và quà rơi
+            if (planet.phase === 'done' && !planet._claimedDoneToast) {
+                planet._claimedDoneToast = true;
+                showToast('🏆 [PHÁ ĐẢO HẦM NGỤC] Đã hoàn thành 5 Ải Hầm Ngục Cổ Đại! Đang thu gom trọn bộ vật phẩm...', 6000);
             }
         }
     }

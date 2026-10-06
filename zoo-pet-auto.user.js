@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.9.4
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Câu Cá Tuyệt Đối 100% Mọi Hồ Không Lỗi, Auto Săn Boss Chuẩn Xác Toàn Map, Auto Farm, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
+// @version      3.0.0
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Câu Cá Tuyệt Đối 100% (Sửa Luck Buff), Auto Săn Boss & Quét Toàn Map, Bất Tử Toàn Diện (Kháng Độc/Nham Thạch), Tăng Điểm Kinh Nghiệm EXP Siêu Tốc, Auto Farm, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -63,15 +63,15 @@
             useSkills: false,
             targetMode: 'all',
             bossOnly: false,
-            searchRadius: 35,
+            searchRadius: 9999,
             dodgeLowHp: false,
             dodgeThreshold: 30,
-            skipTitans: true
+            skipTitans: false
         },
         boss: {
             autoHopPlanets: false,
             hopDelay: 8,
-            skipTitans: true,
+            skipTitans: false,
             waitForBossKill: true,
             waitForQuests: false,
             planets: {
@@ -111,6 +111,7 @@
             globalMagnet: false,
             speedBoost: 1.0,
             attackMultiplier: 1.0,
+            expMultiplier: 1.0,
             brightShadow: false
         },
         loot: {
@@ -207,6 +208,8 @@
 
     // --- MODULE 1: CHEATS & HACKS ENGINE ---
     let origTakeDamage = null;
+    let origHazard = null;
+    let origGainExp = null;
     let origRollDamage = null;
     let origAimDir = null;
 
@@ -215,10 +218,10 @@
 
         const p = G.player;
 
-        // 1. GOD MODE (Bất tử máu)
+        // 1. GOD MODE (Bất tử máu 100% - Miễn nhiễm sát thương quái, Boss, Độc, Nham thạch, Acid, Gai)
         if (!origTakeDamage && typeof p.takeDamage === 'function') {
             origTakeDamage = p.takeDamage;
-            p.takeDamage = function (dmg, src) {
+            p.takeDamage = function (dmg, src, type) {
                 if (CFG.cheats.godMode) {
                     if (this.hp !== undefined && this.maxHp !== undefined) {
                         this.hp = this.maxHp;
@@ -229,12 +232,48 @@
             };
         }
 
-        // 2. TĂNG SÁT THƯƠNG (Damage Multiplier)
+        if (!origHazard && typeof p.hazard === 'function') {
+            origHazard = p.hazard;
+            p.hazard = function (dmg, type) {
+                if (CFG.cheats.godMode) {
+                    if (this.hp !== undefined && this.maxHp !== undefined) {
+                        this.hp = this.maxHp;
+                    }
+                    return;
+                }
+                return origHazard.apply(this, arguments);
+            };
+        }
+
+        if (CFG.cheats.godMode) {
+            if (p.hp !== undefined && p.maxHp !== undefined) {
+                p.hp = p.maxHp;
+            }
+            p.invuln = 999999;
+            if (!p.buffs) p.buffs = {};
+            p.buffs.fireres = { until: 9999999999, v: 1.0 };
+        }
+
+        // 2. TĂNG ĐIỂM KINH NGHIỆM EXP SIÊU TỐC (EXP Multiplier)
+        if (!origGainExp && typeof p.gainExp === 'function') {
+            origGainExp = p.gainExp;
+            p.gainExp = function (amount) {
+                const mult = (CFG.cheats.expMultiplier && Number(CFG.cheats.expMultiplier) > 1) ? Number(CFG.cheats.expMultiplier) : 1;
+                const finalExp = amount * mult;
+                return origGainExp.call(this, finalExp);
+            };
+        }
+        if (CFG.cheats.expMultiplier && Number(CFG.cheats.expMultiplier) > 1) {
+            if (!p.buffs) p.buffs = {};
+            p.buffs.xp = { until: 9999999999, v: Number(CFG.cheats.expMultiplier) - 1 };
+        }
+
+        // 3. TĂNG SÁT THƯƠNG (Damage Multiplier)
         if (!origRollDamage && typeof p.rollDamage === 'function') {
             origRollDamage = p.rollDamage;
             p.rollDamage = function (e = 1) {
                 const res = origRollDamage.call(this, e);
-                const mult = (CFG.cheats.damageMult && CFG.cheats.damageMult > 1) ? CFG.cheats.damageMult : 1;
+                const mult = (CFG.cheats.attackMultiplier && CFG.cheats.attackMultiplier > 1) ? CFG.cheats.attackMultiplier : 1;
                 if (mult > 1 && res && typeof res.dmg === 'number') {
                     res.dmg = Math.round(res.dmg * mult);
                 }
@@ -242,7 +281,7 @@
             };
         }
 
-        // 3. NO COOLDOWN (Xóa hồi chiêu)
+        // 4. NO COOLDOWN (Xóa hồi chiêu)
         if (CFG.cheats.noCooldown) {
             if (p.cd) {
                 p.cd.atk = 0;
@@ -258,14 +297,14 @@
             }
         }
 
-        // 4. SPEED BOOST
+        // 5. SPEED BOOST
         if (CFG.cheats.speedBoost > 1.0) {
             p.speedMult = CFG.cheats.speedBoost;
         } else {
             p.speedMult = 1.0;
         }
 
-        // 5. SÁNG HÀNH TINH BÓNG TỐI
+        // 6. SÁNG HÀNH TINH BÓNG TỐI
         if (CFG.cheats.brightShadow) {
             try {
                 const darkMask = document.querySelector('#dark2, .dark-mask, #dark-overlay');
@@ -342,12 +381,12 @@
         return null;
     }
 
-    // --- MODULE 3: AUTO CHIẾN ĐẤU & SĂN BOSS (COMBAT & BOSS ENGINE) ---
+    // --- MODULE 3: AUTO CHIẾN ĐẤU & SĂN BOSS TOÀN MAP (COMBAT & BOSS ENGINE) ---
     let combatCooldown = 0;
 
     function isBossEntity(enemy) {
         if (!enemy) return false;
-        if (enemy.boss === true) return true;
+        if (enemy.boss === true || enemy.isBoss === true) return true;
         if (enemy.def && (enemy.def.boss || enemy.def.titan || enemy.def.sboss || enemy.def.worldBoss)) return true;
         if (enemy.type && /boss|titan|bear|cake|yeti|dragon|golem|treant|croc|mammoth|gingerbread/i.test(enemy.type)) return true;
         if (enemy.def && enemy.def.name && /vua|chúa|yeti|rồng|ma mút|golem|titan|khổng lồ|đại thụ/i.test(enemy.def.name)) return true;
@@ -362,15 +401,16 @@
     }
 
     function isAttackable(enemy) {
-        if (!enemy || !enemy.alive || enemy.hp <= 0) return false;
-        if (enemy.obj && enemy.obj.visible === false) return false;
+        if (!enemy) return false;
+        if (enemy.alive === false || (enemy.hp !== undefined && enemy.hp <= 0)) return false;
+        if (enemy.state === 'dead') return false;
         return true;
     }
 
     function findBestTarget() {
-        if (!G || !G.enemies || !G.enemies.list || !G.player) return null;
+        if (!G || !G.enemies || !G.player) return null;
         const player = G.player;
-        const enemies = G.enemies.list;
+        const enemies = G.enemies.list || [];
         const bossOnly = !!CFG.combat.bossOnly;
 
         let bestBoss = null;
@@ -379,6 +419,17 @@
         let bestMob = null;
         let minMobDist = Infinity;
 
+        // 1. Quét Boss Titan / World Boss trực tiếp từ G.enemies.titan
+        if (G.enemies.titan && isAttackable(G.enemies.titan)) {
+            const titan = G.enemies.titan;
+            const d = getDistance(player.pos, titan.pos);
+            if (!CFG.combat.skipTitans || !isTitanBoss(titan)) {
+                bestBoss = titan;
+                minBossDist = d;
+            }
+        }
+
+        // 2. Quét toàn bộ quái và Boss trên toàn map (Không giới hạn bán kính)
         for (let enemy of enemies) {
             if (!isAttackable(enemy)) continue;
 
@@ -393,7 +444,7 @@
                     bestBoss = enemy;
                 }
             } else if (!bossOnly) {
-                const searchRad = CFG.combat.searchRadius || 35;
+                const searchRad = (CFG.combat.searchRadius && CFG.combat.searchRadius > 0) ? CFG.combat.searchRadius : 9999;
                 if (d <= searchRad && d < minMobDist) {
                     minMobDist = d;
                     bestMob = enemy;
@@ -422,16 +473,26 @@
         }
 
         const dist = getDistance(player.pos, target.pos);
-        const attackRange = (target.def ? target.def.radius : 1.2) + (player.weapon?.range || 1.2) * 1.2;
+        const attackRange = (target.def ? target.def.radius : 1.2) + (player.weapon?.range || 1.2) * 1.3;
 
         // Hướng mặt về mục tiêu
         try {
             player.facing = Math.atan2(target.pos.x - player.pos.x, target.pos.z - player.pos.z);
         } catch (_) {}
 
-        // Nếu ở ngoài tầm đánh -> Di chuyển tới mục tiêu
+        // Nếu ở ngoài tầm đánh -> Di chuyển & Khóa mục tiêu toàn map
         if (dist > attackRange) {
             walkTo(target.pos);
+            if (typeof player.interact === 'function') {
+                try {
+                    player.interact({
+                        type: 'enemy',
+                        enemy: target,
+                        point: (typeof target.pos.clone === 'function' ? target.pos.clone() : target.pos),
+                        auto: true
+                    });
+                } catch (_) {}
+            }
         } else {
             // Đã trong tầm đánh -> Gán target và Đánh thường + Xả combo skill
             player.target = { type: 'enemy', enemy: target, point: target.pos.clone(), auto: true };
@@ -727,9 +788,10 @@
         const fishing = G.fishing;
         const player = G.player;
 
-        // Tự động kích hoạt Buff may mắn câu cá nếu bật
+        // Tự động kích hoạt Buff may mắn câu cá an toàn nếu bật (Không can thiệp setter của game)
         if (CFG.fish.luckBuff && player) {
-            player.luck = Math.max(player.luck || 0, 5.0);
+            if (!player.buffs) player.buffs = {};
+            player.buffs.luck = { until: 9999999999, v: 5.0 };
         }
 
         if (fishing.active) {
@@ -1438,6 +1500,20 @@
                             <option value="5.0" ${CFG.cheats.attackMultiplier === 5.0 ? 'selected' : ''}>5.0x (One-Hit)</option>
                         </select>
                     </div>
+                    <div class="zp-row">
+                        <div>
+                            <div class="zp-label">✨ Tăng Điểm Kinh Nghiệm (EXP)</div>
+                            <div class="zp-desc">Hệ số nhân EXP khi diệt quái/làm quest để lên cấp siêu tốc</div>
+                        </div>
+                        <select class="zp-select" id="cfg-exp-mult">
+                            <option value="1.0" ${CFG.cheats.expMultiplier === 1.0 ? 'selected' : ''}>1.0x (Mặc định)</option>
+                            <option value="2.0" ${CFG.cheats.expMultiplier === 2.0 ? 'selected' : ''}>2.0x (Gấp 2 lần EXP)</option>
+                            <option value="5.0" ${CFG.cheats.expMultiplier === 5.0 ? 'selected' : ''}>5.0x (Gấp 5 lần EXP)</option>
+                            <option value="10.0" ${CFG.cheats.expMultiplier === 10.0 ? 'selected' : ''}>10.0x (Gấp 10 lần EXP)</option>
+                            <option value="20.0" ${CFG.cheats.expMultiplier === 20.0 ? 'selected' : ''}>20.0x (Gấp 20 lần EXP)</option>
+                            <option value="50.0" ${CFG.cheats.expMultiplier === 50.0 ? 'selected' : ''}>50.0x (Lên cấp Siêu Tốc)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- TAB 4: NÔNG TRẠI -->
@@ -1659,6 +1735,7 @@
         bindCheck('cfg-magnet', CFG.cheats, 'globalMagnet');
         bindSelect('cfg-speed', CFG.cheats, 'speedBoost', true);
         bindSelect('cfg-atk', CFG.cheats, 'attackMultiplier', true);
+        bindSelect('cfg-exp-mult', CFG.cheats, 'expMultiplier', true);
 
         // Tab Farm
         bindCheck('cfg-farm-en', CFG.farm, 'enabled');

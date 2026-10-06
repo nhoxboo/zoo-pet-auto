@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.7.0
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Farm, Boss Hopper Chuẩn Xác, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
+// @version      2.8.0
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Farm, Săn Boss-Only, Săn Cá Hiếm & Huyền Thoại, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -97,7 +97,10 @@
         },
         fish: {
             enabled: false,
-            autoReCast: false,
+            rareOnly: false,
+            summonMystery: false,
+            luckBuff: false,
+            autoReCast: true,
             autoEquipRod: false,
             mode: 'perfect'
         },
@@ -591,8 +594,32 @@
         }, 500);
     }
 
-    // --- MODULE 5: AUTO CÂU CÁ (ULTRA FISHING) ---
+    // --- MODULE 5: AUTO CÂU CÁ & SĂN CÁ HIẾM / HUYỀN THOẠI ---
     let fishCastCooldown = 0;
+
+    const RARE_FISH_IDS = [
+        'fish_golden',    // Cá Rồng Vàng (HUYỀN THOẠI - 600 vàng, hồi 9999 HP, Buff Atk/Def/Crit/Luck)
+        'fish_whale',     // Cá Voi Con (HUYỀN THOẠI - 420 vàng, Def +25, Regen)
+        'fish_kraken',    // Bạch Tuộc Khổng Lồ (HUYỀN THOẠI - 380 vàng, Atk +35%)
+        'fish_manta',     // Cá Đuối Khổng Lồ (HUYỀN THOẠI)
+        'fish_rainbow',   // Cá Cầu Vồng (HIẾM - 160 vàng, Atk +20%)
+        'fish_swordfish', // Cá Kiếm (HIẾM - 90 vàng, Crit +10%)
+        'fish_angler',    // Cá Lồng Đèn (HIẾM - 85 vàng)
+        'fish_eel',       // Lươn Điện (HIẾM - 70 vàng, Tốc độ +30%)
+        'fish_shark',     // Cá Mập Con (HIẾM - 65 vàng)
+        'fish_koi',       // Cá Koi Rồng (HIẾM - 45 vàng, Luck +30%)
+        'fish_icepike'    // Cá Chó Băng (HIẾM - 48 vàng)
+    ];
+
+    function isRareOrLegendFish(fishId, prize) {
+        if (!fishId) return false;
+        if (prize && (prize.mystery || prize.giant || prize.huge)) return true;
+        if (RARE_FISH_IDS.includes(fishId)) return true;
+        try {
+            if (window.W && window.W[fishId] && (window.W[fishId].rare || window.W[fishId].legend)) return true;
+        } catch (_) {}
+        return false;
+    }
 
     function runFishingEngine() {
         if (!CFG.fish.enabled || !G || !G.fishing || !G.player || !G.player.alive) return;
@@ -600,9 +627,30 @@
         const fishing = G.fishing;
         const player = G.player;
 
+        // Tự động kích hoạt Buff may mắn câu cá nếu bật
+        if (CFG.fish.luckBuff && player) {
+            player.luck = Math.max(player.luck || 0, 5.0);
+        }
+
         if (fishing.active) {
             fishCastCooldown = Date.now() + 1500;
 
+            // 1. Chế độ CHỈ CÂU CÁ HIẾM: Tự kiểm tra loại cá khi bắt đầu cắn câu
+            if (CFG.fish.rareOnly && (fishing.phase === 'approach' || fishing.phase === 'nibble' || fishing.phase === 'bite')) {
+                const catchId = fishing.catchId;
+                const isRare = isRareOrLegendFish(catchId, fishing.prize);
+
+                if (!isRare) {
+                    // Cá thường / rác (cá rô, giày cũ, cá hề, cá nóc...) -> HỦY CÂU NGAY LẬP TỨC để quăng lại
+                    if (typeof fishing.cancel === 'function') {
+                        fishing.cancel(true);
+                        fishCastCooldown = Date.now() + 200; // Quăng lại sau 0.2s
+                        return;
+                    }
+                }
+            }
+
+            // 2. Kích hoạt cắn câu siêu tốc (Ultra Catch)
             if (CFG.cheats.ultraFishing) {
                 if (fishing.phase === 'wait' || fishing.phase === 'cast' || fishing.phase === 'nibble' || fishing.phase === 'approach') {
                     const targetFish = (fishing.fish && fishing.fish.length > 0) ? fishing.fish[0] : null;
@@ -613,21 +661,80 @@
                 }
             }
 
-            if (fishing.phase === 'bite' || fishing.phase === 'hook') {
-                if (typeof fishing.hook === 'function') {
+            // 3. Giật cần kéo cá lên khi cá cắn câu
+            if (fishing.phase === 'bite' || fishing.phase === 'hook' || fishing.phase === 'hooked') {
+                if (typeof fishing.hook === 'function' && fishing.phase !== 'hooked') {
                     fishing.hook();
                 }
                 if (typeof fishing.finish === 'function') {
+                    const catchId = fishing.catchId;
+                    const isRare = isRareOrLegendFish(catchId, fishing.prize);
+                    let fishName = catchId || 'Cá';
+                    try {
+                        if (window.W && window.W[catchId]) fishName = window.W[catchId].name;
+                    } catch (_) {}
+
                     fishing.finish(true);
                     stats.fishCount++;
                     updateStatsUI();
+
+                    if (isRare) {
+                        showToast(`🌟 [CÂU CÁ VIP] Bạn đã câu trúng <b>${fishName}</b> (Hiếm / Huyền Thoại)!`, 4000);
+                    }
                 }
             }
         } else {
-            if (Date.now() > fishCastCooldown && typeof fishing.start === 'function') {
-                fishing.start();
-                fishCastCooldown = Date.now() + 2000;
+            // Khi chưa quăng cần -> Tự tìm hồ nước gần nhất và quăng câu
+            if (Date.now() > fishCastCooldown) {
+                castAtNearestWater();
+                fishCastCooldown = Date.now() + 1500;
             }
+        }
+    }
+
+    function castAtNearestWater() {
+        if (!G || !G.fishing || !G.world || !G.player) return;
+        const waters = G.world.waters || [];
+        if (waters.length === 0) return;
+
+        const player = G.player;
+        let nearestWater = null;
+        let minDist = Infinity;
+
+        for (let w of waters) {
+            if (!w) continue;
+            const d = getDistance(player.pos, { x: w.x, z: w.z });
+            if (d < minDist) {
+                minDist = d;
+                nearestWater = w;
+            }
+        }
+
+        if (!nearestWater) return;
+
+        // Triệu hồi bóng cá bí ẩn phát sáng nếu bật
+        if (CFG.fish.summonMystery && typeof G.fishing.callMystery === 'function') {
+            try { G.fishing.callMystery(); } catch (_) {}
+        }
+
+        if (typeof G.fishing.plan === 'function') {
+            try {
+                const plan = G.fishing.plan(nearestWater, player.pos);
+                if (plan && plan.cast) {
+                    if (plan.shore && getDistance(player.pos, plan.shore) > 2.5) {
+                        walkTo(plan.shore);
+                        return;
+                    }
+                    G.fishing.start(nearestWater, plan.cast);
+                    return;
+                }
+            } catch (_) {}
+        }
+
+        if (typeof G.fishing.start === 'function') {
+            try {
+                G.fishing.start(nearestWater, { x: nearestWater.x, y: 0, z: nearestWater.z });
+            } catch (_) {}
         }
     }
 
@@ -1277,10 +1384,40 @@
                     <div class="zp-row">
                         <div>
                             <div class="zp-label">🎣 Tự động câu cá (Auto Fish)</div>
-                            <div class="zp-desc">Tự quăng cần và kéo cá lên khi cá cắn câu</div>
+                            <div class="zp-desc">Tự tìm hồ nước, quăng cần và kéo cá lên khi cắn câu</div>
                         </div>
                         <label class="zp-switch">
                             <input type="checkbox" id="cfg-fish-en" ${CFG.fish.enabled ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+                    <div class="zp-row">
+                        <div>
+                            <div class="zp-label">🌟 CHỈ CÂU CÁ HIẾM & HUYỀN THOẠI</div>
+                            <div class="zp-desc">Tự hủy cá thường/giày cũ, chỉ kéo Cá Rồng Vàng, Cá Voi, Kraken, Cá Kiếm, Cá Cầu Vồng, Siêu Khổng Lồ</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-fish-rare" ${CFG.fish.rareOnly ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+                    <div class="zp-row">
+                        <div>
+                            <div class="zp-label">🔮 Triệu hồi Bóng Cá Bí Ẩn</div>
+                            <div class="zp-desc">Tự động gọi bóng cá phát sáng khổng lồ mỗi khi quăng câu</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-fish-mystery" ${CFG.fish.summonMystery ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+                    <div class="zp-row">
+                        <div>
+                            <div class="zp-label">🍀 Tăng Tỷ Lệ May Mắn Bắt Cá (+Luck)</div>
+                            <div class="zp-desc">Tăng tối đa cơ hội cắn câu cá huyền thoại và kích thước khủng</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-fish-luck" ${CFG.fish.luckBuff ? 'checked' : ''}>
                             <span class="zp-slider"></span>
                         </label>
                     </div>
@@ -1416,6 +1553,9 @@
 
         // Tab Fish
         bindCheck('cfg-fish-en', CFG.fish, 'enabled');
+        bindCheck('cfg-fish-rare', CFG.fish, 'rareOnly');
+        bindCheck('cfg-fish-mystery', CFG.fish, 'summonMystery');
+        bindCheck('cfg-fish-luck', CFG.fish, 'luckBuff');
         bindCheck('cfg-fish-ultra', CFG.cheats, 'ultraFishing');
 
         // Kéo thả menu (Drag & Drop)

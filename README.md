@@ -1,26 +1,36 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.7
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.8
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Tính Năng Mới Bản v2.7
+## 🌟 Tính Năng Mới Bản v2.8
 
-### 1. 💀 Chế Độ "CHỈ GIẾT BOSS" (Boss Only Mode)
-* **Nguyên nhân lỗi cũ:** Tool chỉ đánh quái nhỏ gần nhất trong tầm 35m, không tự đi tới vị trí Boss ở xa nên không bao giờ chạm tới Boss.
-* **Cách sửa:** Thêm công tắc **"💀 CHỈ GIẾT BOSS (Bỏ Qua Quái Nhỏ)"** trong tab Chiến Đấu.
-  * Khi bật: Tool **BỎ QUA TOÀN BỘ quái nhỏ**, tự động quét toàn bản đồ, tìm Boss gần nhất và **tự đi tới vị trí Boss** để đánh.
-  * Tự động nhắm mặt về Boss, tung combo Q-W-E-R liên tục.
-  * Tự nhận diện cả Boss đang "ngủ" (dormant) — tool sẽ đánh thức Boss để đánh.
-  * Tùy chọn **"🛡️ Bỏ qua Boss Titan"** vẫn hoạt động để né Titan trâu máu > 2500 HP.
+### 1. 🌟 Chế Độ "CHỈ CÂU CÁ HIẾM & HUYỀN THOẠI" (Rare & Legend Fish Hunter)
+* **Tự Động Phân Loại Cá Thông Minh:**
+  * Khi cá cắn câu, tool sẽ lập tức quét loại cá (`species` & `prize`).
+  * **Nếu là cá thường / rác** (Cá rô, cá hề, giày cũ, cá nóc, cá trê...): Tool sẽ **TỰ ĐỘNG HỦY CÂU TỨC THÌ (0.2s)** và quăng lại ngay mà không làm tốn thời gian hay hao mồi của bạn!
+  * **Chỉ kéo lên khi phát hiện:**
+    * 👑 **Cá Rồng Vàng** (`fish_golden` - Huyền Thoại, 600 Vàng, hồi 9999 HP, Buff Atk/Def/Crit/Luck).
+    * 🐋 **Cá Voi Con** (`fish_whale` - Huyền Thoại, 420 Vàng, Def +25, Regen máu).
+    * 🐙 **Bạch Tuộc Khổng Lồ** (`fish_kraken` - Huyền Thoại, 380 Vàng, Atk +35%).
+    * 🦈 **Cá Đuối Khổng Lồ** (`fish_manta` - Huyền Thoại).
+    * 🌈 **Cá Cầu Vồng** (`fish_rainbow` - Hiếm, 160 Vàng, Atk +20%).
+    * 🗡️ **Cá Kiếm** (`fish_swordfish` - Hiếm, 90 Vàng, Crit +10%).
+    * 🏮 **Cá Lồng Đèn** (`fish_angler` - Hiếm, 85 Vàng).
+    * ⚡ **Lươn Điện** (`fish_eel` - Hiếm, 70 Vàng, Tốc độ +30%).
+    * 🦈 **Cá Mập Con** (`fish_shark` - Hiếm, 65 Vàng).
+    * 🎏 **Cá Koi Rồng** (`fish_koi` - Hiếm, 45 Vàng, Luck +30%).
+    * ❄️ **Cá Chó Băng** (`fish_icepike` - Hiếm, 48 Vàng).
+    * ❓ **Bóng Cá Bí Ẩn (Mystery Fish)** & 🐳 **Cá Siêu Khổng Lồ (Giant Fish)**.
+* **🔮 Triệu Hồi Bóng Cá Bí Ẩn (Mystery Fish Summoner):** Tự động gọi bóng cá phát sáng khổng lồ bơi về phía phao mỗi lần quăng câu.
+* **🍀 Tăng Tỷ Lệ May Mắn Bắt Cá (+Luck Buff):** Tự động kích hoạt chỉ số may mắn để tỷ lệ roll ra cá huyền thoại đạt mức cao nhất.
 
-### 2. 🛡️ Sửa Lỗi Chuyển Tab Game Đứng / Dừng
-* **Nguyên nhân lỗi cũ:** Vòng lặp Auto chạy bằng `requestAnimationFrame` — trình duyệt **đình hoàn toàn** rAF khi tab ẩn (`document.hidden = true`) → nhân vật đứng yên, không di chuyển, không đánh.
-* **Cách sửa:** Thay bằng **ticker lai thông minh**:
-  * Tab đang hiển thị: chạy bằng rAF (mượt, 60fps).
-  * Tab ẩn: chuyển sang `Interval 200ms` (timer nền vẫn chạy kể cả khi tab bị thu nhỏ/ẩn).
-  * Khi chuyển lại tab: tự động đánh thức rAF ngay lập tức + bù 1 nhịp tick.
-  * Kết hợp Web Worker 100ms để đánh thức game khi cần.
+### 2. 💀 Chế Độ "CHỈ GIẾT BOSS" (Boss Only Mode)
+* Tự động bỏ qua quái nhỏ, quét toàn bản đồ và di chuyển tới tận vị trí Boss để tiêu diệt.
+
+### 3. 🛡️ Ticker Lai Chống Đứng Game Khi Đổi Tab
+* Tự động chuyển đổi giữa rAF và Timer nền giúp game và Auto chạy xuyên suốt khi hạ tab.
 
 ---
 
@@ -32,8 +42,8 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 * **🏃 Tăng Tốc Chạy (1.0x - 2.5x) & ⚔️ Tăng Sát Thương (1.0x - 5.0x).**
 * **🌾 Auto Nông Trại:** Tự thu hoạch cây chín, gieo hạt theo cấp, thu sản phẩm thú nuôi.
 * **📜 Auto Nhiệm Vụ 100% An Toàn:** Tự động hoàn thành nhiệm vụ theo hành động thật, tự nhận thưởng Daily, Weekly, Bounty không bị báo lỗi số bất thường.
-* **🛡️ Bộ Lọc Boss:** Tự động né các Boss Titan siêu trâu máu > 2500 (Rùa núi, Mãng xà 3 đầu, Nhện đồng hồ...).
-* **💤 Chạy Ẩn Nền Khi Hạ Tab:** Sử dụng Web Worker 100ms độc lập và Anti-Throttle.
+* **🚀 Chuyển Hành Tinh Nhanh (1-Click Fast Travel):** 9 nút bấm hành tinh + menu chọn nhanh + nút "Bay Ngay".
+* **🚀 Auto Du Hành Săn Boss Liên Hành Tinh:** Chỉ chuyển map khi ĐÃ TIÊU DIỆT XONG BOSS và nhặt hết quà.
 
 ---
 
@@ -43,5 +53,5 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 2. Mở link cài đặt trực tiếp:  
 👉 **[https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js](https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js)**
 3. Bấm **Install** (hoặc **Update**).
-4. Vào game [https://zoo-pet.store/](https://zoo-pet.store/) (hoặc link CloudFront CDN) và trải nghiện!
+4. Vào game [https://zoo-pet.store/](https://zoo-pet.store/) (hoặc link CloudFront CDN) và trải nghiệm!
 5. Phím tắt ẩn/hiện menu: **F2** hoặc click nút 🤖 ở góc dưới màn hình.

@@ -1,29 +1,26 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.6
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.7
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Tính Năng Mới Bản v2.6
+## 🌟 Tính Năng Mới Bản v2.7
 
-### 1. ⚙️ Mặc Định Toàn Bộ Tính Năng Ở Trạng Thái TẮT (Default OFF)
-* Tất cả công tắc Auto, Săn Boss, Du Hành, Hack & Mod đều mặc định ở trạng thái `Tắt (OFF)` khi tải trang.
-* Người dùng hoàn toàn chủ động lựa chọn bật từng tính năng theo nhu cầu mà không lo bị kích hoạt tự động ngoài ý muốn.
+### 1. 💀 Chế Độ "CHỈ GIẾT BOSS" (Boss Only Mode)
+* **Nguyên nhân lỗi cũ:** Tool chỉ đánh quái nhỏ gần nhất trong tầm 35m, không tự đi tới vị trí Boss ở xa nên không bao giờ chạm tới Boss.
+* **Cách sửa:** Thêm công tắc **"💀 CHỈ GIẾT BOSS (Bỏ Qua Quái Nhỏ)"** trong tab Chiến Đấu.
+  * Khi bật: Tool **BỎ QUA TOÀN BỘ quái nhỏ**, tự động quét toàn bản đồ, tìm Boss gần nhất và **tự đi tới vị trí Boss** để đánh.
+  * Tự động nhắm mặt về Boss, tung combo Q-W-E-R liên tục.
+  * Tự nhận diện cả Boss đang "ngủ" (dormant) — tool sẽ đánh thức Boss để đánh.
+  * Tùy chọn **"🛡️ Bỏ qua Boss Titan"** vẫn hoạt động để né Titan trâu máu > 2500 HP.
 
-### 2. 🚀 Chuyển Hành Tinh Nhanh (1-Click Fast Travel)
-* Bổ sung bảng chọn 9 Hành Tinh trực quan:
-  * `[🌱 Mầm Xanh]` `[🧸 Đồ Chơi]` `[🍭 Kẹo Ngọt]`
-  * `[🌿 Rừng Rậm]` `[❄️ Băng Giá]` `[🌊 Đại Dương]`
-  * `[🌋 Dung Nham]` `[☁️ Mây Trời]` `[🌑 Bóng Tối]`
-* Kèm menu danh sách chọn theo cấp độ + nút **"Bay Ngay"** giúp phi thuyền dịch chuyển tức thì sang bất kỳ hành tinh nào trong 1 cú nhấp chuột.
-
-### 3. 🛡️ Sửa Triệt Để Lỗi Săn Boss Đa Hành Tinh Bị Chuyển Map Liên Tục
-* Khắc phục triệt để lỗi nhảy map liên tục: Tool sẽ kiểm tra chuẩn xác trạng thái Boss trên hành tinh.
-* **Chỉ chuyển map khi:**
-  1. Đã tìm thấy và **TIÊU DIỆT XONG BOSS** trên hành tinh đó.
-  2. Kích hoạt nam châm gom sạch trang bị, vương miện, đá quý rơi ra.
-  3. Hoàn thành xong nhiệm vụ hành tinh (nếu bật tùy chọn *Chờ xong nhiệm vụ*).
-* Hiển thị thanh tiến trình thời gian thực chi tiết từng giai đoạn: *Đang quét Boss $\rightarrow$ Đang tiêu diệt Boss [Tên Boss / Máu] $\rightarrow$ Đang hút phần thưởng $\rightarrow$ Khởi hành sang hành tinh kế tiếp*.
+### 2. 🛡️ Sửa Lỗi Chuyển Tab Game Đứng / Dừng
+* **Nguyên nhân lỗi cũ:** Vòng lặp Auto chạy bằng `requestAnimationFrame` — trình duyệt **đình hoàn toàn** rAF khi tab ẩn (`document.hidden = true`) → nhân vật đứng yên, không di chuyển, không đánh.
+* **Cách sửa:** Thay bằng **ticker lai thông minh**:
+  * Tab đang hiển thị: chạy bằng rAF (mượt, 60fps).
+  * Tab ẩn: chuyển sang `Interval 200ms` (timer nền vẫn chạy kể cả khi tab bị thu nhỏ/ẩn).
+  * Khi chuyển lại tab: tự động đánh thức rAF ngay lập tức + bù 1 nhịp tick.
+  * Kết hợp Web Worker 100ms để đánh thức game khi cần.
 
 ---
 
@@ -46,5 +43,5 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 2. Mở link cài đặt trực tiếp:  
 👉 **[https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js](https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js)**
 3. Bấm **Install** (hoặc **Update**).
-4. Vào game [https://zoo-pet.store/](https://zoo-pet.store/) (hoặc link CloudFront CDN) và trải nghiệm!
+4. Vào game [https://zoo-pet.store/](https://zoo-pet.store/) (hoặc link CloudFront CDN) và trải nghiện!
 5. Phím tắt ẩn/hiện menu: **F2** hoặc click nút 🤖 ở góc dưới màn hình.

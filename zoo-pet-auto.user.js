@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.6.0
+// @version      2.7.0
 // @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Farm, Boss Hopper Chuẩn Xác, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
@@ -62,6 +62,7 @@
             enabled: false,
             useSkills: false,
             targetMode: 'all',
+            bossOnly: false,
             searchRadius: 35,
             dodgeLowHp: false,
             dodgeThreshold: 30,
@@ -301,7 +302,7 @@
         return 'seed_carrot';
     }
 
-    // --- MODULE 3: AUTO CHIẾN ĐẤU & COMBO SKILL ---
+    // --- MODULE 3: AUTO CHIẾN ĐẤU & COMBO SKILL (hỗ trợ CHỈ GIẾT BOSS) ---
     let combatCooldown = 0;
 
     function runCombatEngine() {
@@ -311,53 +312,101 @@
         const player = G.player;
         const enemies = G.enemies.list || [];
 
-        let target = null;
-        let minDist = CFG.combat.searchRadius || 35;
+        const bossOnly = !!CFG.combat.bossOnly;
 
-        for (let enemy of enemies) {
-            if (!enemy || !enemy.alive || enemy.hp <= 0) continue;
-
+        // Pass 1: chỉ săn Boss trong tầm
+        let bossTarget = null;
+        let bossDist = Infinity;
+        for (const enemy of enemies) {
+            if (!isAttackable(enemy)) continue;
+            if (!enemy.boss) continue;
             if (CFG.combat.skipTitans && isTitanBoss(enemy)) continue;
-
-            const dist = getDistance(player.pos, enemy.pos);
-            if (dist < minDist) {
-                // Ưu tiên Boss nếu targetMode là boss
-                if (enemy.boss) {
-                    target = enemy;
-                    break;
-                }
-                minDist = dist;
-                target = enemy;
+            const d = getDistance(player.pos, enemy.pos);
+            if (d < bossDist) {
+                bossDist = d;
+                bossTarget = enemy;
             }
         }
 
-        if (target) {
-            // Tự động tiếp cận mục tiêu
-            if (getDistance(player.pos, target.pos) > 3.0) {
-                if (typeof player.moveTo === 'function') {
-                    player.moveTo(target.pos.x, target.pos.z);
+        let target = bossTarget;
+
+        // Pass 2: Boss-Only -> KHÔNG đánh quái nhỏ; ngược lại săn quái gần nhất
+        if (!target && !bossOnly) {
+            let minDist = CFG.combat.searchRadius || 35;
+            for (const enemy of enemies) {
+                if (!isAttackable(enemy)) continue;
+                if (CFG.combat.skipTitans && isTitanBoss(enemy)) continue;
+                const d = getDistance(player.pos, enemy.pos);
+                if (d < minDist) {
+                    minDist = d;
+                    target = enemy;
                 }
             }
+        }
 
-            // Tung đòn đánh hoặc Skill Q, W, E, R
+        if (!target) return;
+
+        // Tiếp cận mục tiêu (auto đi tới vị trí Boss ở bất kỳ đâu trên bản đồ)
+        const dist = getDistance(player.pos, target.pos);
+        if (dist > 3.0) {
+            walkTo(target.pos);
+        } else {
+            // Đã tới nơi -> nhắm mục tiêu rồi đánh
+            if (typeof player.target !== 'undefined' && player.target) {
+                player.target = { type: 'enemy', ref: target, point: target.pos.clone() };
+            }
+            // hướng mặt về Boss (dùng cho aim/damage direction)
+            try {
+                if (typeof player.facing === 'number') {
+                    player.facing = Math.atan2(target.pos.x - player.pos.x, target.pos.z - player.pos.z);
+                }
+            } catch (_) { }
+
             const skills = ['q', 'w', 'e', 'r', 'basic'];
-            for (let s of skills) {
-                if (s === 'basic' || (CFG.combat.useSkills && (!player.cd || !player.cd[s] || player.cd[s] <= 0))) {
+            for (const s of skills) {
+                const cdReady = !player.cd || !player.cd[s] || player.cd[s] <= 0;
+                if (s === 'basic' || (CFG.combat.useSkills && cdReady)) {
                     if (typeof player.useSkill === 'function') {
-                        player.useSkill(s, target.pos);
+                        // engine: useSkill(key) -- chỉ nhận key, không nhận target
+                        player.useSkill(s);
                     } else if (typeof player.attack === 'function') {
                         player.attack(target);
+                    } else if (typeof player.basicAttack === 'function') {
+                        player.basicAttack(target);
                     }
                     break;
                 }
             }
-            combatCooldown = Date.now() + 150;
         }
+
+        combatCooldown = Date.now() + 150;
+    }
+
+    // Boss "dormant"/"sleep" (worldBoss, sboss, minion) được game cho ngủ -> obj.visible=false
+    function isAttackable(enemy) {
+        if (!enemy || !enemy.alive || enemy.hp <= 0) return false;
+        if (enemy.obj && enemy.obj.visible === false) return false;
+        return true;
+    }
+
+    function walkTo(pos) {
+        const player = G.player;
+        if (!player || !pos || typeof player.moveTo !== 'function') return;
+        try {
+            // moveTo() của engine nhận Vector3 (pos.clone() có sẵn vì enemy.pos là Vector3)
+            if (typeof pos.clone === 'function') {
+                player.moveTo(pos.clone());
+                return;
+            }
+            // Dự phòng: tự tạo object có đủ interface cần thiết
+            player.moveTo({ x: pos.x || 0, y: 0, z: pos.z || 0, clone: () => ({ x: pos.x || 0, y: 0, z: pos.z || 0 }) });
+        } catch (_) { }
     }
 
     function isTitanBoss(enemy) {
         if (!enemy || !enemy.type) return false;
-        const TITAN_PREFIXES = ['titan_', 'colossus_', 'worldboss_'];
+        if (enemy.def && (enemy.def.sboss || enemy.def.titan || enemy.def.worldBoss)) return true;
+        const TITAN_PREFIXES = ['titan_', 'colossus_', 'sb_', 'sbm_', 'worldboss_'];
         return TITAN_PREFIXES.some(p => enemy.type.startsWith(p)) || (enemy.hp && enemy.hp > 2500 && enemy.boss);
     }
 
@@ -433,13 +482,14 @@
             if (boss && boss.alive && boss.hp > 0 && enemies.includes(boss)) {
                 // Tự động bật combat và tấn công Boss
                 if (typeof G.player.moveTo === 'function' && getDistance(G.player.pos, boss.pos) > 2.5) {
-                    G.player.moveTo(boss.pos.x, boss.pos.z);
+                    walkTo(boss.pos);
                 }
+                // engine: useSkill(key) chỉ nhận 1 tham số (không nhận target)
                 if (typeof G.player.useSkill === 'function') {
-                    G.player.useSkill('q', boss.pos);
-                    G.player.useSkill('w', boss.pos);
-                    G.player.useSkill('e', boss.pos);
-                    G.player.useSkill('r', boss.pos);
+                    G.player.useSkill('q');
+                    G.player.useSkill('w');
+                    G.player.useSkill('e');
+                    G.player.useSkill('r');
                 } else if (typeof G.player.attack === 'function') {
                     G.player.attack(boss);
                 }
@@ -661,7 +711,11 @@
     }
 
     // --- VÒNG LẶP CHÍNH CỦA AUTO TOOL (MAIN LOOP) ---
-    function autoLoop() {
+    // ⚠️ FIX v2.7.0: requestAnimationFrame bị trình duyệt ĐÌNH HOÀN TOÀN khi chuyển tab
+    // (document.hidden = true) => nhân vật đứng yên, không di chuyển, không đánh.
+    // => Dùng ticker lai: rAF khi tab hiển thị, setInterval khi tab ẩn (timer chỉ bị
+    // throttle nhẹ ~1s ở background nên vẫn chạy, và luôn có Web Worker để đánh thức).
+    function autoTick() {
         try {
             if (G) {
                 initCheatsEngine();
@@ -678,11 +732,45 @@
         } catch (err) {
             // Safe silent error suppression
         }
-        requestAnimationFrame(autoLoop);
+    }
+
+    let autoRafId = null;
+    let hiddenTickerId = null;
+
+    function startAutoLoop() {
+        if (autoRafId) return;
+
+        const rafLoop = () => {
+            if (document.hidden) return; // tạm dừng vòng rAF, chờ sự kiện focus/visibility
+            autoTick();
+            autoRafId = requestAnimationFrame(rafLoop);
+        };
+
+        autoRafId = requestAnimationFrame(rafLoop);
+
+        // Timer nền: luôn chạy (kể cả khi tab ẩn) để game không bị "đứng hình"
+        hiddenTickerId = setInterval(() => {
+            if (document.hidden) autoTick();
+        }, 200);
+
+        // Chuyển tab: rAF bị treo -> đánh thức lại ngay khi tab hiện lại
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (autoRafId) { cancelAnimationFrame(autoRafId); autoRafId = null; }
+            } else if (!autoRafId) {
+                autoRafId = requestAnimationFrame(rafLoop);
+                autoTick(); // bù ngay 1 nhịp cho tab vừa mở
+            }
+        });
+
+        addEventListener('focus', () => {
+            if (!autoRafId && !document.hidden) autoRafId = requestAnimationFrame(rafLoop);
+            autoTick();
+        });
     }
 
     function initEngine() {
-        autoLoop();
+        startAutoLoop();
     }
 
     // --- XÂY DỰNG GIAO DIỆN ĐIỀU KHIỂN (UI WHITE-BLUE CHUẨN XỊN) ---
@@ -993,6 +1081,16 @@
                     </div>
                     <div class="zp-row">
                         <div>
+                            <div class="zp-label">💀 CHỈ GIẾT BOSS (Bỏ Qua Quái Nhỏ)</div>
+                            <div class="zp-desc">Auto đi tới vị trí Boss trên bản đồ, KHÔNG đánh quái nhỏ</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-boss-only" ${CFG.combat.bossOnly ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+                    <div class="zp-row">
+                        <div>
                             <div class="zp-label">🛡️ Bỏ qua Boss Titan</div>
                             <div class="zp-desc">Bỏ qua Titan Rùa núi, Mãng xà (>2500 HP)</div>
                         </div>
@@ -1293,6 +1391,7 @@
         // Tab Boss
         bindCheck('cfg-combat-en', CFG.combat, 'enabled');
         bindCheck('cfg-skip-titans', CFG.combat, 'skipTitans');
+        bindCheck('cfg-boss-only', CFG.combat, 'bossOnly');
         bindCheck('cfg-boss-hop', CFG.boss, 'autoHopPlanets');
         bindCheck('cfg-wait-quests', CFG.boss, 'waitForQuests');
         bindSelect('cfg-hop-delay', CFG.boss, 'hopDelay', true);

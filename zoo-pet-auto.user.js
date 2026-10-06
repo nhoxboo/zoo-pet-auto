@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.9.0
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Farm (Harvest & Replant), Săn Boss-Only Không Đứng Hình, Săn Cá Hiếm & Huyền Thoại, Sửa Triệt Để Tự Động Câu Cá Mọi Hồ, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
+// @version      2.9.1
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Sửa Lỗi Quăng Cần Không Thu Về Bậy, Auto Săn Boss Chuẩn Xác 100%, Auto Farm, Săn Cá Hiếm & Huyền Thoại, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -383,7 +383,9 @@
     }
 
     function runCombatEngine() {
-        if (!CFG.combat.enabled || !G || !G.enemies || !G.player || !G.player.alive) return;
+        // Tự động kích hoạt khi bật Tự Động Đánh HOẶC Chỉ Giết Boss
+        const isCombatWanted = CFG.combat.enabled || CFG.combat.bossOnly;
+        if (!isCombatWanted || !G || !G.enemies || !G.player || !G.player.alive) return;
         if (Date.now() < combatCooldown) return;
 
         const player = G.player;
@@ -404,13 +406,10 @@
             player.facing = Math.atan2(target.pos.x - player.pos.x, target.pos.z - player.pos.z);
         } catch (_) {}
 
-        // Gán target chuẩn xác cho engine game
+        // Gán target chuẩn xác cho engine game (game engine tự động di chuyển nhân vật tới gần quái/boss)
         player.target = { type: 'enemy', enemy: target, point: target.pos.clone(), auto: true };
 
-        if (dist > attackRange) {
-            // Ở xa -> Tự động di chuyển tới
-            walkTo(target.pos);
-        } else {
+        if (dist <= attackRange) {
             // Đã trong tầm đánh -> Đánh thường & xả combo skill chuẩn xác
             try {
                 if (player.cd) player.cd.atk = 0;
@@ -520,25 +519,30 @@
 
             // Kiểm tra Boss còn sống không
             if (boss && boss.alive && boss.hp > 0 && enemies.includes(boss)) {
-                // Gán target chuẩn cho player
+                // Gán target chuẩn cho player (game engine tự động di chuyển tới Boss)
                 G.player.target = { type: 'enemy', enemy: boss, point: boss.pos.clone(), auto: true };
 
-                if (getDistance(G.player.pos, boss.pos) > 2.5) {
-                    walkTo(boss.pos);
-                }
-
                 try {
-                    if (G.player.cd) G.player.cd.atk = 0;
-                    if (typeof G.player.attack === 'function') G.player.attack(boss);
+                    G.player.facing = Math.atan2(boss.pos.x - G.player.pos.x, boss.pos.z - G.player.pos.z);
                 } catch (_) {}
 
-                if (typeof G.player.useSkill === 'function') {
-                    const validSkills = ['spin', 'dash', 'slam', 'special'];
-                    for (let s of validSkills) {
-                        try {
-                            const cdReady = !G.player.cd || !G.player.cd[s] || G.player.cd[s] <= 0;
-                            if (cdReady) G.player.useSkill(s);
-                        } catch (_) {}
+                const dist = getDistance(G.player.pos, boss.pos);
+                const attackRange = (boss.def ? boss.def.radius : 1.5) + (G.player.weapon?.range || 1.2) * 1.2;
+
+                if (dist <= attackRange) {
+                    try {
+                        if (G.player.cd) G.player.cd.atk = 0;
+                        if (typeof G.player.attack === 'function') G.player.attack(boss);
+                    } catch (_) {}
+
+                    if (typeof G.player.useSkill === 'function') {
+                        const validSkills = ['spin', 'dash', 'slam', 'special'];
+                        for (let s of validSkills) {
+                            try {
+                                const cdReady = !G.player.cd || !G.player.cd[s] || G.player.cd[s] <= 0;
+                                if (cdReady) G.player.useSkill(s);
+                            } catch (_) {}
+                        }
                     }
                 }
                 updateHopperStatusUI(`⚔️ Đang tiêu diệt Boss: <b>${boss.def?.name || boss.type || 'Boss'}</b> (HP còn: ${Math.round(boss.hp)})...`);
@@ -711,6 +715,11 @@
         if (fishing.active) {
             fishCastCooldown = Date.now() + 1000;
 
+            // Đang trong giai đoạn quăng phao (cast) -> KHÔNG ĐƯỢC CAN THIỆP, chờ phao rơi xuống nước
+            if (fishing.phase === 'cast') {
+                return;
+            }
+
             // Đảm bảo hồ nước luôn có cá (tự spawn nếu hết sạch cá)
             if (fishing.w && typeof fishing.addFish === 'function') {
                 const fishesInWater = (fishing.fish || []).filter(f => f.w === fishing.w);
@@ -719,25 +728,9 @@
                 }
             }
 
-            // 1. Chế độ CHỈ CÂU CÁ HIẾM: Tự kiểm tra loại cá khi bắt đầu cắn câu
-            if (CFG.fish.rareOnly && (fishing.phase === 'approach' || fishing.phase === 'nibble' || fishing.phase === 'bite')) {
-                const catchId = fishing.catchId || (fishing.interest ? fishing.interest.species : null);
-                if (catchId) {
-                    const isRare = isRareOrLegendFish(catchId, fishing.prize);
-                    if (!isRare) {
-                        // Cá thường / rác -> HỦY CÂU NGAY LẬP TỨC để quăng lại
-                        if (typeof fishing.cancel === 'function') {
-                            fishing.cancel(true);
-                            fishCastCooldown = Date.now() + 200; // Quăng lại sau 0.2s
-                            return;
-                        }
-                    }
-                }
-            }
-
-            // 2. Kích hoạt cắn câu siêu tốc (Ultra Catch)
+            // 1. Kích hoạt cắn câu siêu tốc (Ultra Catch) khi phao đã chạm nước
             if (CFG.cheats.ultraFishing) {
-                if (fishing.phase === 'wait' || fishing.phase === 'cast' || fishing.phase === 'nibble' || fishing.phase === 'approach') {
+                if (fishing.phase === 'wait' || fishing.phase === 'approach' || fishing.phase === 'nibble') {
                     const targetFish = fishing.interest || ((fishing.fish && fishing.fish.length > 0) ? (fishing.fish.find(f => f.w === fishing.w && f.state === 'swim') || fishing.fish[0]) : null);
                     if (targetFish) {
                         fishing.interest = targetFish;
@@ -749,12 +742,28 @@
                 }
             }
 
+            // 2. Chế độ CHỈ CÂU CÁ HIẾM: Chỉ kiểm tra khi cá ĐÃ CẮN CÂU (phase === 'bite')
+            if (CFG.fish.rareOnly && fishing.phase === 'bite') {
+                const catchId = fishing.catchId || (fishing.interest ? fishing.interest.species : null);
+                if (catchId) {
+                    const isRare = isRareOrLegendFish(catchId, fishing.prize);
+                    if (!isRare) {
+                        // Cá thường / rác -> HỦY CÂU để quăng lại
+                        if (typeof fishing.cancel === 'function') {
+                            fishing.cancel(true);
+                            fishCastCooldown = Date.now() + 300;
+                            return;
+                        }
+                    }
+                }
+            }
+
             // 3. Giật cần kéo cá lên khi cá cắn câu
             if (fishing.phase === 'bite' || fishing.phase === 'hook' || fishing.phase === 'hooked') {
                 if (typeof fishing.hook === 'function' && fishing.phase !== 'hooked') {
                     try { fishing.hook(); } catch (_) {}
                 }
-                if (typeof fishing.finish === 'function') {
+                if (typeof fishing.finish === 'function' && fishing.interest) {
                     const catchId = fishing.catchId || (fishing.interest ? fishing.interest.species : null);
                     const isRare = isRareOrLegendFish(catchId, fishing.prize);
                     let fishName = catchId || 'Cá';

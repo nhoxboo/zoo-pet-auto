@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.9.2
+// @version      2.9.3
 // @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Câu Cá Tuyệt Đối 100% Mọi Hồ Không Lỗi, Auto Săn Boss Chuẩn Xác Toàn Map, Auto Farm, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
@@ -169,19 +169,64 @@
         dark: { name: '🌑 Bóng Tối', lvl: 20, boss: 'Chúa Tể Bóng Đêm' }
     };
 
-    // --- HOOK ENGINE GAME BẢO ĐẢM 100% NHẬN GAME ---
-    function checkGameHook() {
-        if (window.game && window.game.player && window.game.world) {
-            if (!G) {
-                G = window.game;
-                console.log('%c[ZooPet Auto]%c Đã kết nối với Game Engine thành công!', 'color:#10B981;font-weight:bold', 'color:#334155');
-                updateStatusBadge(true);
-                initEngine();
-            }
+    // --- HOOK ENGINE GAME BẢO ĐẢM 100% NHẬN GAME (PRODUCTION HOOK) ---
+    // Game gốc chỉ tự gán `window.game = $` khi chạy localhost (Pb = true).
+    // Trên domain chính `https://zoo-pet.store/` và CDN `cloudfront.net`, Pb = false.
+    // Hook này đón đầu ngay khi Game khởi tạo các module (fishing, player, world)
+    // để gán tức thì vào `G` và `window.game`!
+
+    function onGameConnected(gameObj) {
+        if (!gameObj || G) return;
+        if (gameObj.player && gameObj.world) {
+            G = gameObj;
+            window.game = gameObj;
+            console.log('%c[ZooPet Auto]%c Đã kết nối với Game Engine thành công!', 'color:#10B981;font-weight:bold', 'color:#334155');
+            updateStatusBadge(true);
+            initEngine();
         }
     }
 
-    const hookInterval = setInterval(checkGameHook, 200);
+    // Hook đón đầu qua Object property traps
+    try {
+        Object.defineProperty(Object.prototype, 'fishing', {
+            set: function (val) {
+                Object.defineProperty(this, 'fishing', {
+                    value: val,
+                    writable: true,
+                    configurable: true,
+                    enumerable: true
+                });
+                if (this && this.player && this.world) onGameConnected(this);
+                else if (val && val.game) onGameConnected(val.game);
+            },
+            configurable: true,
+            enumerable: true
+        });
+
+        Object.defineProperty(Object.prototype, 'player', {
+            set: function (val) {
+                Object.defineProperty(this, 'player', {
+                    value: val,
+                    writable: true,
+                    configurable: true,
+                    enumerable: true
+                });
+                if (this && this.fishing && this.world) onGameConnected(this);
+                else if (val && val.game) onGameConnected(val.game);
+            },
+            configurable: true,
+            enumerable: true
+        });
+    } catch (_) {}
+
+    function checkGameHook() {
+        if (G) return;
+        if (window.game && window.game.player && window.game.world) {
+            onGameConnected(window.game);
+        }
+    }
+
+    const hookInterval = setInterval(checkGameHook, 100);
 
     // --- MODULE 1: CHEATS & HACKS ENGINE ---
     let origTakeDamage = null;

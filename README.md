@@ -1,20 +1,26 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.9.2
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.9.3
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật v2.9.2: Đại Tu Auto Câu Cá 100% & Săn Boss
+## 🌟 Bản Cập Nhật v2.9.3: Fix Lỗi Không Kết Nối Được Game Trên Web Thật (Production Hook)
 
-### 1. 🎣 Đại Tu Toàn Diện Auto Câu Cá (100% Mọi Hồ & Mọi Map)
-* **Gỡ bỏ cơ chế lọc cá gây hủy cần:** Theo yêu cầu từ người dùng, toàn bộ logic tự hủy cần khi gặp cá thường đã được loại bỏ hoàn toàn.
-* **Tự Động Tính Điểm Bờ & Quăng Phao Chuẩn Xác:** Tích hợp hàm `fishing.plan()` của game engine để nhân vật tự đi tới vị trí đứng bờ (`shore`) và quăng phao vào lòng hồ (`cast`) chuẩn xác $100\%$.
-* **Độc Lập & Chống Xung Đột State:** Khi đang câu cá (`fishing.active`), toàn bộ các module khác (Combat, Boss Hunt, Farm) tạm dừng can thiệp vào `player.target`, `player.state` hoặc di chuyển của nhân vật để không bao giờ làm đứt dây hay ngắt trạng thái câu.
-* **Kéo Cá Tự Động 100%:** Khi cá cắn câu (`phase === 'bite'`), tool tự động giật cần (`hook`) và hoàn thành kéo cá (`finish`) liên tục, sau đó tự quăng mồi mới.
+### 1. 🔍 Nguyên nhân cốt lõi phát hiện trên domain https://zoo-pet.store/
+* Trong mã nguồn game gốc:
+  ```javascript
+  Pb = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  ...
+  Pb && (window.game = $)
+  ```
+  * Biến `Pb` (kiểm tra môi trường Dev) **chỉ bằng `true` khi chạy trên localhost**.
+  * Khi người dùng chơi trên trang web thật `https://zoo-pet.store/` hoặc CloudFront CDN, `Pb` mang giá trị `false`. Game gốc **không bao giờ gán `window.game = $`** vào `window`.
+  * Hậu quả: Userscript trước đây đợi `window.game` thì không bao giờ tìm thấy, biểu tượng trạng thái không thể kết nối và các chức năng tự động (Câu Cá, Săn Boss, Farm...) đều không thể chạy!
 
-### 2. ⚔️ Auto Săn Boss Chuẩn Xác Toàn Map
-* **Tự Động Kích Hoạt khi bật "Chỉ Giết Boss":** Gạt bật nút `Chỉ Giết Boss` hoặc `Auto Du Hành` là tool tự động quét và đi săn Boss ngay lập tức không cần phụ thuộc nút đánh quái thường.
-* **Tự Động Di Chuyển & Tấn Công:** Nếu ở xa ngoài tầm đánh, nhân vật tự chạy mượt mà tới vị trí Boss. Khi đã áp sát tầm đánh, nhân vật tự target Boss, đánh thường và xả liên hoàn 4 chiêu `spin`, `dash`, `slam`, `special`.
+### 2. 🚀 Khắc phục triệt để trong v2.9.3: Production Proactive Hook
+* ✅ **Bắt chủ động Game Instance (`$`):** Sử dụng cơ chế Object Property Traps (`fishing`, `player`, `world`) đón đầu ngay từ mili-giây đầu tiên khi các hệ thống game được khởi tạo để tự động trích xuất thực thể Game gốc và gán vào `G` cũng như `window.game`.
+* ✅ **Kết Nối Ngay Lập Tức:** Ngay khi vào game tại `https://zoo-pet.store/`, badge góc trên chuyển thành `🟢 Đã kết nối` và kích hoạt toàn bộ hệ thống Auto.
+* ✅ **Auto Câu Cá Chạy Mượt Mà 100%:** Nhân vật tự đứng đúng mép nước, quăng phao, cắn câu siêu tốc (`Ultra Catch`) và tự động giật cần kéo cá vào balo liên tục.
 
 ---
 

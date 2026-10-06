@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.0.2
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Câu Cá Đầy Đủ Cơ Chế Kéo Cần Mượt Mà, Auto Săn Boss & Quét Toàn Map, Bất Tử Toàn Diện, Tăng Điểm Kinh Nghiệm EXP Siêu Tốc, Nút Kết Nối Lại 1-Click.
+// @version      3.1.0
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Đi Ải Hầm Ngục Solo 1 Người Không Cần Chờ Đủ Đội, Vô Hạn Lượt Đi Ải Mỗi Ngày, Auto Câu Cá Đầy Đủ Cơ Chế Kéo Cần, Auto Săn Boss Toàn Map, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -157,7 +157,7 @@
     };
 
     // --- DANH SÁCH 9 HÀNH TINH & DỮ LIỆU ---
-    const PLANET_ORDER = ['home', 'toy', 'candy', 'jungle', 'ice', 'ocean', 'lava', 'sky', 'dark'];
+    const PLANET_ORDER = ['home', 'toy', 'candy', 'jungle', 'ice', 'ocean', 'lava', 'sky', 'dark', 'dungeon'];
     const PLANET_DATA = {
         home: { name: '🌱 Mầm Xanh', lvl: 1, boss: 'Không có Boss' },
         toy: { name: '🧸 Đồ Chơi', lvl: 4, boss: 'Robot Khổng Lồ' },
@@ -167,7 +167,8 @@
         ocean: { name: '🌊 Đại Dương', lvl: 12, boss: 'Thủy Quái Leviathan' },
         lava: { name: '🌋 Dung Nham', lvl: 14, boss: 'Golem Nham Thạch / Rồng Lửa' },
         sky: { name: '☁️ Mây Trời', lvl: 16, boss: 'Phượng Hoàng Phoenix' },
-        dark: { name: '🌑 Bóng Tối', lvl: 20, boss: 'Chúa Tể Bóng Đêm' }
+        dark: { name: '🌑 Bóng Tối', lvl: 20, boss: 'Chúa Tể Bóng Đêm' },
+        dungeon: { name: '🏰 Hầm Ngục Cổ Đại (5 Ải Solo)', lvl: 1, boss: '5 Trùm Hầm Ngục & Cổ Vương' }
     };
 
     // --- HOOK ENGINE GAME NATIVE AN TOÀN 100% (ZERO SIDE-EFFECTS) ---
@@ -739,14 +740,21 @@
         return list.some(q => q && q.p < q.n);
     }
 
-    // --- HÀM CHUYỂN HÀNH TINH NHANH (FAST PLANET TELEPORT) ---
+    // --- HÀM CHUYỂN HÀNH TINH NHANH & ĐI ẢI SOLO (FAST TELEPORT & SOLO DUNGEON) ---
     async function travelToPlanet(targetPlanet) {
         if (!targetPlanet) return;
         const pName = PLANET_DATA[targetPlanet]?.name || targetPlanet;
         showToast(`🚀 Đang khởi hành đến ${pName}...`, 3000);
 
         try {
-            sessionStorage.setItem('zp-flight', JSON.stringify({ to: targetPlanet, t: Date.now() }));
+            if (targetPlanet === 'dungeon') {
+                // Thiết lập phiên đi Ải Solo 1 người, không cần đợi đủ 5 người và không giới hạn lượt
+                sessionStorage.setItem('zp-dg', JSON.stringify({ id: 'solo_' + Date.now(), n: 1, t: Date.now() }));
+                sessionStorage.setItem('zp-flight', JSON.stringify({ to: 'dungeon', t: Date.now() }));
+            } else {
+                sessionStorage.setItem('zp-flight', JSON.stringify({ to: targetPlanet, t: Date.now() }));
+                sessionStorage.removeItem('zp-dg');
+            }
         } catch (_) {}
 
         if (G && G.save) {
@@ -1072,6 +1080,37 @@
         }
     }
 
+    // --- MODULE 8: AUTO ĐI ẢI HẦM NGỤC (DUNGEON CONTROLLER ENGINE) ---
+    function runDungeonEngine() {
+        if (!G || !G.planet) return;
+        const planet = G.planet;
+        // Kiểm tra nếu đang ở map Dungeon (Hầm Ngục 5 Ải)
+        if (planet.stage !== undefined || (planet.constructor && planet.constructor.name === 'Pv')) {
+            // 1. Tự động khởi động Ải ngay lập tức khi đang ở phase chờ (Solo Fast-Start, không cần chờ)
+            if (planet.phase === 'wait' && typeof planet.startStage === 'function') {
+                try {
+                    planet.startStage(0);
+                } catch (_) {}
+            }
+
+            // 2. Khi đã dọn sạch quái & Boss ải hiện tại (phase: clear) -> Tự động chạy tới cổng ải tiếp theo
+            if (planet.phase === 'clear') {
+                const arena = planet.A || (planet.arenas ? planet.arenas[planet.stage] : null);
+                if (arena && G.player && G.player.alive) {
+                    const portalPos = { x: arena.x, y: 0, z: arena.z };
+                    const d = getDistance(G.player.pos, portalPos);
+                    if (d > 1.8) {
+                        walkTo(portalPos);
+                    } else if (typeof planet.place === 'function' && planet.stage < 4) {
+                        try {
+                            planet.place(planet.stage + 1);
+                        } catch (_) {}
+                    }
+                }
+            }
+        }
+    }
+
     // --- VÒNG LẶP CHÍNH CỦA AUTO TOOL (MAIN LOOP) ---
     // ⚠️ FIX v2.7.0: requestAnimationFrame bị trình duyệt ĐÌNH HOÀN TOÀN khi chuyển tab
     // (document.hidden = true) => nhân vật đứng yên, không di chuyển, không đánh.
@@ -1086,6 +1125,7 @@
                 if (CFG.fish.enabled && G.fishing && G.fishing.active) {
                     runFishingEngine();
                 } else {
+                    runDungeonEngine();
                     runFarmEngine();
                     runCombatEngine();
                     runPlanetBossHopper();
@@ -1424,6 +1464,16 @@
                         <div class="zp-planet-btn" data-planet="lava">🌋 Dung Nham</div>
                         <div class="zp-planet-btn" data-planet="sky">☁️ Mây Trời</div>
                         <div class="zp-planet-btn" data-planet="dark">🌑 Bóng Tối</div>
+                        <div class="zp-planet-btn" data-planet="dungeon" style="grid-column: span 3;background:#FAF5FF;border-color:#D8B4FE;color:#7E22CE;font-weight:700;">🏰 Hầm Ngục Cổ Đại (5 Ải Solo)</div>
+                    </div>
+
+                    <div style="margin-top:12px;padding:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                            <div style="font-weight:700;font-size:12px;color:#15803D;">🏰 Hầm Ngục Cổ Đại (Đi Ải Solo)</div>
+                            <span style="font-size:10px;background:#DCFCE7;color:#166534;padding:2px 6px;border-radius:999px;font-weight:600;">1 Người • Vô Hạn Lượt</span>
+                        </div>
+                        <div class="zp-desc" style="color:#166534;margin-bottom:8px;">Vào thẳng 5 ải hầm ngục ngay lập tức, không cần đợi đủ 5 người và không bị giới hạn 2 lượt/ngày:</div>
+                        <button class="zp-btn" id="zp-btn-dungeon-solo" style="background:#16A34A;margin-top:0;">⚔️ Vào Ải Hầm Ngục Solo Ngay</button>
                     </div>
 
                     <div style="margin-top:14px;padding-top:10px;border-top:1px solid #F1F5F9;">
@@ -1439,6 +1489,7 @@
                                 <option value="lava">🌋 Hành Tinh Dung Nham (Lv 14)</option>
                                 <option value="sky">☁️ Quần Đảo Mây Trời (Lv 16)</option>
                                 <option value="dark">🌑 Tinh Cầu Bóng Đêm (Lv 20)</option>
+                                <option value="dungeon">🏰 Hầm Ngục Cổ Đại (5 Ải Solo • Vô Hạn Lượt)</option>
                             </select>
                             <button class="zp-btn" id="zp-btn-teleport-go" style="width:auto;margin-top:0;padding:6px 14px;">Bay Ngay</button>
                         </div>
@@ -1777,6 +1828,11 @@
         document.getElementById('zp-btn-teleport-go')?.addEventListener('click', () => {
             const sel = document.getElementById('zp-select-planet');
             if (sel) travelToPlanet(sel.value);
+        });
+
+        // Solo Dungeon 1-Click Button
+        document.getElementById('zp-btn-dungeon-solo')?.addEventListener('click', () => {
+            travelToPlanet('dungeon');
         });
 
         // Bind Config Checkboxes & Inputs

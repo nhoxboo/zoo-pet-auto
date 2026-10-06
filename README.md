@@ -1,36 +1,43 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.0.2
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.1.0
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật v3.0.2
+## 🌟 Bản Cập Nhật Lớn v3.1.0 (Đi Ải Hầm Ngục Solo & Vô Hạn Lượt)
 
-* **🎣 Hoàn Thiện Cơ Chế Kéo Cần Câu Mượt Mà (Smart Tug-of-War Auto Reel):**
-  * Tái hiện đầy đủ tiến trình giật cần câu khi cá cắn câu (`phase: bite` $\rightarrow$ `hook`).
-  * Thực hiện cơ chế **kéo cần liên tục** (`phase: hooked`), hiển thị đầy đủ hiệu ứng cần câu uốn cong, rung dây câu, bọt nước và cá vùng vẫy.
-  * Tích hợp bộ kiểm soát lực căng dây thông minh (khi dây quá căng tự nhả nhẹ một nhịp để không bao giờ bị đứt dây).
-  * Khi bật **Ultra Fishing**, tốc độ kéo cần được nhân nhanh mượt mà mà vẫn giữ trọn vẹn hoạt ảnh kéo cá lên bờ.
-* **🔄 Nút Kết Nối Lại 1-Click (Manual Reconnect):** Nút bấm `🔄 Kết nối lại` trên thanh tiêu đề menu giúp kết nối tức thì khi tải trang trễ.
-* **👑 Săn Boss & Quét Quái Toàn Map:** Quét toàn bộ bản đồ hành tinh, tự động tiếp cận và tiêu diệt Boss/quái vật ở mọi cự ly.
-* **🛡️ Bất Tử Toàn Diện (God Mode Ultimate):** Miễn nhiễm $100\%$ mọi sát thương độc, dung nham (lava), acid, bẫy gai và đòn đánh của Boss.
-* **✨ Tăng Điểm Kinh Nghiệm EXP Siêu Tốc:** Nhân hệ số EXP từ **2x đến 50x** để lên cấp thần tốc.
+* **🏰 Đi Ải Hầm Ngục Solo 1 Người (Không Cần Đợi Đủ 5 Người):**
+  * Game gốc bắt buộc phải ghép phòng đủ 5 người và đợi đếm ngược mới mở cổng.
+  * Bản **v3.1.0** tích hợp **Solo Dungeon Fast-Start**: Cho phép người chơi 1 mình bước thẳng vào **Hầm Ngục Cổ Đại (5 Ải)** bất cứ lúc nào, Ải 1 tự động khởi động ngay trong $0.1$ giây.
+* **♾️ Phá Bỏ Giới Hạn Lượt Đi (Vô Hạn Lần / Không Giới Hạn 2 Lượt/Ngày):**
+  * Game gốc giới hạn 2 lượt/ngày tại NPC Mầm Xanh.
+  * Tính năng Du Hành Hầm Ngục đưa bạn vào thẳng không gian phó bản độc lập, cho phép cày cuốc, săn Thú Cưng Trùm và Rương Cổ Đại liên tục không giới hạn.
+* **⚡ Tự Động Vượt 5 Ải & Bước Qua Cổng (Auto Dungeon Runner):**
+  * Tự động tiêu diệt quái thường và Boss từng ải (Ải 1 $\rightarrow$ Ải 2 $\rightarrow$ Ải 3 $\rightarrow$ Ải 4 $\rightarrow$ Ải 5 - Trùm Cuối Cổ Vương).
+  * Ngay khi Boss ải ngã xuống, nhân vật tự động bước vào cổng ma thuật để chuyển sang ải tiếp theo.
+* **🎣 Cơ Chế Kéo Cần Câu Cá Chuẩn Xác & Mượt Mà:**
+  * Tái hiện đầy đủ hoạt ảnh quăng cần, cá cắn giật cần, uốn cần kéo cá và cá nhảy lên bờ.
+  * Tích hợp bộ điều tiết lực căng dây (Tension Regulator) chống đứt dây tuyệt đối.
+* **👑 Kết Hợp Trọn Bộ VIP Cheats:**
+  * Bất Tử Toàn Diện (Kháng độc, nham thạch, gai).
+  * Tăng Điểm Kinh Nghiệm EXP ($2\times \to 50\times$).
+  * One-Hit Sát Thương & Không Thời Gian Hồi Chiêu.
 
 ---
 
-## 🛠️ Danh Sách Tính Năng Tổng Thể
-* **🎣 Auto Câu Cá & Kéo Cần (Smart Auto Reel):** Tự tìm hồ, quăng cần, giật cá cắn câu, kéo cần mượt mà và thu cá lên bờ liên tục (hỗ trợ Luck Buff).
-* **🔄 Nút Kết Nối Lại (Reconnect Button):** Quét và kết nối thủ công tức thì chỉ với 1 cú click.
-* **✨ Tăng Điểm Kinh Nghiệm (EXP Multiplier):** Tùy chọn 2x đến 50x EXP giúp lên cấp nhanh như chớp.
-* **🛡️ Chế độ Bất Tử Toàn Diện (God Mode):** Miễn nhiễm mọi sát thương, độc, nham thạch, acid.
-* **⚔️ Tăng Sát Thương (Damage Multiplier):** Nhân sát thương đầu ra cực mạnh (One-Hit).
-* **⚡ Hồi chiêu 0s (No Cooldown):** Xả chiêu liên tục không chờ thời gian hồi.
-* **🏃 Tăng Tốc Chạy (Speed Boost):** Di chuyển siêu tốc qua các vùng đất.
-* **💡 Sáng Bản Đồ Bóng Tối:** Xóa bỏ màn đen tối và sương mù.
-* **🌾 Auto Nông Trại:** Tự động thu hoạch cây chín và gieo hạt giống cấp cao nhất.
-* **👑 Săn Boss & Đánh Quái Toàn Map:** Tìm và tiêu diệt mục tiêu trên toàn hành tinh.
-* **🚀 Chuyển Hành Tinh Nhanh 1-Click:** 9 nút bấm trực quan trên menu.
-* **📜 Auto Nhiệm Vụ An Toàn:** Tự nhận thưởng Daily, Weekly, Bounty không sợ bị lỗi server.
+## 📋 Danh Sách Tính Năng
+
+| Module | Tính Năng | Mô Tả |
+| :--- | :--- | :--- |
+| **Du Hành & Đi Ải** | **🏰 Hầm Ngục Cổ Đại Solo** | Vào 5 Ải hầm ngục 1 mình ngay lập tức, không cần đợi đủ người, không giới hạn lượt |
+| **Du Hành & Đi Ải** | **🚀 Chuyển Nhanh 9 Hành Tinh** | Dịch chuyển tức thì đến bất kỳ hành tinh nào chỉ với 1 click |
+| **Câu Cá** | **🎣 Auto Câu Cá Mọi Hồ** | Tự tìm hồ nước, quăng câu, giật cá và kéo cần mượt mà chống đứt dây |
+| **Chiến Đấu** | **⚔️ Auto Săn Boss Toàn Map** | Tự động quét và diệt Boss trên toàn bộ bề mặt hành tinh |
+| **VIP Cheats** | **🛡️ Bất Tử Toàn Diện** | Miễn nhiễm $100\%$ sát thương quái, độc, lửa, dung nham và gai |
+| **VIP Cheats** | **⭐ Nhân EXP ($1\times \to 50\times$)** | Tăng hệ số nhận kinh nghiệm giúp thăng cấp siêu tốc |
+| **VIP Cheats** | **🧲 Nam Châm Hút Đồ** | Hút toàn bộ rương, túi quà, đá sao và vật phẩm rơi về vị trí nhân vật |
+| **Nhiệm Vụ** | **📜 Auto Nhận & Trả Q** | Tự động hoàn thành nhiệm vụ hằng ngày không gửi packet ảo |
+| **Hệ Thống** | **🔄 Nút Kết Nối Lại** | Quét và kết nối lại engine 1-click khi mạng lag hoặc load trang trễ |
 
 ---
 

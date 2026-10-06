@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.0.0
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Câu Cá Tuyệt Đối 100% (Sửa Luck Buff), Auto Săn Boss & Quét Toàn Map, Bất Tử Toàn Diện (Kháng Độc/Nham Thạch), Tăng Điểm Kinh Nghiệm EXP Siêu Tốc, Auto Farm, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod.
+// @version      3.0.1
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Câu Cá Tuyệt Đối 100%, Auto Săn Boss & Quét Toàn Map, Bất Tử Toàn Diện, Tăng Điểm Kinh Nghiệm EXP Siêu Tốc, Nút Kết Nối Lại 1-Click, Auto Farm, Chuyển Hành Tinh Nhanh, Smart Quests.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -187,7 +187,7 @@
     } catch (_) {}
 
     function onGameConnected(gameObj) {
-        if (!gameObj || G) return;
+        if (!gameObj) return;
         if (gameObj.player && gameObj.world) {
             G = gameObj;
             window.game = gameObj;
@@ -197,8 +197,44 @@
         }
     }
 
+    function reconnectGame() {
+        if (window.game && window.game.player && window.game.world) {
+            G = window.game;
+            updateStatusBadge(true);
+            initEngine();
+            return true;
+        }
+
+        // Deep scan tìm kiếm instance Game trên window
+        try {
+            const keys = Object.getOwnPropertyNames(window);
+            for (let k of keys) {
+                try {
+                    const obj = window[k];
+                    if (obj && typeof obj === 'object' && obj.player && obj.world && obj.scene) {
+                        window.game = obj;
+                        G = obj;
+                        updateStatusBadge(true);
+                        initEngine();
+                        return true;
+                    }
+                } catch (_) {}
+            }
+        } catch (_) {}
+
+        if (window.game) {
+            G = window.game;
+            updateStatusBadge(true);
+            initEngine();
+            return true;
+        }
+
+        updateStatusBadge(false, '🟡 Chưa vào map');
+        return false;
+    }
+
     function checkGameHook() {
-        if (G) return;
+        if (G && G.player && G.world) return;
         if (window.game && window.game.player && window.game.world) {
             onGameConnected(window.game);
         }
@@ -1310,13 +1346,22 @@
                 #zp-toggle-btn:hover {
                     transform: scale(1.08);
                 }
+                #zp-reconnect-btn:hover {
+                    background: #0284C7 !important;
+                    color: #FFFFFF !important;
+                }
             </style>
 
             <div class="zp-header" id="zp-drag-handle">
                 <div class="zp-title">
                     🐾 Zoo Pet Auto <span class="zp-status-badge">🟡 Đang kết nối...</span>
                 </div>
-                <div style="cursor:pointer;color:#94A3B8;font-size:16px;" id="zp-close-btn">✕</div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button id="zp-reconnect-btn" title="Thử quét và kết nối lại với Game Engine" style="background:#E0F2FE;color:#0284C7;border:1px solid #BAE6FD;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all 0.2s;">
+                        🔄 Kết nối lại
+                    </button>
+                    <div style="cursor:pointer;color:#94A3B8;font-size:16px;" id="zp-close-btn">✕</div>
+                </div>
             </div>
 
             <div class="zp-tabs">
@@ -1753,19 +1798,39 @@
         bindCheck('cfg-fish-luck', CFG.fish, 'luckBuff');
         bindCheck('cfg-fish-ultra', CFG.cheats, 'ultraFishing');
 
+        // Nút kết nối lại thủ công (Manual Reconnect)
+        const reconnectBtn = document.getElementById('zp-reconnect-btn');
+        if (reconnectBtn) {
+            reconnectBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                reconnectBtn.textContent = '⏳ Đang quét...';
+                reconnectBtn.style.opacity = '0.7';
+                const success = reconnectGame();
+                setTimeout(() => {
+                    reconnectBtn.textContent = success ? '✅ Đã kết nối' : '🔄 Kết nối lại';
+                    reconnectBtn.style.opacity = '1';
+                    if (success) showToast('🟢 Đã kết nối với Game Engine thành công!');
+                    else showToast('⚠️ Chưa tìm thấy Game Engine. Hãy đảm bảo bạn đã vào bản đồ game!');
+                    setTimeout(() => {
+                        reconnectBtn.textContent = '🔄 Kết nối lại';
+                    }, 2500);
+                }, 400);
+            });
+        }
+
         // Kéo thả menu (Drag & Drop)
         makeDraggable(panel, document.getElementById('zp-drag-handle'));
     }
 
-    function updateStatusBadge(connected) {
+    function updateStatusBadge(connected, customText) {
         const badge = document.querySelector('.zp-status-badge');
         if (badge) {
             if (connected) {
-                badge.textContent = '🟢 Đã kết nối';
+                badge.textContent = customText || '🟢 Đã kết nối';
                 badge.style.background = '#DCFCE7';
                 badge.style.color = '#15803D';
             } else {
-                badge.textContent = '🟡 Đang kết nối...';
+                badge.textContent = customText || '🟡 Đang kết nối...';
                 badge.style.background = '#FEF3C7';
                 badge.style.color = '#92400E';
             }

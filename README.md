@@ -1,31 +1,21 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.0.0
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.0.1
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật Đột Phá v3.0.0
+## 🌟 Bản Cập Nhật v3.0.1
 
-### 1. 🎣 Khắc phục triệt để Buff May Mắn (Luck Buff) khi Auto Câu Cá
-* **Nguyên nhân:** Thuộc tính `player.luck` trong Game Engine là `getter-only`. Khi bật Buff May Mắn, việc gán trực tiếp đã gây lỗi `TypeError` ngầm làm đứng tiến trình câu.
-* **Khắc phục:** Chuyển sang kích hoạt thông qua bảng hiệu ứng `player.buffs['luck']`. Giờ đây khi bật Tăng May Mắn, nhân vật vừa nhận đầy đủ tỷ lệ ra cá quý hiếm vừa quăng cần & kéo cá mượt mà $100\%$.
-
-### 2. 👑 Săn Boss & Quét Quái Chuẩn Xác Toàn Map (Full-Map Hunting)
-* **Xóa bỏ giới hạn bán kính:** Loại bỏ hoàn toàn bộ lọc khoảng cách và kiểm tra ẩn hiện `obj.visible` (do cơ chế Three.js camera culling).
-* **Chế độ Săn Boss Chuyên Biệt (Boss-Only):** Tự động phát hiện Boss thường, Boss Titan, World Boss ở bất kỳ đâu trên bản đồ và phi thẳng tới vị trí Boss để xả combo tiêu diệt.
-* **Auto Đánh Thường Toàn Map:** Quét và tiêu diệt sạch sẽ mọi quái vật trên toàn hành tinh mà không bị giới hạn trong khu vực hẹp.
-
-### 3. 🛡️ Bất Tử Toàn Diện (God Mode Ultimate)
-* **Kháng độc, nham thạch & môi trường:** Bổ sung hook phương thức `player.hazard()` và kích hoạt `fireres = 1.0` cùng `invuln = 999999`.
-* Giờ đây khi bật Bất Tử, nhân vật hoàn toàn miễn nhiễm với **chất độc, dung nham (lava), acid, bẫy gai và mọi sát thương từ Boss/quái vật** — máu luôn giữ ở mức $100\%$ tối đa!
-
-### 4. ✨ Tăng Điểm Kinh Nghiệm EXP Siêu Tốc (EXP Multiplier)
-* **Nâng cấp cấp độ thần tốc:** Bổ sung tùy chọn nhân hệ số EXP: **1x, 2x, 5x, 10x, 20x, 50x**.
-* Hook trực tiếp hàm `player.gainExp()` và buff `xp`, giúp bạn nhận lượng EXP khổng lồ sau mỗi lần hạ gục quái hoặc hoàn thành nhiệm vụ để lên cấp vùn vụt!
+* **🔄 Nút Kết Nối Lại 1-Click (Manual Reconnect):** Tích hợp nút bấm `🔄 Kết nối lại` trực tiếp trên thanh tiêu đề menu (bên cạnh huy hiệu trạng thái). Trong trường hợp tải trang trễ, vào game sau khi DOM đã nạp hoặc chuyển map chưa kịp nhận diện, chỉ cần bấm nút này để tool tự động quét sâu và kết nối ngay lập tức với Game Engine.
+* **🎣 Khắc phục triệt để Buff May Mắn (Luck Buff):** Bật Buff May Mắn hoạt động trơn tru không gây lỗi, tăng tối đa tỉ lệ ra cá quý hiếm.
+* **👑 Săn Boss & Quét Quái Toàn Map:** Quét xuyên suốt toàn bộ bản đồ hành tinh, tự động tiếp cận và tiêu diệt Boss/quái vật ở mọi cự ly.
+* **🛡️ Bất Tử Toàn Diện (God Mode Ultimate):** Miễn nhiễm $100\%$ mọi sát thương độc, dung nham (lava), acid, bẫy gai và đòn đánh của Boss.
+* **✨ Tăng Điểm Kinh Nghiệm EXP Siêu Tốc:** Nhân hệ số EXP từ **2x đến 50x** để lên cấp thần tốc.
 
 ---
 
 ## 🛠️ Danh Sách Tính Năng Tổng Thể
+* **🔄 Nút Kết Nối Lại (Reconnect Button):** Quét và kết nối thủ công tức thì chỉ với 1 cú click.
 * **✨ Tăng Điểm Kinh Nghiệm (EXP Multiplier):** Tùy chọn 2x đến 50x EXP giúp lên cấp nhanh như chớp.
 * **🛡️ Chế độ Bất Tử Toàn Diện (God Mode):** Miễn nhiễm mọi sát thương, độc, nham thạch, acid.
 * **⚔️ Tăng Sát Thương (Damage Multiplier):** Nhân sát thương đầu ra cực mạnh (One-Hit).

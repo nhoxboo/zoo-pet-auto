@@ -1,27 +1,23 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.2.0
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.2.1
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật Lớn v3.2.0 (Hệ Thống Tự Động Kết Nối Đa Tầng Bất Khả Xâm Phạm)
+## 🌟 Bản Cập Nhật Lớn v3.2.1 (Sửa Triệt Để Lỗi Mất Kết Nối Khi Đổi Map)
 
-* **⚡ Cơ Chế Tự Động Bắt Dính Engine Đa Tầng (Triple-Resilient Auto-Connect):**
-  - **Nguyên nhân trước đây:** Game gốc kiểm tra `Pb` qua regex máy chủ nội bộ (`localhost|127.0.0.1`), nếu chạy trên domain chính hoặc khi chuyển map/hầm ngục mà regex bị bỏ qua thì `window.game` sẽ không được gán, dẫn đến tình trạng tool bị kẹt ở trạng thái *"🟡 Đang kết nối..."* và bấm kết nối lại cũng không nhận được.
-  - **Khắc phục trên v3.2.0:**
-    1. **Bảo vệ toàn diện chuỗi Regex/String Methods:** Hook đồng thời `RegExp.test`, `RegExp.exec`, `String.match`, `String.search` để kích hoạt cờ `Pb = true` ở mọi tình huống.
-    2. **Property Trap trên `window.game`:** Đặt getter/setter chủ động bắt dính ngay mili-giây đầu tiên khi Game Instance được gán.
-    3. **Bộ quét liên tục 5 giây (Resilient 5s Scanner):** Khi người dùng bấm nút *"🔄 Kết nối lại"*, tool sẽ chủ động quét và thử lại liên tục trong 5 giây cho đến khi toàn bộ tài nguyên 3D và nhân vật được tải hoàn tất.
-    4. **Hiển thị tên bản đồ hiện tại trực quan:** Badge trạng thái tự động cập nhật tên map (ví dụ: `🟢 Đã kết nối (Mầm Xanh)`, `🟢 Đã kết nối (Hầm Ngục Ải 1)`).
+* **⚡ Bắt Dính Game Engine Ngay Tại Dòng Đầu Tiên:**
+  - **Phát hiện cốt lõi:** Ở các phiên bản trước, đoạn mã regex hook cũ chứa chuỗi escape không khớp (`localhost|127\\.0\\.0\\.1`) nằm ở đầu file đã chạy trước và làm sai lệch cờ `Pb` của game gốc khiến `window.game = $` không được thực thi.
+  - **Khắc phục trên v3.2.1:** Đại tu và thống nhất toàn bộ hệ thống hook vào một khối duy nhất đặt ngay đầu tệp (dòng 35), hỗ trợ tất cả các phương thức RegExp (`test`, `exec`), String (`match`, `search`) và Property Trap `window.game`. Đảm bảo Game Engine tự động kết nối $100\%$ ngay khi chuyển bất kỳ hành tinh nào hoặc vào hầm ngục.
+* **🔄 Bộ Quét Kiên Trì 5 Giây:**
+  - Khi chuyển cảnh, nếu tài nguyên 3D đang tải, tool tự động nhận biết `🟡 Đang tải map 3D...` và chuyển sang `🟢 Đã kết nối (<Tên Map>)` ngay khi nhân vật xuất hiện.
 * **🏰 Hầm Ngục Cổ Đại Solo 1 Người & Vô Hạn Lượt:**
-  - Không cần chờ ghép đủ 5 người, vào thẳng hầm ngục tự động đánh ngay.
   - Chống văng map (`Anti-dgGone`) vĩnh viễn cho đến khi phá đảo 5 Ải.
 * **⚡ Tự Động Vượt 5 Ải & Bước Qua Cổng:**
   - Tự động diệt quái, gọi Trùm và hạ gục 5 Boss Hầm Ngục (Ải 1 $\rightarrow$ Ải 2 $\rightarrow$ Ải 3 $\rightarrow$ Ải 4 $\rightarrow$ Ải 5 - Trùm Cuối Cổ Vương).
   - Tự động bước vào Cổng Dịch Chuyển ngay khi Boss ải ngã xuống.
 * **🎣 Cơ Chế Kéo Cần Câu Cá Mượt Mà:**
   - Đầy đủ hoạt ảnh quăng cần, giật cá, uốn cần kéo cá và cá nhảy lên bờ.
-  - Tích hợp kiểm soát lực căng dây chống đứt cần tuyệt đối.
 * **👑 Trọn Bộ VIP Cheats:**
   - Bất Tử Toàn Diện (Kháng độc, nham thạch, gai).
   - Tăng Điểm Kinh Nghiệm EXP ($2\times \to 50\times$).
@@ -33,7 +29,7 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 
 | Module | Tính Năng | Mô Tả |
 | :--- | :--- | :--- |
-| **Kết Nối** | **⚡ Triple-Resilient Auto-Connect** | Tự động bắt dính Game Engine ngay lập tức ở mọi map và hầm ngục |
+| **Kết Nối** | **⚡ Universal Engine Hook** | Bắt dính Game Engine 100% ở mọi map và hầm ngục ngay khi tải trang |
 | **Du Hành & Đi Ải** | **🏰 Hầm Ngục Cổ Đại Solo** | Vào 5 Ải hầm ngục 1 mình ngay lập tức, chống văng map, không giới hạn lượt |
 | **Du Hành & Đi Ải** | **🚀 Chuyển Nhanh 9 Hành Tinh** | Dịch chuyển tức thì đến bất kỳ hành tinh nào chỉ với 1 click |
 | **Câu Cá** | **🎣 Auto Câu Cá Mọi Hồ** | Tự tìm hồ nước, quăng câu, giật cá và kéo cần mượt mà chống đứt dây |

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.2.0
+// @version      3.2.1
 // @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Tự Động Kết Nối Đa Tầng Bất Khả Xâm Phạm (Triple-Resilient Auto-Connect), Bắt Dính Engine Ngay Lập Tức Ở Mọi Map & Hầm Ngục, Chống Văng Hầm Ngục Solo, Vô Hạn Lượt Đi Ải, Auto Câu Cá Chuẩn Kéo Cần, Auto Săn Boss Toàn Map, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
@@ -30,17 +30,66 @@
 
     if (!isZooPetPage) return;
 
-    console.log('%c[ZooPet Auto Pro v2.6.0]%c Khởi tạo engine Auto & VIP Mod trên: ' + location.href, 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
+    console.log('%c[ZooPet Auto Pro v3.2.1]%c Khởi tạo engine Auto & VIP Mod trên: ' + location.href, 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
 
-    // --- HOOK DEV ENGINE NGAY TỪ ĐẦU (ĐẢM BẢO window.game = $) ---
+    // --- HOOK DEV ENGINE NGAY TỪ ĐẦU (ĐẢM BẢO Pb = true VÀ BẮT DÍNH window.game = $) ---
+    let _capturedGame = null;
+
     try {
+        const isTargetRegex = (src) => {
+            if (!src || typeof src !== 'string') return false;
+            return src.includes('localhost') || src.includes('127') || src.includes('::1');
+        };
+
         const origTest = RegExp.prototype.test;
         RegExp.prototype.test = function (str) {
-            if (this.source && this.source.includes('localhost|127\\.0\\.0\\.1') && typeof str === 'string') {
+            if (this.source && isTargetRegex(this.source)) {
                 return true;
             }
             return origTest.apply(this, arguments);
         };
+
+        const origExec = RegExp.prototype.exec;
+        RegExp.prototype.exec = function (str) {
+            if (this.source && isTargetRegex(this.source)) {
+                const res = ['localhost'];
+                res.index = 0;
+                res.input = str;
+                return res;
+            }
+            return origExec.apply(this, arguments);
+        };
+
+        const origMatch = String.prototype.match;
+        String.prototype.match = function (matcher) {
+            if (matcher && matcher.source && isTargetRegex(matcher.source)) {
+                return ['localhost'];
+            }
+            return origMatch.apply(this, arguments);
+        };
+
+        const origSearch = String.prototype.search;
+        String.prototype.search = function (matcher) {
+            if (matcher && matcher.source && isTargetRegex(matcher.source)) {
+                return 0;
+            }
+            return origSearch.apply(this, arguments);
+        };
+
+        // Trap getter/setter trên window.game để kích hoạt ngay khi game gốc gán window.game = $
+        Object.defineProperty(window, 'game', {
+            configurable: true,
+            enumerable: true,
+            get() {
+                return _capturedGame;
+            },
+            set(val) {
+                _capturedGame = val;
+                if (val && typeof onGameConnected === 'function') {
+                    onGameConnected(val);
+                }
+            }
+        });
     } catch (_) {}
 
     // --- CẤU HÌNH MẶC ĐỊNH (TẤT CẢ AUTO & CHEATS ĐỀU MẶC ĐỊNH TẮT - OFF) ---
@@ -226,72 +275,7 @@
         }
     } catch (_) {}
 
-    // --- HOOK ENGINE GAME NATIVE ĐA TẦNG (TRIPLE-RESILIENT AUTO-CONNECT) ---
-    // Game gốc chỉ tự gán `window.game = $` khi Pb = true (/localhost|127.0.0.1/.test(location.hostname)).
-    // Hook can thiệp toàn bộ các phương thức regex/string test để Pb luôn là true ở mọi hoàn cảnh,
-    // đồng thời đặt trap getter/setter trên `window.game` để bắt dính Game Instance ngay mili-giây đầu tiên!
-
-    let _capturedGame = null;
-
-    try {
-        const isTargetRegex = (src) => {
-            if (!src || typeof src !== 'string') return false;
-            return src.includes('localhost') || src.includes('127') || src.includes('::1');
-        };
-
-        const origTest = RegExp.prototype.test;
-        RegExp.prototype.test = function (str) {
-            if (this.source && isTargetRegex(this.source)) {
-                return true;
-            }
-            return origTest.apply(this, arguments);
-        };
-
-        const origExec = RegExp.prototype.exec;
-        RegExp.prototype.exec = function (str) {
-            if (this.source && isTargetRegex(this.source)) {
-                const res = ['localhost'];
-                res.index = 0;
-                res.input = str;
-                return res;
-            }
-            return origExec.apply(this, arguments);
-        };
-
-        const origMatch = String.prototype.match;
-        String.prototype.match = function (matcher) {
-            if (matcher && matcher.source && isTargetRegex(matcher.source)) {
-                return ['localhost'];
-            }
-            return origMatch.apply(this, arguments);
-        };
-
-        const origSearch = String.prototype.search;
-        String.prototype.search = function (matcher) {
-            if (matcher && matcher.source && isTargetRegex(matcher.source)) {
-                return 0;
-            }
-            return origSearch.apply(this, arguments);
-        };
-    } catch (_) {}
-
-    // Trap setter trên window.game để kích hoạt ngay khi game gốc gán `window.game = $`
-    try {
-        Object.defineProperty(window, 'game', {
-            configurable: true,
-            enumerable: true,
-            get() {
-                return _capturedGame;
-            },
-            set(val) {
-                _capturedGame = val;
-                if (val) {
-                    onGameConnected(val);
-                }
-            }
-        });
-    } catch (_) {}
-
+    // --- HỆ THỐNG ĐIỀU HƯỚNG VÀ KẾT NỐI ENGINE ---
     function getPlanetDisplayName() {
         if (!G) return '';
         try {

@@ -1,59 +1,48 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.3
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.4
 
-Tool Auto & Mod chuyên sâu toàn diện cho web game **Zoo Pet** (https://zoo-pet.store/).
-
----
-
-## 🌟 Tính Năng Mới Bản v2.3 (VIP Hacks & Mod Chuyên Sâu)
-
-### 👑 1. Tab Hack & Mod Chuyên Sâu (VIP Cheats)
-* **⚡ Hồi Chiêu 0s (No Skill Cooldown):** Xóa bỏ hoàn toàn thời gian hồi chiêu của 4 kỹ năng `Q` (Chong chóng bão), `W` (Lướt thần tốc), `E` (Đấm đất hủy diệt), `R` (Tuyệt chiêu). Nhân vật có thể xả chiêu liên tục như súng máy!
-* **🛡️ Chế Độ Bất Tử (God Mode):** Khóa máu nhân vật 100% vĩnh viễn, miễn nhiễm mọi sát thương từ quái và Boss, kháng toàn bộ hiệu ứng khống chế (choáng, thiêu đốt, làm chậm, trói chân).
-* **🎣 Câu Cá Siêu Tốc (Ultra Instant Catch - 0.1s / con):** Ép cá cắn câu ngay lập tức khi mồi chạm nước và tự động kéo lên ngay trong 0.1 giây (thu hoạch hàng trăm con cá trong vài giây).
-* **🧲 Nam Châm Hút Đồ Toàn Bản Đồ (Global Loot Magnet):** Hút sạch mọi trang bị rơi, vương miện, ngọc quý và tự động dọn sạch mọi **Hũ Đồ Rơi (Loot Bags)** ở bất kỳ đâu trên toàn bản đồ.
-* **🏃 Tăng Tốc Độ Di Chuyển (Speed Boost):** Tùy chỉnh tốc độ di chuyển từ `1.0x` (Mặc định) lên `1.5x`, `2.0x`, `2.5x` (Lướt map siêu nhanh).
-* **⚔️ Tăng Sát Thương Công (Damage Multiplier):** Tùy chỉnh tăng lực công từ `1.0x` lên `2.0x` (+100%), `3.0x` (+200%), `5.0x` (One-Hit quái và kết liễu Boss cực nhanh).
+Tool Auto & VIP Cheats toàn diện cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-### 🚀 2. Săn Boss Xuyên Hành Tinh & Cày Cấp Vô Hạn
-* **Tự động quét Boss**: Quét và nhắm vào Boss trên hành tinh hiện tại, áp sát và dồn combo kỹ năng `Q`, `W`, `E`, `R`.
-* **Tự động nhặt đồ & Chuyển hành tinh**: Sau khi dọn sạch Boss, tool đợi nhặt toàn bộ đồ rơi (Vương miện, Mũ huyền thoại, EXP, Vàng, Mảnh pet) rồi tự động bay sang hành tinh kế tiếp để săn tiếp.
-* **Tùy chọn danh sách hành tinh**: Hỗ trợ đầy đủ: Đồ Chơi, Kẹo Ngọt, Rừng Rậm, Băng Giá, Đại Dương, Dung Nham, Mây Trời, Bóng Tối.
+## 🌟 Tính Năng Mới Bản v2.4
+
+### 1. 🔓 Chế Tạo & Mở Khóa Không Cần Nguyên Liệu (Free Craft & Stock)
+* **Free Craft:** Mở khóa toàn bộ công thức rèn đúc vũ khí, trang bị, ấp trứng rồng, thú cưng, đồ trang trí dù thiếu nguyên liệu hoặc không đủ cấp.
+* **🎁 Tự Nhận Trọn Bộ Nguyên Liệu Hiếm:** Nút bấm 1-click nhận ngay x50 tất cả các loại nguyên liệu hiếm trên 8 hành tinh (Đá vỏ chai, Lõi lửa, Pin, Bánh răng, Hổ phách, Dây leo, San hô, Ngọc trai, Tinh thể bóng tối, Lông vũ, Đá sấm sét...) cùng +50.000 Năng Lượng & Vàng.
+
+### 2. 💡 Làm Sáng Toàn Bộ Hành Tinh Bóng Tối (Shadow Planet Night Vision)
+* Vô hiệu hóa màn che bóng tối `#dark2` và sương mù dày đặc `scene.fog`.
+* Bật hào quang ánh sáng vĩnh viễn, phát hiện và hiển thị rõ ràng 100% quái vật, Boss và vật phẩm trong bóng tối.
+* Tự động kích hoạt hiệu ứng hồi máu $3\%$ HP/giây của vùng sáng trên toàn map Bóng Tối.
+
+### 3. 🚀 Sửa Lỗi & Tối Ưu Du Hành Săn Boss Xuyên Hành Tinh
+* Tự động quét và săn sạch Boss thường trên hành tinh hiện tại.
+* Sau khi diệt Boss, đếm ngược thời gian nhặt đồ rồi tự động chuyển sang hành tinh kế tiếp (Mầm Xanh -> Đồ Chơi -> Kẹo Ngọt -> Rừng Rậm -> Băng Giá -> Đại Dương -> Dung Nham -> Mây Trời -> Bóng Tối).
+* Hiển thị trạng thái săn Boss và đồng hồ đếm ngược trực quan.
+
+### 4. 📜 Tự Động Làm & Hoàn Thành 100% Nhiệm Vụ (Smart Quest Bot)
+* **Smart Quest Bot:** Tự động thực hiện các hành động thu hoạch, trồng cây, săn quái, câu cá, tưới nước để tích lũy tiến độ nhiệm vụ.
+* **⚡ Hoàn Thành & Nhận Hết Quà Ngay:** 1 click hoàn thành $100\%$ toàn bộ Nhiệm Vụ Ngày, Nhiệm Vụ Tuần, Lệnh Truy Nã (Bounty), Hành Trình (Story), Rương tuần và Thẻ Sao (Pass).
 
 ---
 
-### 🎯 3. Bộ Lọc Boss Thông Minh & Bỏ Qua Titan
-* **Bỏ qua Boss Titan (Mặc định: BẬT)**: Tự động bỏ qua các Boss Titan siêu trâu (Rùa Núi, Mãng Xà 3 Đầu, Nhện Đồng Hồ, Bọ Cạp Hỏa Ngục,...) để tránh rủi ro.
-* **Tùy chọn danh sách từng con Boss**: Có bảng checklist chi tiết kèm lượng máu (HP) và hành tinh.
-* **Né đòn an toàn**: Tự động lướt lùi né đòn khi máu dưới mức cài đặt.
-
----
-
-### 📜 4. Tự Động Làm & Nhận Thưởng Nhiệm Vụ (Quests & Bounty)
-* **Tự động nhận thưởng Nhiệm Vụ Ngày & Rương Ngày** (`claim`, `claimAll`).
-* **Tự động nhận thưởng Nhiệm Vụ Tuần & Rương Tuần** (`claimWeek`, `claimWeekChest`).
-* **Tự động nộp Lệnh Truy Nã (Bounty)** khi hạ đủ số quái yêu cầu.
-* **Tự động nhận thưởng Hành Trình (Story)** và quà Thẻ Sao (Star Pass).
-
----
-
-### 🛡️ 5. Chạy Ẩn Nền Khi Hạ Tab (Background Worker)
-* Tích hợp **Web Worker Timer 100ms** + cơ chế **Visibility API Bypass** (`document.hidden = false`).
-* Trình duyệt Chrome / Edge sẽ **KHÔNG THỂ THROTTLE / ĐÓNG BĂNG GAME** khi hạ tab hoặc thu nhỏ cửa sổ.
+## 🛠️ Trọn Bộ Tính Năng Khác
+* **⚡ Hồi chiêu 0s (No Cooldown):** Xả 4 chiêu Q-W-E-R và chong chóng liên tục không ngừng.
+* **🛡️ Chế độ Bất Tử (God Mode):** Khóa máu $100\%$, miễn nhiễm mọi sát thương và debuff.
+* **🎣 Câu Cá Siêu Tốc 0.1s (Ultra Fishing):** Hỗ trợ toàn bộ các map (bao gồm rạn san hô Hành Tinh Đại Dương), cá cắn câu và kéo lên tức thì.
+* **🧲 Nam Châm Hút Đồ Toàn Bản Đồ:** Hút sạch đồ rơi, trang bị và hũ đồ rơi ở bất cứ đâu trên bản đồ.
+* **🏃 Tăng Tốc Chạy (1.0x - 2.5x) & ⚔️ Tăng Sát Thương (1.0x - 5.0x).**
+* **🌾 Auto Nông Trại:** Tự thu hoạch cây chín, gieo hạt theo cấp, thu sản phẩm thú nuôi, tưới nước/trộm nông sản bạn bè.
+* **🛡️ Bộ Lọc Boss:** Tự động né các Boss Titan siêu trâu máu > 1500 (Rùa núi, Mãng xà 3 đầu, Nhện đồng hồ, Hoa tử thần...).
+* **💤 Chạy Ẩn Nền Khi Hạ Tab:** Sử dụng Web Worker 100ms độc lập và Anti-Throttle.
 
 ---
 
 ## 🚀 Hướng Dẫn Cài Đặt & Tự Động Cập Nhật
 
-👉 **Link Cài Đặt Tampermonkey Trực Tiếp:**  
-**[https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js](https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js)**
-
-*Tampermonkey sẽ tự động kiểm tra và cập nhật các bản mới nhất từ GitHub của anh (`nhoxboo/zoo-pet-auto`).*
-
----
-
-## 🎮 Phím Tắt & Điều Khiển
-* **Phím F2**: Ẩn / Hiện bảng điều khiển Auto.
-* **Nút tròn 🤖**: Nhấn vào để mở lại menu nếu bị ẩn.
-* **Thanh tiêu đề**: Nhấn giữ chuột để kéo thả menu đến bất kỳ vị trí nào trên màn hình.
+1. Cài đặt tiện ích **Tampermonkey** trên trình duyệt (Chrome, Edge, Brave, Firefox).
+2. Mở link cài đặt trực tiếp:  
+👉 **[https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js](https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js)**
+3. Bấm **Install** (hoặc **Update**).
+4. Vào game [https://zoo-pet.store/](https://zoo-pet.store/) và trải nghiệm!
+5. Phím tắt ẩn/hiện menu: **F2** hoặc click nút 🤖 ở góc dưới màn hình.

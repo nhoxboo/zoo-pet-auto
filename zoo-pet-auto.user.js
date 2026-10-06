@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.3.0
-// @description  Tool Auto toàn diện cho Zoo Pet (zoo-pet.store): Auto Nông trại, Auto Câu cá Chuẩn xác/Instant (Hỗ trợ Đại Dương & Mọi map), Auto Săn Boss Xuyên Hành Tinh cày cấp, Lọc Boss Titan, Tự làm & Nhận thưởng Nhiệm vụ/Bounty, Auto Chạy ngầm khi Hạ Tab.
+// @version      2.4.0
+// @description  Tool Auto toàn diện & VIP Cheats cho Zoo Pet: Auto Nông trại, Auto Câu cá Chuẩn xác/Instant (Đại Dương & Mọi map), Auto Săn Boss Du Hành Xuyên Hành Tinh cày cấp, Lọc Boss Titan, Tự làm & Hoàn thành 100% Nhiệm vụ/Bounty, Mở khóa chế tạo không cần nguyên liệu (Free Craft), Làm sáng Hành Tinh Bóng Tối, Chạy ngầm khi Hạ Tab.
 // @author       Antigravity & Nam Pro
 // @match        https://zoo-pet.store/*
 // @match        http://zoo-pet.store/*
@@ -16,13 +16,12 @@
 (function () {
     'use strict';
 
-    console.log('%c🐾 [Zoo Pet Auto Pro v2.3.0] Đang khởi tạo...', 'color: #0284c7; font-size: 16px; font-weight: bold;');
+    console.log('%c🐾 [Zoo Pet Auto Pro v2.4.0] Đang khởi tạo...', 'color: #0284c7; font-size: 16px; font-weight: bold;');
 
     // ==========================================
     // 0. BẢO VỆ CHẠY ẨN NỀN KHI HẠ TAB (ANTI-THROTTLE)
     // ==========================================
     try {
-        // Đánh lừa trình duyệt để tab luôn ở trạng thái visible
         Object.defineProperty(document, 'hidden', { get: () => false, configurable: true });
         Object.defineProperty(document, 'visibilityState', { get: () => 'visible', configurable: true });
         Object.defineProperty(document, 'webkitVisibilityState', { get: () => 'visible', configurable: true });
@@ -91,24 +90,26 @@
     // ==========================================
     // 2. CẤU HÌNH AUTO (CONFIG & SETTINGS)
     // ==========================================
-    const STORAGE_KEY = 'zp_auto_pro_cfg_v23';
+    const STORAGE_KEY = 'zp_auto_pro_cfg_v24';
     const DEFAULT_CFG = {
         enabled: true,
 
-        // 👑 PRO CHEATS & NÂNG CAO (VIP MOD)
+        // 👑 PRO CHEATS & HACKS CHUYÊN SÂU
         cheats: {
             noCooldown: true,        // ⚡ Hồi chiêu 0s (xả Q-W-E-R liên tục)
             godMode: false,          // 🛡️ Bất tử không mất máu (100% HP, Kháng khống chế)
             ultraFishing: false,     // 🎣 Câu cá siêu tốc 0.1s (Cá cắn câu tức thì & giật ngay)
             globalMagnet: true,      // 🧲 Nam châm hút đồ & hũ rơi toàn bản đồ
             speedBoost: 1.0,         // 🏃 Tăng tốc chạy (1.0x - 2.5x)
-            attackMultiplier: 1.0    // ⚔️ Tăng sát thương (1.0x - 5.0x)
+            attackMultiplier: 1.0,   // ⚔️ Tăng sát thương (1.0x - 5.0x)
+            freeCraft: false,        // 🔓 Chế tạo & Mở khóa không cần nguyên liệu (Free Craft)
+            brightShadow: true       // 💡 Làm sáng toàn bộ Hành Tinh Bóng Tối (Full Brightness)
         },
 
         // 🚀 SĂN BOSS & DU HÀNH XUYÊN HÀNH TINH
         bossHopper: {
             enabled: false,
-            waitLootSeconds: 6,
+            waitLootSeconds: 5,
             planets: {
                 home: true,
                 toy: true,
@@ -128,42 +129,42 @@
             ignoreSuperBoss: true,     // Bỏ qua Boss Thế Giới
             minHpPercent: 30,          // Mức máu tối thiểu để né tránh hồi phục
             customSelect: {
-                // Boss thường theo từng hành tinh
-                bear: true,            // Mầm Xanh (HP 400)
-                boar: true,            // Mầm Xanh (HP 300)
-                robot: true,           // Đồ Chơi (HP 800)
-                cake: true,            // Kẹo Ngọt (HP 900)
-                gingerbread: true,     // Kẹo Ngọt (HP 850)
-                jellyqueen: true,      // Kẹo Ngọt (HP 950)
-                gorilla: true,         // Rừng Rậm (HP 1000)
-                yeti: true,            // Băng Giá (HP 1100)
-                mammoth: true,         // Băng Giá (HP 1200)
-                frostowl: true,        // Băng Giá (HP 1050)
-                leviathan: true,       // Đại Dương (HP 1300)
-                golem: true,           // Dung Nham (HP 1400)
-                dragon: true,          // Dung Nham (HP 1500)
-                phoenix: true,         // Mây Trời (HP 1600)
-                shadowlord: true,      // Bóng Tối (HP 1800)
+                bear: true,
+                boar: true,
+                robot: true,
+                cake: true,
+                gingerbread: true,
+                jellyqueen: true,
+                gorilla: true,
+                yeti: true,
+                mammoth: true,
+                frostowl: true,
+                leviathan: true,
+                golem: true,
+                dragon: true,
+                phoenix: true,
+                shadowlord: true,
 
-                // Boss Titan (Mặc định tắt để tránh bị hạ gục)
-                titan_turtle: false,   // Rùa Núi (HP 1500)
-                titan_hydra: false,    // Mãng Xà 3 Đầu (HP 1600)
-                titan_clock: false,    // Nhện Đồng Hồ (HP 1500)
-                titan_flower: false,   // Hoa Tử Thần (HP 1650)
-                titan_crystal: false,  // Nữ Vương Băng (HP 1700)
-                titan_kraken: false,   // Kraken Vực Thẳm (HP 1750)
-                titan_scorpion: false, // Bọ Cạp Hỏa Ngục (HP 1800)
-                titan_whale: false     // Cá Voi Mây (HP 1850)
+                // Titan Bosses
+                titan_turtle: false,
+                titan_hydra: false,
+                titan_clock: false,
+                titan_flower: false,
+                titan_crystal: false,
+                titan_kraken: false,
+                titan_scorpion: false,
+                titan_whale: false
             }
         },
 
-        // 📜 TỰ LÀM & NHẬN THƯỞNG NHIỆM VỤ
+        // 📜 TỰ LÀM & HOÀN THÀNH NHIỆM VỤ
         quests: {
-            autoClaimDaily: true,
-            autoClaimWeekly: true,
-            autoClaimBounty: true,
-            autoClaimStory: true,
-            autoClaimPass: true
+            autoDoQuests: true,        // Tự động thực hiện các hành động làm nhiệm vụ
+            autoClaimDaily: true,      // Tự nhận thưởng Nhiệm vụ Ngày & Rương
+            autoClaimWeekly: true,     // Tự nhận thưởng Nhiệm vụ Tuần & Rương
+            autoClaimBounty: true,     // Tự nhận thưởng Lệnh Truy Nã (Bounty)
+            autoClaimStory: true,      // Tự nhận thưởng Hành Trình (Story)
+            autoClaimPass: true        // Tự nhận toàn bộ quà Thẻ Sao (Pass)
         },
 
         // 🌾 NÔNG TRẠI
@@ -210,7 +211,7 @@
             autoStealFriend: false
         },
 
-        // UI
+        // UI Position
         pos: { top: 65, right: 20 }
     };
 
@@ -295,6 +296,12 @@
         { id: 'titan_whale', name: 'Cá Voi Thiên Không (Titan)', planet: 'sky', hp: 1850, titan: true }
     ];
 
+    const ALL_MATERIALS = [
+        'obsidian', 'firecore', 'dragonscale', 'gear', 'battery', 'amber',
+        'vine', 'coral', 'pearl', 'feather', 'shadow', 'moonstone', 'starshard',
+        'wood', 'stone', 'iron', 'gold', 'crystal', 'honey', 'worm'
+    ];
+
     const CROPS = [
         { id: 'auto', name: '🌟 Tốt nhất theo Cấp' },
         { id: 'goldcorn', name: 'Ngô Vàng (Lv13)', lvl: 13 },
@@ -325,7 +332,7 @@
         if (!G || !G.save || isHoppingPlanet) return;
         isHoppingPlanet = true;
 
-        console.log(`[Zoo Pet Auto] 🚀 Du hành tới hành tinh: ${targetPlanet}`);
+        console.log(`[Zoo Pet Auto] 🚀 Đang du hành tới hành tinh: ${targetPlanet}`);
         try {
             sessionStorage.setItem('zp-flight', JSON.stringify({ to: targetPlanet, t: Date.now() }));
         } catch (e) {}
@@ -338,7 +345,10 @@
             try { await G.cloud.flushNow(); } catch (e) {}
         }
         G.noSave = true;
-        location.href = location.pathname;
+
+        setTimeout(() => {
+            location.href = location.pathname;
+        }, 300);
     }
 
     function isBossValidTarget(m) {
@@ -378,7 +388,7 @@
             const bName = b.def?.name || b.type || 'Boss';
             const hpPercent = Math.round((b.hp / (b.maxHp || b.hp)) * 100);
             if (statusEl) {
-                statusEl.innerHTML = `⚔️ Đang săn: <b>${bName}</b> (${hpPercent}% HP)`;
+                statusEl.innerHTML = `⚔️ Đang săn: <b>${bName}</b> (${hpPercent}% HP) tại ${PLANETS[currentPlanet]?.name || currentPlanet}`;
                 statusEl.style.color = '#dc2626';
             }
             return;
@@ -386,7 +396,7 @@
 
         // Không còn Boss hợp lệ trên hành tinh hiện tại
         if (statusEl) {
-            statusEl.innerHTML = `✅ Đã diệt sạch Boss hành tinh này!`;
+            statusEl.innerHTML = `✅ Đã diệt sạch Boss tại ${PLANETS[currentPlanet]?.name || currentPlanet}!`;
             statusEl.style.color = '#16a34a';
         }
 
@@ -401,7 +411,7 @@
         const elapsed = (Date.now() - lastBossClearedTime) / 1000;
         if (elapsed < CFG.bossHopper.waitLootSeconds) {
             if (statusEl) {
-                statusEl.innerHTML = `🧲 Đang nhặt đồ... Chuyển hành tinh sau: <b>${Math.ceil(CFG.bossHopper.waitLootSeconds - elapsed)}s</b>`;
+                statusEl.innerHTML = `🧲 Đang hút đồ... Chuyển map sau: <b>${Math.ceil(CFG.bossHopper.waitLootSeconds - elapsed)}s</b>`;
                 statusEl.style.color = '#0284c7';
             }
             return;
@@ -409,7 +419,7 @@
 
         // Chọn hành tinh kế tiếp đã mở khóa
         const planetKeys = ['toy', 'candy', 'jungle', 'ice', 'ocean', 'lava', 'sky', 'shadow', 'home'];
-        const validPlanets = planetKeys.filter(p => CFG.bossHopper.planets[p] && playerLvl >= PLANET_DATA[p].lvl);
+        const validPlanets = planetKeys.filter(p => CFG.bossHopper.planets[p] && playerLvl >= (PLANETS[p]?.lvl || 1));
 
         if (validPlanets.length === 0) return;
 
@@ -440,7 +450,7 @@
         const curHp = player.hp || 100;
         const hpPercent = (curHp / maxHp) * 100;
 
-        if (hpPercent < CFG.bossFilter.minHpPercent) {
+        if (hpPercent < CFG.bossFilter.minHpPercent && (!CFG.cheats || !CFG.cheats.godMode)) {
             const nearestThreat = aliveMobs.find(e => e.pos && e.pos.distanceTo(player.pos) < 10);
             if (nearestThreat) {
                 const retreatDir = player.pos.clone().sub(nearestThreat.pos).normalize();
@@ -505,10 +515,64 @@
         }
     }
 
-    // --- MODULE 3: TỰ LÀM & NHẬN THƯỞNG NHIỆM VỤ (QUESTS & BOUNTY) ---
+    // --- MODULE 3: TỰ LÀM & HOÀN THÀNH NHIỆM VỤ (SMART QUEST BOT & INSTANT CLAIM) ---
     let lastQuestCheck = 0;
+
+    function instantCompleteAllQuests() {
+        if (!G || !G.quests) return;
+        const qSys = G.quests;
+
+        try {
+            // 1. Hoàn thành Nhiệm Vụ Ngày
+            if (G.save?.quests?.list) {
+                G.save.quests.list.forEach((q, idx) => {
+                    q.p = q.n;
+                    q.claimed = false;
+                    if (typeof qSys.claim === 'function') qSys.claim(idx);
+                });
+                if (typeof qSys.claimAll === 'function') qSys.claimAll();
+            }
+
+            // 2. Hoàn thành Nhiệm Vụ Tuần
+            if (G.save?.week?.list) {
+                G.save.week.list.forEach((w, idx) => {
+                    w.p = w.n;
+                    w.claimed = false;
+                    if (typeof qSys.claimWeek === 'function') qSys.claimWeek(idx);
+                });
+                if (typeof qSys.claimWeekChest === 'function') qSys.claimWeekChest();
+            }
+
+            // 3. Hoàn thành Lệnh Truy Nã (Bounty)
+            if (typeof qSys.bounty === 'function') {
+                const b = qSys.bounty();
+                if (b) {
+                    b.p = b.n;
+                    b.claimed = false;
+                    if (typeof qSys.claimBounty === 'function') qSys.claimBounty();
+                }
+            }
+
+            // 4. Hoàn thành Hành Trình (Story)
+            if (typeof qSys.claimStory === 'function') {
+                qSys.claimStory();
+            }
+
+            // 5. Nhận Thẻ Sao (Pass)
+            if (typeof qSys.claimPassAll === 'function') {
+                qSys.claimPassAll();
+            }
+
+            stats.questsClaimed += 10;
+            updateStatUI();
+            if (G.ui?.toast) G.ui.toast(`🎉 <b>Đã hoàn thành và nhận thưởng 100% Nhiệm vụ!</b>`, 3);
+        } catch (e) {
+            console.warn('[Zoo Pet Auto] Lỗi khi instant complete quests:', e);
+        }
+    }
+
     function runQuestsEngine() {
-        if (!G || !G.quests || Date.now() - lastQuestCheck < 2500) return;
+        if (!G || !G.quests || Date.now() - lastQuestCheck < 2000) return;
         lastQuestCheck = Date.now();
 
         const qSys = G.quests;
@@ -516,6 +580,16 @@
             qSys.refreshDay?.();
             qSys.refreshWeek?.();
             qSys.refreshPass?.();
+
+            // Auto Do Quests (Tự động thúc đẩy tiến độ nhiệm vụ)
+            if (CFG.quests.autoDoQuests && typeof qSys.track === 'function') {
+                qSys.track('harvest', 5);
+                qSys.track('plant', 5);
+                qSys.track('kill', 2);
+                qSys.track('fish', 2);
+                qSys.track('water', 3);
+                qSys.track('cook', 2);
+            }
 
             // 1. Nhận thưởng Nhiệm Vụ Ngày
             if (CFG.quests.autoClaimDaily && G.save?.quests?.list) {
@@ -570,9 +644,7 @@
             if (CFG.quests.autoClaimPass && typeof qSys.claimPassAll === 'function') {
                 qSys.claimPassAll();
             }
-        } catch (e) {
-            // Safe ignore
-        }
+        } catch (e) {}
     }
 
     // --- MODULE 4: AUTO NÔNG TRẠI ---
@@ -664,7 +736,7 @@
             fishNavigating = false;
             fishCastCooldown = Date.now() + 1500;
 
-            // ⚡ PRO CHEAT: Câu cá siêu tốc 0.1s (Cá cắn câu tức thì & kéo lên ngay)
+            // ⚡ PRO CHEAT: Câu cá siêu tốc 0.1s
             if (CFG.cheats && CFG.cheats.ultraFishing) {
                 if (fishing.phase === 'wait' || fishing.phase === 'cast' || fishing.phase === 'nibble' || fishing.phase === 'approach') {
                     const targetFish = (fishing.fish && fishing.fish.length > 0) ? fishing.fish[0] : (typeof fishing.addFish === 'function' && fishing.w ? fishing.addFish(fishing.w) : null);
@@ -687,7 +759,7 @@
                 return;
             }
 
-            // 1. Cá cắn câu -> Giật cần ngay lập tức
+            // 1. Cá cắn câu -> Giật cần ngay
             if (fishing.phase === 'bite') {
                 if (typeof fishing.hook === 'function') fishing.hook();
                 return;
@@ -703,7 +775,6 @@
                         updateStatUI();
                     }
                 } else {
-                    // Chế độ Chuẩn xác: Giữ lực căng dây tối ưu (40% - 68%) không bao giờ đứt
                     if (fishing.tension > 0.68) {
                         fishing.release();
                     } else if (fishing.tension < 0.42) {
@@ -730,10 +801,9 @@
             }
         }
 
-        // 2. Tìm điểm câu / hồ nước gần nhất (Hỗ trợ cả Ocean Planet rạn san hô, Hồ Mầm Xanh, Băng Giá, Kẹo Ngọt, Dung Nham)
+        // 2. Tìm điểm câu / hồ nước gần nhất (Hỗ trợ Đại Dương, Mầm Xanh, Băng Giá, Kẹo Ngọt, Dung Nham...)
         let watersList = G.world?.waters || [];
         if (watersList.length === 0 && G.world?.waterAt) {
-            // Fallback nếu map không có list waters tường minh
             watersList = [{ x: player.pos.x + 3, z: player.pos.z + 3, r: 4, kind: G.world.planet || 'lake' }];
         }
 
@@ -750,7 +820,6 @@
             }
 
             if (nearestWater) {
-                // Tính toán vị trí đứng câu (shore) và vị trí quăng mồi (cast)
                 let shorePos, castPos;
                 if (typeof fishing.plan === 'function') {
                     try {
@@ -759,7 +828,6 @@
                         shorePos = planned.shore;
                         castPos = planned.cast;
                     } catch (e) {
-                        // Fallback
                         const angle = Math.atan2(nearestWater.z - player.pos.z, nearestWater.x - player.pos.x);
                         shorePos = new Vector3(nearestWater.x - Math.cos(angle) * (nearestWater.r + 0.8), 0, nearestWater.z - Math.sin(angle) * (nearestWater.r + 0.8));
                         castPos = new Vector3(nearestWater.x + Math.cos(angle) * (nearestWater.r * 0.4), 0, nearestWater.z + Math.sin(angle) * (nearestWater.r * 0.4));
@@ -772,14 +840,12 @@
 
                 const distToShore = Math.hypot(player.pos.x - shorePos.x, player.pos.z - shorePos.z);
 
-                // Nếu còn cách xa bờ/điểm câu -> Tự động di chuyển tới điểm câu
                 if (distToShore > 2.6) {
                     fishNavigating = true;
                     player.moveTo(shorePos);
                     return;
                 }
 
-                // Khi đã tới gần mép nước / rạn san hô -> Dừng bước và quăng câu
                 if (fishNavigating) {
                     player.target = null;
                     fishNavigating = false;
@@ -795,7 +861,7 @@
         }
     }
 
-    // --- MODULE 6: AUTO LOOT & UTILS ---
+    // --- MODULE 6: AUTO LOOT & TÌM KIẾM TÀI NGUYÊN ---
     function runLootAndUtilsEngine() {
         if (!G || !G.player) return;
         const player = G.player;
@@ -806,13 +872,13 @@
             else if (typeof player.revive === 'function') player.revive();
         }
 
-        // Magnet Loot
+        // Magnet Loot & Auto Collect
         if (CFG.utils.magnetLoot && G.drops) {
             // Hũ đồ rơi
             if (G.drops.bags?.length > 0) {
                 for (const bag of [...G.drops.bags]) {
                     const dist = Math.hypot(bag.x - player.pos.x, bag.z - player.pos.z);
-                    if (dist < 3.5) {
+                    if (dist < 3.5 || (CFG.cheats && CFG.cheats.globalMagnet)) {
                         G.drops.pickupBag(bag);
                         stats.itemsLooted++;
                         updateStatUI();
@@ -824,9 +890,9 @@
                 for (const item of G.drops.items) {
                     if (!item.obj) continue;
                     const dist = Math.hypot(item.obj.position.x - player.pos.x, item.obj.position.z - player.pos.z);
-                    if (dist < (CFG.utils.lootRadius || 40)) {
-                        item.obj.position.x += (player.pos.x - item.obj.position.x) * 0.35;
-                        item.obj.position.z += (player.pos.z - item.obj.position.z) * 0.35;
+                    if (dist < (CFG.utils.lootRadius || 40) || (CFG.cheats && CFG.cheats.globalMagnet)) {
+                        item.obj.position.x += (player.pos.x - item.obj.position.x) * 0.4;
+                        item.obj.position.z += (player.pos.z - item.obj.position.z) * 0.4;
                     }
                 }
             }
@@ -839,11 +905,29 @@
         }
     }
 
-    // ==========================================
-    // 5. MASTER TICK (CHẠY ĐƯỢC CẢ ẨN NỀN)
-    // ==========================================
+    // --- MODULE 7: PRO CHEATS & VIP HACKS ---
+    function giveFreeMaterials() {
+        if (!G || !G.bag) return;
+        try {
+            ALL_MATERIALS.forEach(mat => {
+                if (typeof G.bag.add === 'function') {
+                    G.bag.add(mat, 50);
+                } else if (G.save?.inv) {
+                    G.save.inv[mat] = (G.save.inv[mat] || 0) + 50;
+                }
+            });
+            if (G.save) {
+                G.save.energy = (G.save.energy || 0) + 50000;
+                G.save.gold = (G.save.gold || 0) + 50000;
+                G.save.gems = (G.save.gems || 0) + 500;
+            }
+            if (typeof G.persist === 'function') G.persist();
+            if (G.ui?.toast) G.ui.toast(`🎁 <b>Đã nhận x50 Trọn bộ Nguyên liệu hiếm & +50.000 Năng lượng!</b>`, 3);
+        } catch (e) {
+            console.warn('[Zoo Pet Auto] Lỗi khi nhận nguyên liệu:', e);
+        }
+    }
 
-    // --- MODULE 7: PRO CHEATS & HACKS ENGINE ---
     function runCheatsEngine() {
         if (!G || !G.player) return;
         const player = G.player;
@@ -855,7 +939,7 @@
 
         // 2. Chế độ Bất Tử (God Mode)
         if (CFG.cheats && CFG.cheats.godMode && player.alive) {
-            player.hp = player.maxHp;
+            player.hp = player.maxHp || 100;
             player.invuln = 999999;
             player.burnUntil = 0;
             player.stunUntil = 0;
@@ -879,7 +963,6 @@
             player.buffs = player.buffs || {};
             player.buffs.magnet = { v: 999, until: player.time + 10 };
 
-            // Tự động thu thập mọi hũ đồ rơi khắp map
             if (G.drops && G.drops.bags && G.drops.bags.length > 0) {
                 for (const bag of [...G.drops.bags]) {
                     G.drops.pickupBag(bag);
@@ -888,8 +971,44 @@
                 }
             }
         }
+
+        // 6. Làm Sáng Toàn Bản Đồ Hành Tinh Bóng Tối (Bright Shadow Planet)
+        if (CFG.cheats && CFG.cheats.brightShadow) {
+            const darkEl = document.getElementById('dark2');
+            if (darkEl) darkEl.style.display = 'none';
+
+            if (G.scene?.fog) {
+                G.scene.fog.far = 9999;
+                G.scene.fog.near = 999;
+            }
+            if (G.planet) {
+                G.planet.revealed = () => true;
+                G.planet.inLight = () => true;
+            }
+            player.buffs = player.buffs || {};
+            player.buffs.light = { v: 1, until: Infinity };
+        }
+
+        // 7. Chế Tạo & Mở Khóa Không Cần Nguyên Liệu (Free Craft)
+        if (CFG.cheats && CFG.cheats.freeCraft && G.bag) {
+            if (!G.bag.__orig_count) {
+                G.bag.__orig_count = G.bag.count;
+                G.bag.count = function (id) {
+                    return 999;
+                };
+            }
+            if (G.save) {
+                G.save.energy = Math.max(G.save.energy || 0, 99999);
+            }
+        } else if (G.bag && G.bag.__orig_count && (!CFG.cheats || !CFG.cheats.freeCraft)) {
+            G.bag.count = G.bag.__orig_count;
+            delete G.bag.__orig_count;
+        }
     }
 
+    // ==========================================
+    // 5. MASTER TICK (CHẠY ĐƯỢC CẢ ẨN NỀN)
+    // ==========================================
     function masterTick() {
         G = getGameInstance();
         if (!G || !G.player || !G.save) return;
@@ -927,7 +1046,7 @@
                 position: fixed;
                 top: ${CFG.pos.top}px;
                 right: ${CFG.pos.right}px;
-                width: 360px;
+                width: 370px;
                 max-height: 88vh;
                 background: #ffffff;
                 border: 1px solid #bfdbfe;
@@ -1075,6 +1194,23 @@
                 outline: none;
             }
 
+            .zp-action-btn {
+                background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+                color: #ffffff;
+                border: none;
+                border-radius: 8px;
+                padding: 8px 12px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+            }
+            .zp-action-btn:hover { background: linear-gradient(135deg, #0369a1 0%, #075985 100%); }
+
             .zp-card-box {
                 background: #f0fdf4;
                 border: 1px solid #bbf7d0;
@@ -1150,7 +1286,7 @@
             <div class="zp-header" id="zp-header-drag">
                 <div class="zp-title">
                     <span class="zp-status-dot"></span>
-                    <span>Zoo Pet Auto Pro v2.3</span>
+                    <span>Zoo Pet Auto Pro v2.4</span>
                 </div>
                 <div class="zp-btn-group">
                     <button class="zp-icon-btn" id="zp-btn-min" title="Thu nhỏ">_</button>
@@ -1194,6 +1330,32 @@
                             <span class="zp-slider"></span>
                         </label>
                     </div>
+
+                    <div class="zp-row" style="background:#fdf2f8;padding:6px 8px;border-radius:8px;border:1px solid #fbcfe8">
+                        <div>
+                            <b style="color:#db2777">🔓 Chế Tạo Không Cần Nguyên Liệu (Free Craft)</b>
+                            <div style="font-size:10px;color:#64748b">Mở khóa chế tạo, rèn đồ, ấp rồng dù thiếu nguyên liệu</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-cheat-freecraft" ${CFG.cheats && CFG.cheats.freeCraft ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="zp-row" style="background:#fefce8;padding:6px 8px;border-radius:8px;border:1px solid #fef08a">
+                        <div>
+                            <b style="color:#ca8a04">💡 Làm Sáng Hành Tinh Bóng Tối</b>
+                            <div style="font-size:10px;color:#64748b">Tắt màn đen & sương mù, hiện rõ quái và tự hồi máu</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-cheat-bright" ${CFG.cheats && CFG.cheats.brightShadow ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+
+                    <button class="zp-action-btn" id="zp-btn-give-mats" style="background:linear-gradient(135deg, #8b5cf6, #6d28d9)">
+                        🎁 Tự Nhận x50 Trọn Bộ Nguyên Liệu Hiếm
+                    </button>
 
                     <div class="zp-row" style="background:#faf5ff;padding:6px 8px;border-radius:8px;border:1px solid #e9d5ff">
                         <div>
@@ -1265,8 +1427,8 @@
                     <div class="zp-row" style="margin-top:4px;">
                         <span>Thời gian nhặt đồ trước khi chuyển map:</span>
                         <select class="zp-select" id="cfg-wait-loot">
-                            <option value="4" ${CFG.bossHopper.waitLootSeconds === 4 ? 'selected' : ''}>4 giây</option>
-                            <option value="6" ${CFG.bossHopper.waitLootSeconds === 6 ? 'selected' : ''}>6 giây</option>
+                            <option value="3" ${CFG.bossHopper.waitLootSeconds === 3 ? 'selected' : ''}>3 giây</option>
+                            <option value="5" ${CFG.bossHopper.waitLootSeconds === 5 ? 'selected' : ''}>5 giây</option>
                             <option value="8" ${CFG.bossHopper.waitLootSeconds === 8 ? 'selected' : ''}>8 giây</option>
                             <option value="12" ${CFG.bossHopper.waitLootSeconds === 12 ? 'selected' : ''}>12 giây</option>
                         </select>
@@ -1309,6 +1471,17 @@
 
                 <!-- TAB 3: NHIỆM VỤ -->
                 <div class="zp-tab-content" data-tab-content="quests">
+                    <button class="zp-action-btn" id="zp-btn-instant-quests" style="background:linear-gradient(135deg, #16a34a, #15803d)">
+                        ⚡ Hoàn Thành & Nhận Hết Quà Nhiệm Vụ Ngay
+                    </button>
+
+                    <div class="zp-row">
+                        <span>🤖 Tự động thực hiện các mục nhiệm vụ</span>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-q-autodo" ${CFG.quests.autoDoQuests ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
                     <div class="zp-row">
                         <span>📜 Tự nhận thưởng Nhiệm vụ Ngày & Rương</span>
                         <label class="zp-switch">
@@ -1513,14 +1686,18 @@
         // Cheats
         bindChk('cfg-cheat-cd', v => CFG.cheats.noCooldown = v);
         bindChk('cfg-cheat-god', v => CFG.cheats.godMode = v);
+        bindChk('cfg-cheat-freecraft', v => CFG.cheats.freeCraft = v);
+        bindChk('cfg-cheat-bright', v => CFG.cheats.brightShadow = v);
         bindChk('cfg-cheat-fish', v => CFG.cheats.ultraFishing = v);
         bindChk('cfg-cheat-mag', v => CFG.cheats.globalMagnet = v);
         bindVal('cfg-cheat-speed', v => CFG.cheats.speedBoost = Number(v) || 1.0);
         bindVal('cfg-cheat-atk', v => CFG.cheats.attackMultiplier = Number(v) || 1.0);
 
+        document.getElementById('zp-btn-give-mats')?.addEventListener('click', giveFreeMaterials);
+
         // Boss & Planets
         bindChk('cfg-boss-hopper', v => CFG.bossHopper.enabled = v);
-        bindVal('cfg-wait-loot', v => CFG.bossHopper.waitLootSeconds = Number(v) || 6);
+        bindVal('cfg-wait-loot', v => CFG.bossHopper.waitLootSeconds = Number(v) || 5);
         bindChk('cfg-ignore-titans', v => CFG.bossFilter.ignoreTitans = v);
         bindVal('cfg-min-hp', v => CFG.bossFilter.minHpPercent = Number(v) || 30);
 
@@ -1539,11 +1716,13 @@
         });
 
         // Quests
+        bindChk('cfg-q-autodo', v => CFG.quests.autoDoQuests = v);
         bindChk('cfg-q-daily', v => CFG.quests.autoClaimDaily = v);
         bindChk('cfg-q-week', v => CFG.quests.autoClaimWeekly = v);
         bindChk('cfg-q-bounty', v => CFG.quests.autoClaimBounty = v);
         bindChk('cfg-q-story', v => CFG.quests.autoClaimStory = v);
         bindChk('cfg-q-pass', v => CFG.quests.autoClaimPass = v);
+        document.getElementById('zp-btn-instant-quests')?.addEventListener('click', instantCompleteAllQuests);
 
         // Farm
         bindChk('cfg-farm-harvest', v => CFG.farm.harvest = v);

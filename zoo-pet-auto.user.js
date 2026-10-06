@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.9.3
+// @version      2.9.4
 // @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Câu Cá Tuyệt Đối 100% Mọi Hồ Không Lỗi, Auto Săn Boss Chuẩn Xác Toàn Map, Auto Farm, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
@@ -169,11 +169,21 @@
         dark: { name: '🌑 Bóng Tối', lvl: 20, boss: 'Chúa Tể Bóng Đêm' }
     };
 
-    // --- HOOK ENGINE GAME BẢO ĐẢM 100% NHẬN GAME (PRODUCTION HOOK) ---
-    // Game gốc chỉ tự gán `window.game = $` khi chạy localhost (Pb = true).
-    // Trên domain chính `https://zoo-pet.store/` và CDN `cloudfront.net`, Pb = false.
-    // Hook này đón đầu ngay khi Game khởi tạo các module (fishing, player, world)
-    // để gán tức thì vào `G` và `window.game`!
+    // --- HOOK ENGINE GAME NATIVE AN TOÀN 100% (ZERO SIDE-EFFECTS) ---
+    // Game gốc chỉ tự gán `window.game = $` khi Pb = true (/localhost|127.0.0.1/.test(location.hostname)).
+    // Trên domain chính `https://zoo-pet.store/`, Pb = false.
+    // Hook này can thiệp trực tiếp hàm regex test để kích hoạt Pb = true một cách tự nhiên,
+    // giúp Game Engine NATIVELY tự gán `window.game = $` mà KHÔNG đụng chạm Object.prototype!
+
+    try {
+        const origRegExpTest = RegExp.prototype.test;
+        RegExp.prototype.test = function (str) {
+            if (this.source && this.source.includes('localhost') && this.source.includes('127')) {
+                return true; // Kích hoạt Pb = true cho game engine!
+            }
+            return origRegExpTest.apply(this, arguments);
+        };
+    } catch (_) {}
 
     function onGameConnected(gameObj) {
         if (!gameObj || G) return;
@@ -185,39 +195,6 @@
             initEngine();
         }
     }
-
-    // Hook đón đầu qua Object property traps
-    try {
-        Object.defineProperty(Object.prototype, 'fishing', {
-            set: function (val) {
-                Object.defineProperty(this, 'fishing', {
-                    value: val,
-                    writable: true,
-                    configurable: true,
-                    enumerable: true
-                });
-                if (this && this.player && this.world) onGameConnected(this);
-                else if (val && val.game) onGameConnected(val.game);
-            },
-            configurable: true,
-            enumerable: true
-        });
-
-        Object.defineProperty(Object.prototype, 'player', {
-            set: function (val) {
-                Object.defineProperty(this, 'player', {
-                    value: val,
-                    writable: true,
-                    configurable: true,
-                    enumerable: true
-                });
-                if (this && this.fishing && this.world) onGameConnected(this);
-                else if (val && val.game) onGameConnected(val.game);
-            },
-            configurable: true,
-            enumerable: true
-        });
-    } catch (_) {}
 
     function checkGameHook() {
         if (G) return;

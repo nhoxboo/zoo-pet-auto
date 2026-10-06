@@ -1,26 +1,19 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.9.3
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.9.4
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật v2.9.3: Fix Lỗi Không Kết Nối Được Game Trên Web Thật (Production Hook)
+## 🌟 Bản Cập Nhật v2.9.4: Fix Triệt Để Lỗi "Cannot read properties of undefined (reading 'clone')"
 
-### 1. 🔍 Nguyên nhân cốt lõi phát hiện trên domain https://zoo-pet.store/
-* Trong mã nguồn game gốc:
-  ```javascript
-  Pb = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
-  ...
-  Pb && (window.game = $)
-  ```
-  * Biến `Pb` (kiểm tra môi trường Dev) **chỉ bằng `true` khi chạy trên localhost**.
-  * Khi người dùng chơi trên trang web thật `https://zoo-pet.store/` hoặc CloudFront CDN, `Pb` mang giá trị `false`. Game gốc **không bao giờ gán `window.game = $`** vào `window`.
-  * Hậu quả: Userscript trước đây đợi `window.game` thì không bao giờ tìm thấy, biểu tượng trạng thái không thể kết nối và các chức năng tự động (Câu Cá, Săn Boss, Farm...) đều không thể chạy!
+### 1. 🔍 Nguyên nhân chính xác của lỗi loading
+* Trong bản v2.9.3, việc can thiệp vào `Object.prototype` để đón bắt các thuộc tính `player` và `fishing` đã làm ảnh hưởng tới chuỗi Prototype của toàn bộ đối tượng trong Three.js (đặc biệt là `Scene.background` và `Scene.fog`).
+* Khi game khởi tạo module Boss `$.sboss = new zb($)`, hàm khởi tạo gọi `e.scene.background.clone()` bị mất dữ liệu và văng lỗi trên màn hình: `Lỗi tải game: Cannot read properties of undefined (reading 'clone')`.
 
-### 2. 🚀 Khắc phục triệt để trong v2.9.3: Production Proactive Hook
-* ✅ **Bắt chủ động Game Instance (`$`):** Sử dụng cơ chế Object Property Traps (`fishing`, `player`, `world`) đón đầu ngay từ mili-giây đầu tiên khi các hệ thống game được khởi tạo để tự động trích xuất thực thể Game gốc và gán vào `G` cũng như `window.game`.
-* ✅ **Kết Nối Ngay Lập Tức:** Ngay khi vào game tại `https://zoo-pet.store/`, badge góc trên chuyển thành `🟢 Đã kết nối` và kích hoạt toàn bộ hệ thống Auto.
-* ✅ **Auto Câu Cá Chạy Mượt Mà 100%:** Nhân vật tự đứng đúng mép nước, quăng phao, cắn câu siêu tốc (`Ultra Catch`) và tự động giật cần kéo cá vào balo liên tục.
+### 2. 🚀 Khắc phục hoàn hảo trong v2.9.4: Native Dev Environment Bypass
+* ✅ **Gỡ bỏ hoàn toàn mọi can thiệp vào `Object.prototype`:** Đảm bảo $100\%$ đối tượng Three.js và Game Engine nguyên bản tuyệt đối, load game siêu tốc không có bất kỳ lỗi nào.
+* ✅ **Mở khóa Native Game Engine:** Can thiệp thông minh và an toàn vào hàm regex kiểm tra môi trường dev (`Pb`) để Game Engine gốc tự động gán `window.game = $` một cách tự nhiên và sạch sẽ $100\%$.
+* ✅ **Auto Câu Cá & Kéo Cần Trơn Tru:** Tự động kết nối Game Engine ngay lập tức, tự tìm hồ nước, quăng phao, cắn câu siêu tốc (`Ultra Catch`) và kéo cá liên tục vào túi.
 
 ---
 

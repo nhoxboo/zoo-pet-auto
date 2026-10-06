@@ -1,64 +1,58 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.8.2
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v2.9.0
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Tính Năng Mới Bản v2.8.2
+## 🌟 Bản Cập Nhật v2.9.0: Đại Tu Toàn Diện Engine Đánh Boss, Farm & Cheats
 
-### 1. 🎣 Sửa Triệt Để Lỗi Tự Động Câu Cá (Cả Hồ Nước Thường & Hành Tinh Đại Dương)
-* **Nguyên nhân sâu xa được phát hiện:**
-  1. **Lỗi `refreshEquip()` chạy lặp vô tận:** Hàm `autoEquipRod` cũ kiểm tra biến `window.W` (vốn không tồn tại trên window do biến cục bộ), khiến tool hiểu nhầm chưa có Cần Câu và liên tục gọi `player.refreshEquip()` mỗi 100ms. Mỗi lần gọi `refreshEquip()` engine game lập tức xóa bỏ cần câu và HỦY lệnh câu cá (`fishing.cancel()`).
-  2. **Lỗi kẹt di chuyển `walkTo`:** Khi nhân vật ở cách hồ nước $> 2.5$m, hàm quăng câu liên tục tính lại tọa độ mục tiêu mỗi 100ms làm ngắt quãng bước đi của nhân vật.
-  3. **Hết cá trong hồ sau khi câu nhanh:** Khi dùng Ultra Catch câu hết cá trong hồ, hồ bị trống cá trong 15s khiến tool đứng chờ vô tận.
-* **Giải pháp hoàn thiện trong v2.8.2:**
-  * ✅ **`ensureRodEquipped()` an toàn:** Chỉ trang bị cần câu đúng 1 lần duy nhất khi `player.weapon.kind !== 'rod'`. Một khi đã cầm cần câu, tuyệt đối không chạm vào `refreshEquip()` giúp phao câu và dây câu tồn tại ổn định $100\%$.
-  * ✅ **Điều hướng mượt mà `isWalkingToWater`:** Khóa đích đến của bước đi khi đến gần hồ nước, không làm giật lag hay ngắt quãng nhân vật.
-  * ✅ **Auto Fish Respawn:** Khi hồ nước bị câu cạn sạch cá, tool tự động kích hoạt hồi sinh cá mới ngay lập tức để tiếp tục câu liên tục không bị gián đoạn.
-  * ✅ **Tương thích toàn diện:** Hoạt động hoàn hảo trên tất cả các hành tinh (Hành tinh Nhà, Đầm Lầy, Băng Giá, Rừng Rậm, Hành Tinh Đại Dương...).
+### 1. ⚔️ Khắc Phục Triệt Để Lỗi Đứng Màn Hình / Đơ Game Khi Đánh Boss
+* **Nguyên nhân cốt lõi được tìm thấy trong mã nguồn:**
+  1. **Lỗi Skill Key không hợp lệ:** Tool cũ gọi `player.useSkill('q')`, `player.useSkill('w')`, `player.useSkill('e')`, `player.useSkill('r')`. Nhưng trong engine game Zoo Pet, mảng skill nội bộ quy định là: `['spin', 'dash', 'slam', 'special']` (chứ không phải `['q', 'w', 'e', 'r']`). Việc truyền `'q'` làm `Kf['q']` trả về `undefined`, dẫn đến lỗi `TypeError: Cannot read properties of undefined (reading 'cd')` ngay trong luồng render `requestAnimationFrame`, làm **đứng hình và đóng băng hoàn toàn màn hình game**.
+  2. **Lỗi gán Target sai cấu trúc:** Tool cũ gán `player.target = { type: 'enemy', ref: target }`, trong khi game engine yêu cầu trường `target.enemy`. Khi thiếu trường này, game cố truy cập `target.enemy.alive` làm văng lỗi ngoại lệ.
+* **Giải pháp trong v2.9.0:**
+  * ✅ Chuẩn hóa toàn bộ combo kỹ năng: `'spin'` (Q - Chong Chóng), `'dash'` (W - Lướt tới), `'slam'` (E - Đấm đất), `'special'` (R - Chiêu thức vũ khí đặc biệt).
+  * ✅ Toàn bộ lệnh gọi kỹ năng được bọc lớp `try-catch` an toàn tuyệt đối, đảm bảo game luôn mượt mà 60 FPS không bao giờ bị đơ hay đứng hình khi giao chiến.
+  * ✅ Cấu trúc Target chuẩn hóa theo engine: `{ type: 'enemy', enemy: target, point: target.pos.clone(), auto: true }`.
 
-### 2. 🌟 Chế Độ "CHỈ CÂU CÁ HIẾM & HUYỀN THOẠI" (Rare & Legend Fish Hunter)
-* **Tự Động Phân Loại Cá Thông Minh:**
-  * Khi cá cắn câu, tool sẽ lập tức quét loại cá (`species` & `prize`).
-  * **Nếu là cá thường / rác** (Cá rô, cá hề, giày cũ, cá nóc, cá trê...): Tool sẽ **TỰ ĐỘNG HỦY CÂU TỨC THÌ (0.2s)** và quăng lại ngay mà không làm tốn thời gian hay hao mồi của bạn!
-  * **Chỉ kéo lên khi phát hiện:**
-    * 👑 **Cá Rồng Vàng** (`fish_golden` - Huyền Thoại, 600 Vàng, hồi 9999 HP, Buff Atk/Def/Crit/Luck).
-    * 🐋 **Cá Voi Con** (`fish_whale` - Huyền Thoại, 420 Vàng, Def +25, Regen máu).
-    * 🐙 **Bạch Tuộc Khổng Lồ** (`fish_kraken` - Huyền Thoại, 380 Vàng, Atk +35%).
-    * 🦈 **Cá Đuối Khổng Lồ** (`fish_manta` - Huyền Thoại tại Đại Dương).
-    * 🌈 **Cá Cầu Vồng** (`fish_rainbow` - Hiếm, 160 Vàng, Atk +20%).
-    * 🗡️ **Cá Kiếm** (`fish_swordfish` - Hiếm, 90 Vàng, Crit +10%).
-    * 🏮 **Cá Lồng Đèn** (`fish_angler` - Hiếm, 85 Vàng).
-    * ⚡ **Lươn Điện** (`fish_eel` - Hiếm, 70 Vàng, Tốc độ +30%).
-    * 🦈 **Cá Mập Con** (`fish_shark` - Hiếm, 65 Vàng).
-    * 🎏 **Cá Koi Rồng** (`fish_koi` - Hiếm, 45 Vàng, Luck +30%).
-    * ❄️ **Cá Chó Băng** (`fish_icepike` - Hiếm, 48 Vàng).
-    * ❓ **Bóng Cá Bí Ẩn (Mystery Fish)** & 🐳 **Cá Siêu Khổng Lồ (Giant Fish)**.
-* **🔮 Triệu Hồi Bóng Cá Bí Ẩn (Mystery Fish Summoner):** Tự động gọi bóng cá phát sáng khổng lồ bơi về phía phao mỗi lần quăng câu.
-* **🍀 Tăng Tỷ Lệ May Mắn Bắt Cá (+Luck Buff):** Tự động kích hoạt chỉ số may mắn để tỷ lệ roll ra cá huyền thoại đạt mức cao nhất.
+### 2. 👑 Nâng Cấp Bộ Nhận Diện & Tự Động Tìm Boss Toàn Bản Đồ
+* **Nhận diện Boss toàn diện:** Thuật toán `isBossEntity()` quét và nhận diện chính xác $100\%$ tất cả các loại Boss trên mọi hành tinh:
+  * 🐻 **Gấu Vua** (`bear` - Hành tinh Nhà)
+  * 🎂 **Bánh Kem Khổng Lồ** (`cake` - Hành tinh Bánh Kẹo)
+  * ❄️ **Yeti Băng Giá** & 🦣 **Voi Ma Mút Chúa** (`yeti`, `mammoth` - Hành tinh Băng)
+  * 🐉 **Rồng Nham Thạch** & 🗿 **Người Đá Magma** (`dragon`, `golem` - Hành tinh Nham Thạch)
+  * 🌳 **Cây Cổ Thụ** & 🐊 **Cá Sấu Chúa** (`treant`, `croc` - Hành tinh Đầm Lầy)
+  * 🍪 **Bánh Gừng Khổng Lồ** (`gingerbread`)
+  * 👾 **Space Colossus & Titan Bosses** (`sboss`, `titan_...`, `worldboss_...`)
+* **Auto Tìm Boss & Tiến Đánh:** Tự động định vị tọa độ Boss ở bất kỳ vị trí nào trên bản đồ, điều khiển nhân vật di chuyển thẳng tới Boss và xả sát thương liên tục.
 
-### 3. 💀 Chế Độ "CHỈ GIẾT BOSS" (Boss Only Mode)
-* Tự động bỏ qua quái nhỏ, quét toàn bản đồ và di chuyển tới tận vị trí Boss để tiêu diệt.
+### 3. 🌾 Đại Tu Hệ Thống Tự Động Nông Trại (Auto Farm)
+* **Sửa đúng chữ ký hàm engine:**
+  * Sửa hàm thu hoạch thành `farm.harvest(plot)` dựa trên trạng thái `farm.ready(plot)`.
+  * Sửa hàm gieo hạt thành `farm.plant(plot, cropName)` tự động chọn hạt giống cấp cao nhất có trong túi đồ (`radish`, `carrot`, `pumpkin`, `mint`, `chili`, `candy`, `bean`, `star`, `berry`, `coffee`, `moonflower`...).
 
-### 4. 🛡️ Ticker Lai Chống Đứng Game Khi Đổi Tab
-* Tự động chuyển đổi giữa rAF và Timer nền giúp game và Auto chạy xuyên suốt khi hạ tab.
+### 4. 🎣 Hoàn Thiện Tự Động Câu Cá Mọi Hồ & Biển Đại Dương
+* `ensureRodEquipped()` an toàn, không còn vòng lặp hủy cần câu.
+* Quăng câu tự động, hút cá siêu tốc, lọc cá Hiếm & Huyền Thoại chuẩn xác.
+
+### 5. 🧲 Nam Châm Hút Đồ Chuẩn 3D (Loot Magnet)
+* Khắc phục cấu trúc `obj.position` của các túi đồ (`drops.bags`) và vật phẩm rơi (`drops.items`), hút ngay lập tức vào túi đồ người chơi khi đánh quái và diệt boss.
 
 ---
 
-## 🛠️ Trọn Bộ Tính Năng Khác
-* **⚡ Hồi chiêu 0s (No Cooldown):** Xả 4 chiêu Q-W-E-R và chong chóng liên tục không ngừng.
-* **🛡️ Chế độ Bất Tử (God Mode):** Khóa máu $100\%$, miễn nhiễm mọi sát thương và debuff.
-* **🎣 Câu Cá Siêu Tốc 0.1s (Ultra Fishing):** Hỗ trợ toàn bộ các map (bao gồm rạn san hô Hành Tinh Đại Dương), cá cắn câu và kéo lên tức thì.
-* **💡 Làm Sáng Hành Tinh Bóng Tối:** Ẩn màn che `#dark2`, tắt sương mù, bật tầm nhìn $100\%$ quái vật và tự hồi máu.
-* **🏃 Tăng Tốc Chạy (1.0x - 2.5x) & ⚔️ Tăng Sát Thương (1.0x - 5.0x).**
-* **🌾 Auto Nông Trại:** Tự thu hoạch cây chín, gieo hạt theo cấp, thu sản phẩm thú nuôi.
-* **📜 Auto Nhiệm Vụ 100% An Toàn:** Tự động hoàn thành nhiệm vụ theo hành động thật, tự nhận thưởng Daily, Weekly, Bounty không bị báo lỗi số bất thường.
-* **🚀 Chuyển Hành Tinh Nhanh (1-Click Fast Travel):** 9 nút bấm hành tinh + menu chọn nhanh + nút "Bay Ngay".
-* **🚀 Auto Du Hành Săn Boss Liên Hành Tinh:** Chỉ chuyển map khi ĐÃ TIÊU DIỆT XONG BOSS và nhặt hết quà.
+## 🛠️ Danh Sách Tính Năng Tổng Thể
+* **⚡ Hồi chiêu 0s (No Cooldown):** Xả chiêu liên tục không chờ thời gian hồi.
+* **🛡️ Chế độ Bất Tử (God Mode):** Miễn nhiễm sát thương.
+* **⚔️ Tăng Sát Thương (Damage Multiplier):** Nhân sát thương đầu ra cực mạnh.
+* **🏃 Tăng Tốc Chạy (Speed Boost):** Di chuyển siêu tốc qua các vùng đất.
+* **💡 Sáng Bản Đồ Bóng Tối:** Xóa bỏ màn đen tối và sương mù.
+* **🎣 Câu Cá Siêu Tốc & Săn Cá Hiếm:** Lọc bỏ cá rác, săn cá Rồng Vàng, Bạch Tuộc, Cá Voi.
+* **🚀 Chuyển Hành Tinh Nhanh 1-Click:** 9 nút bấm trực quan trên menu.
+* **📜 Auto Nhiệm Vụ An Toàn:** Tự nhận thưởng Daily, Weekly, Bounty không sợ bị lỗi server.
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt & Tự Động Cập Nhật
+## 🚀 Hướng Dẫn Cài Đặt & Cập Nhật
 
 1. Cài đặt tiện ích **Tampermonkey** trên trình duyệt (Chrome, Edge, Brave, Firefox).
 2. Mở link cài đặt trực tiếp:  

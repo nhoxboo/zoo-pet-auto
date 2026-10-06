@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.8.2
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Farm, Săn Boss-Only, Săn Cá Hiếm & Huyền Thoại, Sửa Triệt Để Tự Động Câu Cá Mọi Hồ & Hành Tinh Đại Dương, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
+// @version      2.9.0
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Farm (Harvest & Replant), Săn Boss-Only Không Đứng Hình, Săn Cá Hiếm & Huyền Thoại, Sửa Triệt Để Tự Động Câu Cá Mọi Hồ, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -185,6 +185,7 @@
 
     // --- MODULE 1: CHEATS & HACKS ENGINE ---
     let origTakeDamage = null;
+    let origRollDamage = null;
     let origAimDir = null;
 
     function initCheatsEngine() {
@@ -207,16 +208,26 @@
         }
 
         // 2. TĂNG SÁT THƯƠNG (Damage Multiplier)
-        if (!origAimDir && typeof p.aimDir === 'function') {
-            origAimDir = p.aimDir;
+        if (!origRollDamage && typeof p.rollDamage === 'function') {
+            origRollDamage = p.rollDamage;
+            p.rollDamage = function (e = 1) {
+                const res = origRollDamage.call(this, e);
+                const mult = (CFG.cheats.damageMult && CFG.cheats.damageMult > 1) ? CFG.cheats.damageMult : 1;
+                if (mult > 1 && res && typeof res.dmg === 'number') {
+                    res.dmg = Math.round(res.dmg * mult);
+                }
+                return res;
+            };
         }
 
         // 3. NO COOLDOWN (Xóa hồi chiêu)
         if (CFG.cheats.noCooldown) {
             if (p.cd) {
-                for (let k in p.cd) {
-                    p.cd[k] = 0;
-                }
+                p.cd.atk = 0;
+                p.cd.spin = 0;
+                p.cd.dash = 0;
+                p.cd.slam = 0;
+                p.cd.special = 0;
             }
             if (p.skills) {
                 for (let s in p.skills) {
@@ -239,8 +250,8 @@
                 if (darkMask) darkMask.style.display = 'none';
 
                 if (G.scene && G.scene.fog) {
-                    G.scene.fog.far = 9999;
-                    G.scene.fog.near = 9999;
+                    G.scene.fog.far = 99999;
+                    G.scene.fog.near = 99999;
                 }
                 if (G.planet) {
                     G.planet.revealed = () => true;
@@ -261,156 +272,182 @@
         if (Date.now() < farmCooldown) return;
 
         const farm = G.farm;
-        const player = G.player;
         const plots = farm.plots || [];
 
-        for (let i = 0; i < plots.length; i++) {
-            const plot = plots[i];
+        for (let plot of plots) {
             if (!plot) continue;
 
-            // Thu hoạch cây chín
-            if (CFG.farm.autoHarvest && plot.crop && plot.crop.ready) {
+            // 1. Thu hoạch cây chín
+            if (CFG.farm.autoHarvest && typeof farm.ready === 'function' && farm.ready(plot)) {
                 if (typeof farm.harvest === 'function') {
-                    farm.harvest(i);
-                    stats.cropsHarvested++;
-                    updateStatsUI();
-                    farmCooldown = Date.now() + 200;
-                    return;
+                    try {
+                        farm.harvest(plot);
+                        stats.cropsHarvested++;
+                        updateStatsUI();
+                        farmCooldown = Date.now() + 150;
+                        return;
+                    } catch (_) {}
                 }
             }
 
-            // Gieo hạt nếu đất trống
-            if (CFG.farm.autoPlant && (!plot.crop || plot.crop.empty)) {
-                if (typeof farm.plant === 'function' && G.bag) {
-                    const seedId = findAvailableSeed();
-                    if (seedId) {
-                        farm.plant(i, seedId);
-                        stats.seedsPlanted++;
-                        updateStatsUI();
-                        farmCooldown = Date.now() + 200;
-                        return;
+            // 2. Gieo hạt nếu đất trống
+            if (CFG.farm.autoPlant && !plot.state) {
+                if (typeof farm.plant === 'function') {
+                    const crop = findAvailableCrop();
+                    if (crop) {
+                        try {
+                            farm.plant(plot, crop);
+                            stats.seedsPlanted++;
+                            updateStatsUI();
+                            farmCooldown = Date.now() + 150;
+                            return;
+                        } catch (_) {}
                     }
                 }
             }
         }
     }
 
-    function findAvailableSeed() {
-        if (!G || !G.bag || !G.bag.items) return null;
-        for (let item of G.bag.items) {
-            if (item && item.id && item.id.includes('seed') && item.count > 0) {
-                return item.id;
+    function findAvailableCrop() {
+        if (!G || !G.bag) return null;
+        const CROPS = ['radish', 'carrot', 'pumpkin', 'mint', 'chili', 'candy', 'bean', 'star', 'berry', 'coffee', 'moonflower'];
+        for (let crop of CROPS) {
+            const seedId = 'seed_' + crop;
+            if (typeof G.bag.count === 'function' && G.bag.count(seedId) > 0) {
+                return crop;
             }
         }
-        return 'seed_carrot';
+        return null;
     }
 
-    // --- MODULE 3: AUTO CHIẾN ĐẤU & COMBO SKILL (hỗ trợ CHỈ GIẾT BOSS) ---
+    // --- MODULE 3: AUTO CHIẾN ĐẤU & SĂN BOSS (COMBAT & BOSS ENGINE) ---
     let combatCooldown = 0;
 
-    function runCombatEngine() {
-        if (!CFG.combat.enabled || !G || !G.enemies || !G.player || !G.player.alive) return;
-        if (Date.now() < combatCooldown) return;
-
-        const player = G.player;
-        const enemies = G.enemies.list || [];
-
-        const bossOnly = !!CFG.combat.bossOnly;
-
-        // Pass 1: chỉ săn Boss trong tầm
-        let bossTarget = null;
-        let bossDist = Infinity;
-        for (const enemy of enemies) {
-            if (!isAttackable(enemy)) continue;
-            if (!enemy.boss) continue;
-            if (CFG.combat.skipTitans && isTitanBoss(enemy)) continue;
-            const d = getDistance(player.pos, enemy.pos);
-            if (d < bossDist) {
-                bossDist = d;
-                bossTarget = enemy;
-            }
-        }
-
-        let target = bossTarget;
-
-        // Pass 2: Boss-Only -> KHÔNG đánh quái nhỏ; ngược lại săn quái gần nhất
-        if (!target && !bossOnly) {
-            let minDist = CFG.combat.searchRadius || 35;
-            for (const enemy of enemies) {
-                if (!isAttackable(enemy)) continue;
-                if (CFG.combat.skipTitans && isTitanBoss(enemy)) continue;
-                const d = getDistance(player.pos, enemy.pos);
-                if (d < minDist) {
-                    minDist = d;
-                    target = enemy;
-                }
-            }
-        }
-
-        if (!target) return;
-
-        // Tiếp cận mục tiêu (auto đi tới vị trí Boss ở bất kỳ đâu trên bản đồ)
-        const dist = getDistance(player.pos, target.pos);
-        if (dist > 3.0) {
-            walkTo(target.pos);
-        } else {
-            // Đã tới nơi -> nhắm mục tiêu rồi đánh
-            if (typeof player.target !== 'undefined' && player.target) {
-                player.target = { type: 'enemy', ref: target, point: target.pos.clone() };
-            }
-            // hướng mặt về Boss (dùng cho aim/damage direction)
-            try {
-                if (typeof player.facing === 'number') {
-                    player.facing = Math.atan2(target.pos.x - player.pos.x, target.pos.z - player.pos.z);
-                }
-            } catch (_) { }
-
-            const skills = ['q', 'w', 'e', 'r', 'basic'];
-            for (const s of skills) {
-                const cdReady = !player.cd || !player.cd[s] || player.cd[s] <= 0;
-                if (s === 'basic' || (CFG.combat.useSkills && cdReady)) {
-                    if (typeof player.useSkill === 'function') {
-                        // engine: useSkill(key) -- chỉ nhận key, không nhận target
-                        player.useSkill(s);
-                    } else if (typeof player.attack === 'function') {
-                        player.attack(target);
-                    } else if (typeof player.basicAttack === 'function') {
-                        player.basicAttack(target);
-                    }
-                    break;
-                }
-            }
-        }
-
-        combatCooldown = Date.now() + 150;
-    }
-
-    // Boss "dormant"/"sleep" (worldBoss, sboss, minion) được game cho ngủ -> obj.visible=false
-    function isAttackable(enemy) {
-        if (!enemy || !enemy.alive || enemy.hp <= 0) return false;
-        if (enemy.obj && enemy.obj.visible === false) return false;
-        return true;
-    }
-
-    function walkTo(pos) {
-        const player = G.player;
-        if (!player || !pos || typeof player.moveTo !== 'function') return;
-        try {
-            // moveTo() của engine nhận Vector3 (pos.clone() có sẵn vì enemy.pos là Vector3)
-            if (typeof pos.clone === 'function') {
-                player.moveTo(pos.clone());
-                return;
-            }
-            // Dự phòng: tự tạo object có đủ interface cần thiết
-            player.moveTo({ x: pos.x || 0, y: 0, z: pos.z || 0, clone: () => ({ x: pos.x || 0, y: 0, z: pos.z || 0 }) });
-        } catch (_) { }
+    function isBossEntity(enemy) {
+        if (!enemy) return false;
+        if (enemy.boss === true) return true;
+        if (enemy.def && (enemy.def.boss || enemy.def.titan || enemy.def.sboss || enemy.def.worldBoss)) return true;
+        if (enemy.type && /boss|titan|bear|cake|yeti|dragon|golem|treant|croc|mammoth|gingerbread/i.test(enemy.type)) return true;
+        if (enemy.def && enemy.def.name && /vua|chúa|yeti|rồng|ma mút|golem|titan|khổng lồ|đại thụ/i.test(enemy.def.name)) return true;
+        return false;
     }
 
     function isTitanBoss(enemy) {
         if (!enemy || !enemy.type) return false;
         if (enemy.def && (enemy.def.sboss || enemy.def.titan || enemy.def.worldBoss)) return true;
         const TITAN_PREFIXES = ['titan_', 'colossus_', 'sb_', 'sbm_', 'worldboss_'];
-        return TITAN_PREFIXES.some(p => enemy.type.startsWith(p)) || (enemy.hp && enemy.hp > 2500 && enemy.boss);
+        return TITAN_PREFIXES.some(p => enemy.type.startsWith(p)) || (enemy.hp && enemy.hp > 2500 && isBossEntity(enemy));
+    }
+
+    function isAttackable(enemy) {
+        if (!enemy || !enemy.alive || enemy.hp <= 0) return false;
+        if (enemy.obj && enemy.obj.visible === false) return false;
+        return true;
+    }
+
+    function findBestTarget() {
+        if (!G || !G.enemies || !G.enemies.list || !G.player) return null;
+        const player = G.player;
+        const enemies = G.enemies.list;
+        const bossOnly = !!CFG.combat.bossOnly;
+
+        let bestBoss = null;
+        let minBossDist = Infinity;
+
+        let bestMob = null;
+        let minMobDist = Infinity;
+
+        for (let enemy of enemies) {
+            if (!isAttackable(enemy)) continue;
+
+            const isBoss = isBossEntity(enemy);
+            if (isBoss && CFG.combat.skipTitans && isTitanBoss(enemy)) continue;
+
+            const d = getDistance(player.pos, enemy.pos);
+
+            if (isBoss) {
+                if (d < minBossDist) {
+                    minBossDist = d;
+                    bestBoss = enemy;
+                }
+            } else if (!bossOnly) {
+                const searchRad = CFG.combat.searchRadius || 35;
+                if (d <= searchRad && d < minMobDist) {
+                    minMobDist = d;
+                    bestMob = enemy;
+                }
+            }
+        }
+
+        return bestBoss || (!bossOnly ? bestMob : null);
+    }
+
+    function runCombatEngine() {
+        if (!CFG.combat.enabled || !G || !G.enemies || !G.player || !G.player.alive) return;
+        if (Date.now() < combatCooldown) return;
+
+        const player = G.player;
+        const target = findBestTarget();
+
+        if (!target) {
+            if (player.target && player.target.type === 'enemy') {
+                player.target = null;
+            }
+            return;
+        }
+
+        const dist = getDistance(player.pos, target.pos);
+        const attackRange = (target.def ? target.def.radius : 1.2) + (player.weapon?.range || 1.2) * 1.2;
+
+        // Hướng mặt về mục tiêu
+        try {
+            player.facing = Math.atan2(target.pos.x - player.pos.x, target.pos.z - player.pos.z);
+        } catch (_) {}
+
+        // Gán target chuẩn xác cho engine game
+        player.target = { type: 'enemy', enemy: target, point: target.pos.clone(), auto: true };
+
+        if (dist > attackRange) {
+            // Ở xa -> Tự động di chuyển tới
+            walkTo(target.pos);
+        } else {
+            // Đã trong tầm đánh -> Đánh thường & xả combo skill chuẩn xác
+            try {
+                if (player.cd) player.cd.atk = 0;
+                if (typeof player.attack === 'function') {
+                    player.attack(target);
+                }
+            } catch (err) {
+                console.error('[ZooPetAuto] Lỗi attack:', err);
+            }
+
+            // Xả các chiêu thức hợp lệ trong game: spin (Q), dash (W), slam (E), special (R)
+            if (CFG.combat.useSkills) {
+                const validSkills = ['spin', 'dash', 'slam', 'special'];
+                for (let s of validSkills) {
+                    try {
+                        const cdReady = !player.cd || !player.cd[s] || player.cd[s] <= 0;
+                        if (cdReady && typeof player.useSkill === 'function') {
+                            player.useSkill(s);
+                        }
+                    } catch (_) {}
+                }
+            }
+        }
+
+        combatCooldown = Date.now() + 100;
+    }
+
+    function walkTo(pos) {
+        const player = G.player;
+        if (!player || !pos || typeof player.moveTo !== 'function') return;
+        try {
+            if (typeof pos.clone === 'function') {
+                player.moveTo(pos.clone());
+                return;
+            }
+            player.moveTo({ x: pos.x || 0, y: 0, z: pos.z || 0, clone: () => ({ x: pos.x || 0, y: 0, z: pos.z || 0 }) });
+        } catch (_) { }
     }
 
     function getDistance(p1, p2) {
@@ -454,12 +491,12 @@
 
         // 2. GIAI ĐOẠN 1: Chờ quái & Boss xuất hiện đầy đủ (Chờ tối thiểu 6s)
         if (hopperState.stage === 'WAIT_SPAWN') {
-            const activeBoss = enemies.find(e => e && e.alive && e.hp > 0 && e.boss && (!CFG.boss.skipTitans || !isTitanBoss(e)));
+            const activeBoss = enemies.find(e => isAttackable(e) && isBossEntity(e) && (!CFG.boss.skipTitans || !isTitanBoss(e)));
 
             if (activeBoss) {
                 hopperState.stage = 'FIGHTING';
                 hopperState.targetBoss = activeBoss;
-                updateHopperStatusUI(`⚔️ Phát hiện Boss: <b>${activeBoss.type || 'Boss'}</b> (HP: ${Math.round(activeBoss.hp)}). Đang tiến đánh!`);
+                updateHopperStatusUI(`⚔️ Phát hiện Boss: <b>${activeBoss.def?.name || activeBoss.type || 'Boss'}</b> (HP: ${Math.round(activeBoss.hp)}). Đang tiến đánh!`);
             } else if (timeOnPlanet >= 10) {
                 // Nếu sau 10s không có boss (ví dụ map Home hoặc Boss chưa hồi):
                 if (currentPlanet === 'home' || !PLANET_DATA[currentPlanet]?.boss || PLANET_DATA[currentPlanet]?.boss.includes('Không')) {
@@ -483,20 +520,28 @@
 
             // Kiểm tra Boss còn sống không
             if (boss && boss.alive && boss.hp > 0 && enemies.includes(boss)) {
-                // Tự động bật combat và tấn công Boss
-                if (typeof G.player.moveTo === 'function' && getDistance(G.player.pos, boss.pos) > 2.5) {
+                // Gán target chuẩn cho player
+                G.player.target = { type: 'enemy', enemy: boss, point: boss.pos.clone(), auto: true };
+
+                if (getDistance(G.player.pos, boss.pos) > 2.5) {
                     walkTo(boss.pos);
                 }
-                // engine: useSkill(key) chỉ nhận 1 tham số (không nhận target)
+
+                try {
+                    if (G.player.cd) G.player.cd.atk = 0;
+                    if (typeof G.player.attack === 'function') G.player.attack(boss);
+                } catch (_) {}
+
                 if (typeof G.player.useSkill === 'function') {
-                    G.player.useSkill('q');
-                    G.player.useSkill('w');
-                    G.player.useSkill('e');
-                    G.player.useSkill('r');
-                } else if (typeof G.player.attack === 'function') {
-                    G.player.attack(boss);
+                    const validSkills = ['spin', 'dash', 'slam', 'special'];
+                    for (let s of validSkills) {
+                        try {
+                            const cdReady = !G.player.cd || !G.player.cd[s] || G.player.cd[s] <= 0;
+                            if (cdReady) G.player.useSkill(s);
+                        } catch (_) {}
+                    }
                 }
-                updateHopperStatusUI(`⚔️ Đang tiêu diệt Boss: <b>${boss.type || 'Boss'}</b> (HP còn: ${Math.round(boss.hp)})...`);
+                updateHopperStatusUI(`⚔️ Đang tiêu diệt Boss: <b>${boss.def?.name || boss.type || 'Boss'}</b> (HP còn: ${Math.round(boss.hp)})...`);
                 return;
             } else {
                 // Boss ĐÃ CHẾT!
@@ -565,7 +610,6 @@
 
     function checkPendingQuestsForPlanet(planet) {
         if (!G || !G.quests || !G.quests.s) return false;
-        // Kiểm tra xem còn quest nào chưa nhận hoặc chưa xong không
         const list = G.quests.s.quests?.list || [];
         return list.some(q => q && q.p < q.n);
     }
@@ -867,7 +911,7 @@
 
     // --- MODULE 7: NAM CHÂM HÚT ĐỒ (GLOBAL MAGNET) ---
     function runLootVacuum() {
-        if (!G || !G.drops || !G.player) return;
+        if (!G || !G.drops || !G.player || !G.player.pos) return;
 
         const player = G.player;
         const drops = G.drops;
@@ -875,13 +919,13 @@
         // 1. Hút các túi đồ (bags)
         if (drops.bags && drops.bags.length > 0) {
             for (let bag of drops.bags) {
-                if (bag && bag.mesh) {
-                    bag.mesh.position.x = player.pos.x;
-                    bag.mesh.position.z = player.pos.z;
-                }
-                if (typeof drops.pickupBag === 'function') {
-                    drops.pickupBag(bag);
-                    stats.itemsLooted++;
+                if (bag) {
+                    if (bag.obj && bag.obj.position) {
+                        bag.obj.position.x = player.pos.x;
+                        bag.obj.position.z = player.pos.z;
+                    }
+                    bag.x = player.pos.x;
+                    bag.z = player.pos.z;
                 }
             }
         }
@@ -889,13 +933,9 @@
         // 2. Hút các vật phẩm đơn lẻ (items)
         if (drops.items && drops.items.length > 0) {
             for (let item of drops.items) {
-                if (item && item.mesh) {
-                    item.mesh.position.x = player.pos.x;
-                    item.mesh.position.z = player.pos.z;
-                }
-                if (typeof drops.pickupItem === 'function') {
-                    drops.pickupItem(item);
-                    stats.itemsLooted++;
+                if (item && item.obj && item.obj.position) {
+                    item.obj.position.x = player.pos.x;
+                    item.obj.position.z = player.pos.z;
                 }
             }
         }

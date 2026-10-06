@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      2.8.0
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Farm, Săn Boss-Only, Săn Cá Hiếm & Huyền Thoại, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
+// @version      2.8.1
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Auto Farm, Săn Boss-Only, Săn Cá Hiếm & Huyền Thoại, Fix Auto Câu Cá Hành Tinh Đại Dương, Chuyển Hành Tinh Nhanh, Smart Quests, Combat Mod, Shadow Vision, Ultra Fishing.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -594,14 +594,14 @@
         }, 500);
     }
 
-    // --- MODULE 5: AUTO CÂU CÁ & SĂN CÁ HIẾM / HUYỀN THOẠI ---
+    // --- MODULE 5: AUTO CÂU CÁ & SĂN CÁ HIẾM / HUYỀN THOẠI (TOÀN DIỆN MỌI HÀNH TINH) ---
     let fishCastCooldown = 0;
 
     const RARE_FISH_IDS = [
         'fish_golden',    // Cá Rồng Vàng (HUYỀN THOẠI - 600 vàng, hồi 9999 HP, Buff Atk/Def/Crit/Luck)
         'fish_whale',     // Cá Voi Con (HUYỀN THOẠI - 420 vàng, Def +25, Regen)
         'fish_kraken',    // Bạch Tuộc Khổng Lồ (HUYỀN THOẠI - 380 vàng, Atk +35%)
-        'fish_manta',     // Cá Đuối Khổng Lồ (HUYỀN THOẠI)
+        'fish_manta',     // Cá Đuối Khổng Lồ (HUYỀN THOẠI - Đại Dương)
         'fish_rainbow',   // Cá Cầu Vồng (HIẾM - 160 vàng, Atk +20%)
         'fish_swordfish', // Cá Kiếm (HIẾM - 90 vàng, Crit +10%)
         'fish_angler',    // Cá Lồng Đèn (HIẾM - 85 vàng)
@@ -621,11 +621,42 @@
         return false;
     }
 
+    function autoEquipRod() {
+        if (!G || !G.save || !G.save.equip) return;
+        try {
+            const currentWeapon = G.save.equip.weapon;
+            const isRod = currentWeapon && window.W && window.W[currentWeapon] && window.W[currentWeapon].weapon && window.W[currentWeapon].weapon.kind === 'rod';
+            if (!isRod) {
+                let rodSlot = -1;
+                if (G.bag && G.bag.slots) {
+                    for (let i = 0; i < G.bag.slots.length; i++) {
+                        const item = G.bag.slots[i];
+                        if (item && (item.id === 'rod_gold' || item.id === 'rod')) {
+                            rodSlot = i;
+                            break;
+                        }
+                    }
+                }
+                if (rodSlot >= 0 && typeof G.equip === 'function') {
+                    G.equip(rodSlot);
+                } else {
+                    G.save.equip.weapon = 'rod_gold';
+                    if (G.player && typeof G.player.refreshEquip === 'function') {
+                        G.player.refreshEquip();
+                    }
+                }
+            }
+        } catch (_) {}
+    }
+
     function runFishingEngine() {
         if (!CFG.fish.enabled || !G || !G.fishing || !G.player || !G.player.alive) return;
 
         const fishing = G.fishing;
         const player = G.player;
+
+        // Luôn đảm bảo vũ khí là cần câu để engine game không cancel câu cá
+        autoEquipRod();
 
         // Tự động kích hoạt Buff may mắn câu cá nếu bật
         if (CFG.fish.luckBuff && player) {
@@ -635,13 +666,22 @@
         if (fishing.active) {
             fishCastCooldown = Date.now() + 1500;
 
+            // Đảm bảo luôn gán mục tiêu cá đang bơi (hỗ trợ đặc biệt cho rạn san hô Ocean)
+            if (!fishing.interest && fishing.fish && fishing.fish.length > 0) {
+                const availableFish = fishing.fish.filter(f => !fishing.w || f.w === fishing.w);
+                fishing.interest = (availableFish.length > 0) ? availableFish[0] : fishing.fish[0];
+                if (typeof fishing.attract === 'function' && fishing.phase === 'wait') {
+                    try { fishing.attract(); } catch (_) {}
+                }
+            }
+
             // 1. Chế độ CHỈ CÂU CÁ HIẾM: Tự kiểm tra loại cá khi bắt đầu cắn câu
             if (CFG.fish.rareOnly && (fishing.phase === 'approach' || fishing.phase === 'nibble' || fishing.phase === 'bite')) {
-                const catchId = fishing.catchId;
+                const catchId = fishing.catchId || (fishing.interest ? fishing.interest.species : null);
                 const isRare = isRareOrLegendFish(catchId, fishing.prize);
 
                 if (!isRare) {
-                    // Cá thường / rác (cá rô, giày cũ, cá hề, cá nóc...) -> HỦY CÂU NGAY LẬP TỨC để quăng lại
+                    // Cá thường / rác -> HỦY CÂU NGAY LẬP TỨC để quăng lại
                     if (typeof fishing.cancel === 'function') {
                         fishing.cancel(true);
                         fishCastCooldown = Date.now() + 200; // Quăng lại sau 0.2s
@@ -653,10 +693,13 @@
             // 2. Kích hoạt cắn câu siêu tốc (Ultra Catch)
             if (CFG.cheats.ultraFishing) {
                 if (fishing.phase === 'wait' || fishing.phase === 'cast' || fishing.phase === 'nibble' || fishing.phase === 'approach') {
-                    const targetFish = (fishing.fish && fishing.fish.length > 0) ? fishing.fish[0] : null;
-                    if (targetFish && typeof fishing.startBite === 'function') {
+                    const targetFish = fishing.interest || ((fishing.fish && fishing.fish.length > 0) ? fishing.fish[0] : null);
+                    if (targetFish) {
                         fishing.interest = targetFish;
-                        fishing.startBite(targetFish);
+                        if (typeof fishing.startBite === 'function') {
+                            try { fishing.startBite(targetFish); } catch (_) {}
+                        }
+                        fishing.phase = 'bite';
                     }
                 }
             }
@@ -664,22 +707,27 @@
             // 3. Giật cần kéo cá lên khi cá cắn câu
             if (fishing.phase === 'bite' || fishing.phase === 'hook' || fishing.phase === 'hooked') {
                 if (typeof fishing.hook === 'function' && fishing.phase !== 'hooked') {
-                    fishing.hook();
+                    try { fishing.hook(); } catch (_) {}
                 }
                 if (typeof fishing.finish === 'function') {
-                    const catchId = fishing.catchId;
+                    const catchId = fishing.catchId || (fishing.interest ? fishing.interest.species : null);
                     const isRare = isRareOrLegendFish(catchId, fishing.prize);
                     let fishName = catchId || 'Cá';
                     try {
                         if (window.W && window.W[catchId]) fishName = window.W[catchId].name;
                     } catch (_) {}
 
-                    fishing.finish(true);
-                    stats.fishCount++;
-                    updateStatsUI();
+                    try {
+                        fishing.finish(true);
+                        stats.fishCount++;
+                        updateStatsUI();
 
-                    if (isRare) {
-                        showToast(`🌟 [CÂU CÁ VIP] Bạn đã câu trúng <b>${fishName}</b> (Hiếm / Huyền Thoại)!`, 4000);
+                        if (isRare) {
+                            showToast(`🌟 [CÂU CÁ VIP] Bạn đã câu trúng <b>${fishName}</b> (Hiếm / Huyền Thoại)!`, 4000);
+                        }
+                    } catch (err) {
+                        console.error('[ZooPetAuto] Lỗi finish fishing:', err);
+                        if (typeof fishing.cancel === 'function') fishing.cancel(true);
                     }
                 }
             }
@@ -693,17 +741,22 @@
     }
 
     function castAtNearestWater() {
-        if (!G || !G.fishing || !G.world || !G.player) return;
+        if (!G || !G.fishing || !G.world || !G.player || !G.player.alive) return;
         const waters = G.world.waters || [];
         if (waters.length === 0) return;
 
         const player = G.player;
+        const fishing = G.fishing;
+
+        // Tự động trang bị cần câu
+        autoEquipRod();
+
+        // 1. Tìm điểm nước / rạn san hô gần nhất
         let nearestWater = null;
         let minDist = Infinity;
-
         for (let w of waters) {
             if (!w) continue;
-            const d = getDistance(player.pos, { x: w.x, z: w.z });
+            const d = Math.hypot(player.pos.x - w.x, player.pos.z - w.z);
             if (d < minDist) {
                 minDist = d;
                 nearestWater = w;
@@ -712,29 +765,46 @@
 
         if (!nearestWater) return;
 
+        // 2. Xử lý di chuyển đến gần vùng nước nếu đang ở quá xa
+        const maxReachDist = nearestWater.r + 2.0;
+        if (minDist > maxReachDist) {
+            const dirX = (nearestWater.x - player.pos.x) / minDist;
+            const dirZ = (nearestWater.z - player.pos.z) / minDist;
+            const targetX = nearestWater.x - dirX * (nearestWater.r * 0.7);
+            const targetZ = nearestWater.z - dirZ * (nearestWater.r * 0.7);
+            walkTo({ x: targetX, z: targetZ });
+            return;
+        }
+
+        // 3. Khi đã ở trong phạm vi câu -> Dừng di chuyển
+        if (player.target && player.target.type === 'move') {
+            player.target = null;
+            if (player.vel) player.vel.set(0, 0, 0);
+        }
+
         // Triệu hồi bóng cá bí ẩn phát sáng nếu bật
-        if (CFG.fish.summonMystery && typeof G.fishing.callMystery === 'function') {
-            try { G.fishing.callMystery(); } catch (_) {}
+        if (CFG.fish.summonMystery && typeof fishing.callMystery === 'function') {
+            try { fishing.callMystery(); } catch (_) {}
         }
 
-        if (typeof G.fishing.plan === 'function') {
-            try {
-                const plan = G.fishing.plan(nearestWater, player.pos);
-                if (plan && plan.cast) {
-                    if (plan.shore && getDistance(player.pos, plan.shore) > 2.5) {
-                        walkTo(plan.shore);
-                        return;
-                    }
-                    G.fishing.start(nearestWater, plan.cast);
-                    return;
-                }
-            } catch (_) {}
+        // 4. Tạo Vector3 hợp lệ cho điểm quăng phao (cast point)
+        let castVec = null;
+        if (player.pos && typeof player.pos.clone === 'function') {
+            castVec = player.pos.clone();
+        } else {
+            castVec = { x: nearestWater.x, y: 0, z: nearestWater.z, clone: function() { return Object.assign({}, this); } };
         }
 
-        if (typeof G.fishing.start === 'function') {
-            try {
-                G.fishing.start(nearestWater, { x: nearestWater.x, y: 0, z: nearestWater.z });
-            } catch (_) {}
+        // Quăng phao vào lòng vùng nước / rạn san hô
+        const offsetFactor = Math.min(0.6, (nearestWater.r - 0.4) / Math.max(0.1, minDist));
+        castVec.x = nearestWater.x + (player.pos.x - nearestWater.x) * offsetFactor;
+        castVec.z = nearestWater.z + (player.pos.z - nearestWater.z) * offsetFactor;
+        castVec.y = 0;
+
+        try {
+            fishing.start(nearestWater, castVec);
+        } catch (err) {
+            console.error('[ZooPetAuto] Lỗi start fishing:', err);
         }
     }
 

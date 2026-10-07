@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.4.0
-// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Nông Trại VIP Pro (Trồng Nhanh & Thu Hoạch Liền 0s, Lớn Tức Thì, Cày EXP & Nông Sản Vô Hạn), Tự Động Kết Nối MAIN WORLD 100%, Lụm Sạch Đồ & Rương Sau Khi Đánh Quái/Boss, Săn Sạch Boss Mới Chuyển Map, Chống Văng Hầm Ngục Solo, Vô Hạn Lượt Đi Ải, Auto Câu Cá Chuẩn Kéo Cần, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
+// @version      3.4.1
+// @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Nông Trại VIP Pro (Trồng Nhanh & Thu Hoạch An Toàn Kháng Reject Máy Chủ, Tự Động Theo Cấp Độ, Cày EXP Vô Hạn), Quản Lý ID Hầm Ngục & Ra Vào Tùy Ý (1-5 Người), Tự Động Kết Nối MAIN WORLD 100%, Lụm Sạch Đồ & Rương Sau Khi Đánh Quái/Boss, Săn Sạch Boss Mới Chuyển Map, Chống Văng Hầm Ngục Solo, Auto Câu Cá Chuẩn Kéo Cần, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
 // @match        https://d173ysgpwor2n4.cloudfront.net/*
@@ -32,7 +32,7 @@
 
     if (!isZooPetPage) return;
 
-    console.log('%c[ZooPet Auto Pro v3.4.0]%c Khởi tạo engine Auto & VIP Mod trên: ' + location.href, 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
+    console.log('%c[ZooPet Auto Pro v3.4.1]%c Khởi tạo engine Auto & VIP Mod trên: ' + location.href, 'color:#2563EB;font-weight:bold;font-size:14px', 'color:#475569');
 
     const globalWin = (typeof unsafeWindow !== 'undefined' && unsafeWindow) ? unsafeWindow : window;
     let _capturedGame = null;
@@ -121,43 +121,48 @@
         });
     } catch (_) {}
 
-    // --- CẤU HÌNH MẶC ĐỊNH (TẤT CẢ AUTO & CHEATS ĐỀU MẶC ĐỊNH TẮT - OFF) ---
+    // --- BẢNG DỮ LIỆU CÂY TRỒNG CHUẨN XÁC TỪ GAME (CROPS METADATA) ---
     const CROPS_LIST = [
-        { id: 'peach', name: '🍑 Đào Tiên Bất Tử (Top 1 EXP: 1.400, Năng Lượng: 2.200)', exp: 1400, energy: 2200 },
-        { id: 'lychee', name: '🍒 Vải Thiều Đỏ Rực (EXP: 1.100, Năng Lượng: 1.800)', exp: 1100, energy: 1800 },
-        { id: 'durian', name: '🍈 Sầu Riêng Gai Góc (EXP: 950, Năng Lượng: 1.500)', exp: 950, energy: 1500 },
-        { id: 'coconut', name: '🥥 Dừa Xiêm Mát Lành (EXP: 800, Năng Lượng: 1.300)', exp: 800, energy: 1300 },
-        { id: 'pineapple', name: '🍍 Dứa Vương Miện (EXP: 750, Năng Lượng: 1.200)', exp: 750, energy: 1200 },
-        { id: 'mango', name: '🥭 Xoài Cát Vàng (EXP: 500, Năng Lượng: 800)', exp: 500, energy: 800 },
-        { id: 'grape', name: '🍇 Nho Tím Mọng (EXP: 450, Năng Lượng: 700)', exp: 450, energy: 700 },
-        { id: 'apple', name: '🍎 Táo Đỏ Thần (EXP: 400, Năng Lượng: 600)', exp: 400, energy: 600 },
-        { id: 'melon', name: '🍉 Dưa Cầu Vồng (EXP: 80, Năng Lượng: 60)', exp: 80, energy: 60 },
-        { id: 'goldcorn', name: '🌽 Ngô Vàng Ròng (EXP: 70, Năng Lượng: 110)', exp: 70, energy: 110 },
-        { id: 'clover', name: '🍀 Cỏ Bốn Lá May Mắn (EXP: 50, Năng Lượng: 34)', exp: 50, energy: 34 },
-        { id: 'glowshroom', name: '🍄 Nấm Đèn Lồng (EXP: 48, Năng Lượng: 30)', exp: 48, energy: 30 },
-        { id: 'star', name: '⭐ Nấm Sao Lấp Lánh (EXP: 45, Năng Lượng: 32)', exp: 45, energy: 32 },
-        { id: 'magnetmelon', name: '🧲 Dưa Nam Châm (EXP: 44, Năng Lượng: 30)', exp: 44, energy: 30 },
-        { id: 'coffee', name: '☕ Cà Phê Tỉnh Táo (EXP: 28, Năng Lượng: 18)', exp: 28, energy: 18 },
-        { id: 'candy', name: '🍭 Hoa Kẹo Bông (EXP: 26, Năng Lượng: 18)', exp: 26, energy: 18 },
-        { id: 'bean', name: '🌱 Đậu Thần Khổng Lồ (EXP: 24, Năng Lượng: 16)', exp: 24, energy: 16 },
-        { id: 'chili', name: '🌶️ Ớt Rồng Lửa (EXP: 18, Năng Lượng: 12)', exp: 18, energy: 12 },
-        { id: 'pumpkin', name: '🎃 Bí Ngô Mũm Mĩm (EXP: 14, Năng Lượng: 10)', exp: 14, energy: 10 },
-        { id: 'mint', name: '🌿 Bạc Hà Mát Lạnh (EXP: 14, Năng Lượng: 9)', exp: 14, energy: 9 },
-        { id: 'carrot', name: '🥕 Cà Rốt Tốc Hành (EXP: 4, Năng Lượng: 3)', exp: 4, energy: 3 },
-        { id: 'radish', name: '🌸 Củ Cải Cười (EXP: 6, Năng Lượng: 4)', exp: 6, energy: 4 },
-        { id: 'rainbowrose', name: '🌹 Hồng Cầu Vồng (Cần Hạt Giống)', exp: 120, energy: 90 },
-        { id: 'dragonfruit', name: '🐉 Thanh Long Lửa (Cần Hạt Giống)', exp: 90, energy: 70 },
-        { id: 'iceberry', name: '🧊 Dâu Băng Giá (Cần Hạt Giống)', exp: 60, energy: 40 }
+        { id: 'auto', name: '✨ Tự Động Chọn Cây Tốt Nhất Theo Cấp Độ (Khuyên Dùng)', lvl: 1, time: 10, exp: 4, energy: 3 },
+        { id: 'peach', name: '🍑 Đào Tiên Bất Tử (Cấp 18 • 1400 EXP / 2200 NL)', lvl: 18, time: 50400, exp: 1400, energy: 2200 },
+        { id: 'rainbowrose', name: '🌹 Hồng Cầu Vồng (Cấp 18 • Cần Hạt • 120 EXP)', lvl: 18, time: 200, exp: 120, energy: 90, seed: 'seed_star' },
+        { id: 'lychee', name: '🍒 Vải Thiều Đỏ Rực (Cấp 16 • 1100 EXP / 1800 NL)', lvl: 16, time: 50400, exp: 1100, energy: 1800 },
+        { id: 'dragonfruit', name: '🐉 Thanh Long Lửa (Cấp 15 • Cần Hạt • 90 EXP)', lvl: 15, time: 160, exp: 90, energy: 70, seed: 'seed_fire' },
+        { id: 'durian', name: '🍈 Sầu Riêng Gai Góc (Cấp 14 • 950 EXP / 1500 NL)', lvl: 14, time: 43200, exp: 950, energy: 1500 },
+        { id: 'goldcorn', name: '🌽 Ngô Vàng Ròng (Cấp 13 • 150s • 70 EXP / 110 NL)', lvl: 13, time: 150, exp: 70, energy: 110 },
+        { id: 'iceberry', name: '🧊 Dâu Băng Giá (Cấp 12 • Cần Hạt • 60 EXP)', lvl: 12, time: 120, exp: 60, energy: 40, seed: 'seed_ice' },
+        { id: 'coconut', name: '🥥 Dừa Xiêm Mát Lành (Cấp 11 • 800 EXP / 1300 NL)', lvl: 11, time: 43200, exp: 800, energy: 1300 },
+        { id: 'glowshroom', name: '🍄 Nấm Đèn Lồng (Cấp 11 • 100s • 48 EXP)', lvl: 11, time: 100, exp: 48, energy: 30 },
+        { id: 'clover', name: '🍀 Cỏ Bốn Lá May Mắn (Cấp 10 • 110s • 50 EXP)', lvl: 10, time: 110, exp: 50, energy: 34 },
+        { id: 'pineapple', name: '🍍 Dứa Vương Miện (Cấp 9 • 750 EXP / 1200 NL)', lvl: 9, time: 43200, exp: 750, energy: 1200 },
+        { id: 'melon', name: '🍉 Dưa Cầu Vồng (Cấp 9 • 120s • 80 EXP)', lvl: 9, time: 120, exp: 80, energy: 60 },
+        { id: 'magnetmelon', name: '🧲 Dưa Nam Châm (Cấp 9 • 100s • 44 EXP)', lvl: 9, time: 100, exp: 44, energy: 30 },
+        { id: 'moonflower', name: '🌙 Hoa Trăng Rằm (Cấp 8 • 90s • 40 EXP)', lvl: 8, time: 90, exp: 40, energy: 26 },
+        { id: 'mango', name: '🥭 Xoài Cát Vàng (Cấp 7 • 500 EXP / 800 NL)', lvl: 7, time: 28800, exp: 500, energy: 800 },
+        { id: 'coffee', name: '☕ Cà Phê Tỉnh Táo (Cấp 7 • 60s • 28 EXP)', lvl: 7, time: 60, exp: 28, energy: 18 },
+        { id: 'star', name: '⭐ Nấm Sao Lấp Lánh (Cấp 6 • 80s • 45 EXP)', lvl: 6, time: 80, exp: 45, energy: 32 },
+        { id: 'berry', name: '🍓 Dâu Tiên Lấp Lánh (Cấp 6 • 70s • 30 EXP)', lvl: 6, time: 70, exp: 30, energy: 20 },
+        { id: 'grape', name: '🍇 Nho Tím Mọng (Cấp 5 • 450 EXP / 700 NL)', lvl: 5, time: 28800, exp: 450, energy: 700 },
+        { id: 'bean', name: '🌱 Đậu Thần Khổng Lồ (Cấp 5 • 60s • 24 EXP)', lvl: 5, time: 60, exp: 24, energy: 16 },
+        { id: 'chili', name: '🌶️ Ớt Rồng Lửa (Cấp 4 • 40s • 18 EXP)', lvl: 4, time: 40, exp: 18, energy: 12 },
+        { id: 'candy', name: '🍭 Hoa Kẹo Bông (Cấp 4 • 50s • 26 EXP)', lvl: 4, time: 50, exp: 26, energy: 18 },
+        { id: 'apple', name: '🍎 Táo Đỏ Thần (Cấp 3 • 400 EXP / 600 NL)', lvl: 3, time: 28800, exp: 400, energy: 600 },
+        { id: 'mint', name: '🌿 Bạc Hà Mát Lạnh (Cấp 3 • 35s • 14 EXP)', lvl: 3, time: 35, exp: 14, energy: 9 },
+        { id: 'pumpkin', name: '🎃 Bí Ngô Mũm Mĩm (Cấp 2 • 30s • 14 EXP)', lvl: 2, time: 30, exp: 14, energy: 10 },
+        { id: 'radish', name: '🌸 Củ Cải Cười (Cấp 1 • 15s • 6 EXP)', lvl: 1, time: 15, exp: 6, energy: 4 },
+        { id: 'carrot', name: '🥕 Cà Rốt Tốc Hành (Cấp 1 • 10s • 4 EXP)', lvl: 1, time: 10, exp: 4, energy: 3 }
     ];
 
+    // --- CẤU HÌNH MẶC ĐỊNH (TẤT CẢ AUTO & CHEATS ĐỀU MẶC ĐỊNH TẮT - OFF) ---
     const DEFAULT_CFG = {
         farm: {
             enabled: false,
-            instantGrow: true,
+            instantGrow: false,
+            safeMode: true,
             autoPlant: false,
             autoHarvest: false,
             autoLoop: false,
-            cropChoice: 'peach',
+            cropChoice: 'auto',
             autoPetCare: false,
             seedChoice: 'auto'
         },
@@ -587,8 +592,62 @@
         }
     }
 
-    // --- MODULE 2: NÔNG TRẠI VIP PRO (TRỒNG NHANH & THU HOẠCH LIỀN 0S) ---
+    // --- MODULE 2: NÔNG TRẠI VIP PRO (TRỒNG NHANH & THU HOẠCH AN TOÀN KHÁNG REJECT MÁY CHỦ) ---
     let farmCycleCooldown = 0;
+    let lastKnownDungeonId = localStorage.getItem('zp-last-dg-id') || 'team1';
+
+    // Lấy ID hầm ngục hiện tại từ sessionStorage hoặc Game Engine
+    function getCurrentDungeonId() {
+        try {
+            const sess = JSON.parse(sessionStorage.getItem('zp-dg') || 'null');
+            if (sess && sess.id) {
+                lastKnownDungeonId = sess.id;
+                localStorage.setItem('zp-last-dg-id', sess.id);
+                return sess.id;
+            }
+        } catch (_) {}
+        if (G && G.planet && G.planet.dgId) {
+            lastKnownDungeonId = G.planet.dgId;
+            localStorage.setItem('zp-last-dg-id', G.planet.dgId);
+            return G.planet.dgId;
+        }
+        return lastKnownDungeonId || (CFG.dungeon?.roomId || 'team1');
+    }
+
+    // Tự động kiểm tra cấp độ nhân vật và trả về loại cây trồng hợp lệ nhất
+    function getBestCropForPlayer(preferredCrop) {
+        const playerLvl = G?.save?.lvl || 1;
+        
+        // Nếu chọn auto hoặc chưa chọn: tìm cây cao nhất không cần hạt giống
+        if (!preferredCrop || preferredCrop === 'auto') {
+            const availableNoSeed = CROPS_LIST.filter(c => c.id !== 'auto' && c.lvl <= playerLvl && !c.seed);
+            if (availableNoSeed.length > 0) {
+                return availableNoSeed[0].id; // Đã sắp xếp từ cấp cao xuống thấp
+            }
+            return 'carrot';
+        }
+
+        // Nếu người chơi chọn 1 cây cụ thể: kiểm tra cấp độ
+        const chosen = CROPS_LIST.find(c => c.id === preferredCrop);
+        if (chosen && chosen.id !== 'auto') {
+            if (chosen.lvl <= playerLvl) {
+                return chosen.id;
+            } else {
+                // Người chơi chưa đủ cấp độ để trồng cây này -> tự hạ xuống cây cao nhất mà cấp độ cho phép
+                const fallback = CROPS_LIST.filter(c => c.id !== 'auto' && c.lvl <= playerLvl && !c.seed)[0];
+                return fallback ? fallback.id : 'carrot';
+            }
+        }
+        return 'carrot';
+    }
+
+    // Thiết lập thời gian chín hợp lệ tránh máy chủ từ chối bản lưu
+    function makePlotRipeSafely(plot) {
+        if (!plot || !plot.state) return;
+        const cropData = CROPS_LIST.find(c => c.id === plot.state.crop) || { time: 10 };
+        // Gán timestamp về quá khứ vừa vặn với thời gian sinh trưởng của cây (thay vì số 0)
+        plot.state.t0 = Date.now() - (cropData.time * 1000 + 1000);
+    }
 
     // Ép chín tức thì tất cả các ô đất đang có cây
     function instantGrowPlots() {
@@ -596,7 +655,7 @@
         let count = 0;
         for (let plot of G.farm.plots) {
             if (plot && plot.state) {
-                plot.state.t0 = 0;
+                makePlotRipeSafely(plot);
                 count++;
             }
         }
@@ -612,14 +671,16 @@
         let harvested = 0;
         for (let plot of G.farm.plots) {
             if (!plot || !plot.state) continue;
-            plot.state.t0 = 0; // Đảm bảo chín 100%
-            try {
-                if (typeof G.farm.harvest === 'function') {
+            if (CFG.farm.instantGrow) {
+                makePlotRipeSafely(plot);
+            }
+            if (typeof G.farm.ready === 'function' && G.farm.ready(plot)) {
+                try {
                     G.farm.harvest(plot);
                     harvested++;
                     stats.cropsHarvested++;
-                }
-            } catch (_) {}
+                } catch (_) {}
+            }
         }
         if (harvested > 0) {
             updateStatsUI();
@@ -636,16 +697,19 @@
             showToast('⚠️ Bạn chưa ở trong Nông Trại hoặc chưa có ô đất!');
             return 0;
         }
-        cropKey = cropKey || CFG.farm.cropChoice || 'peach';
+        const effectiveCrop = getBestCropForPlayer(cropKey || CFG.farm.cropChoice);
+        const cropData = CROPS_LIST.find(c => c.id === effectiveCrop) || { name: effectiveCrop, time: 10 };
         let planted = 0;
         for (let plot of G.farm.plots) {
             if (!plot || plot.state) continue;
             try {
                 if (typeof G.farm.plant === 'function') {
-                    G.farm.plant(plot, cropKey);
+                    G.farm.plant(plot, effectiveCrop);
                     if (plot.state) {
                         if (CFG.farm.instantGrow) {
-                            plot.state.t0 = 0; // Lớn chín mọng tức thì 0s
+                            makePlotRipeSafely(plot);
+                        } else {
+                            plot.state.t0 = Date.now();
                         }
                         planted++;
                         stats.seedsPlanted++;
@@ -655,7 +719,7 @@
         }
         if (planted > 0) {
             updateStatsUI();
-            showToast(`🌱 Đã gieo trồng ${planted} ô đất với [${cropKey}]!`);
+            showToast(`🌱 Đã gieo trồng ${planted} ô đất với [${cropData.name}]!`);
         } else {
             showToast('ℹ️ Toàn bộ các ô đất đã được trồng kín.');
         }
@@ -668,13 +732,15 @@
             showToast('⚠️ Bạn chưa ở trong Nông Trại hoặc chưa có ô đất!');
             return;
         }
-        const cropKey = CFG.farm.cropChoice || 'peach';
+        const cropKey = CFG.farm.cropChoice || 'auto';
         instantHarvestAllPlots();
         setTimeout(() => {
             instantPlantAllPlots(cropKey);
             setTimeout(() => {
                 instantHarvestAllPlots();
-                showToast(`🚀 Đã hoàn thành 1 chu trình Trồng & Thu Hoạch [${cropKey}] siêu tốc!`);
+                const effectiveCrop = getBestCropForPlayer(cropKey);
+                const cropData = CROPS_LIST.find(c => c.id === effectiveCrop) || { name: effectiveCrop };
+                showToast(`🚀 Đã hoàn thành 1 chu trình Trồng & Thu Hoạch [${cropData.name}] siêu tốc!`);
             }, 300);
         }, 300);
     }
@@ -685,11 +751,37 @@
         const plots = G.farm.plots || [];
         if (plots.length === 0) return;
 
-        // 1. Nếu bật Instant Grow (luôn ép mọi ô có cây chín 100% trong 0 giây)
+        // Hook chống Reject Box làm đơ game
+        if (G.cloud && !G.cloud.__zp_anti_reject_hooked) {
+            G.cloud.__zp_anti_reject_hooked = true;
+            const origReject = G.cloud.onReject;
+            G.cloud.onReject = function (save, reason) {
+                console.warn('[ZooPet Auto] Máy chủ từ chối lưu dữ liệu nông trại:', reason);
+                try {
+                    if (G.save && G.save.plots) {
+                        const userLvl = G.save.lvl || 1;
+                        for (let k in G.save.plots) {
+                            const p = G.save.plots[k];
+                            const cMeta = CROPS_LIST.find(c => c.id === p?.crop);
+                            if (p && cMeta && cMeta.lvl > userLvl) {
+                                G.save.plots[k] = null;
+                            }
+                        }
+                    }
+                    G.ui?.toast('🛡️ Đã đồng bộ an toàn dữ liệu Nông Trại với máy chủ.', 3);
+                } catch (_) {}
+            };
+        }
+
+        // 1. Nếu bật Instant Grow: thiết lập timestamp hợp lệ
         if (CFG.farm.instantGrow) {
             for (let plot of plots) {
-                if (plot && plot.state && plot.state.t0 !== 0) {
-                    plot.state.t0 = 0;
+                if (plot && plot.state) {
+                    const cropData = CROPS_LIST.find(c => c.id === plot.state.crop) || { time: 10 };
+                    const ripeTime = Date.now() - (cropData.time * 1000 + 1000);
+                    if (!plot.state.t0 || plot.state.t0 > ripeTime) {
+                        plot.state.t0 = ripeTime;
+                    }
                 }
             }
         }
@@ -697,14 +789,14 @@
         if (!CFG.farm.enabled) return;
         if (Date.now() < farmCycleCooldown) return;
 
-        const cropKey = CFG.farm.cropChoice || 'peach';
+        const effectiveCrop = getBestCropForPlayer(CFG.farm.cropChoice);
 
         // A. Tự động thu hoạch toàn bộ các ô đã chín
         if (CFG.farm.autoHarvest || CFG.farm.autoLoop) {
             let hasHarvested = false;
             for (let plot of plots) {
                 if (plot && plot.state) {
-                    if (CFG.farm.instantGrow) plot.state.t0 = 0;
+                    if (CFG.farm.instantGrow) makePlotRipeSafely(plot);
                     if (typeof G.farm.ready === 'function' && G.farm.ready(plot)) {
                         try {
                             G.farm.harvest(plot);
@@ -716,7 +808,7 @@
             }
             if (hasHarvested) {
                 updateStatsUI();
-                farmCycleCooldown = Date.now() + (CFG.farm.autoLoop ? 350 : 700);
+                farmCycleCooldown = Date.now() + (CFG.farm.autoLoop ? 400 : 800);
                 return;
             }
         }
@@ -727,9 +819,13 @@
             for (let plot of plots) {
                 if (plot && !plot.state) {
                     try {
-                        G.farm.plant(plot, cropKey);
+                        G.farm.plant(plot, effectiveCrop);
                         if (plot.state) {
-                            if (CFG.farm.instantGrow) plot.state.t0 = 0;
+                            if (CFG.farm.instantGrow) {
+                                makePlotRipeSafely(plot);
+                            } else {
+                                plot.state.t0 = Date.now();
+                            }
                             stats.seedsPlanted++;
                             hasPlanted = true;
                         }
@@ -738,7 +834,7 @@
             }
             if (hasPlanted) {
                 updateStatsUI();
-                farmCycleCooldown = Date.now() + (CFG.farm.autoLoop ? 350 : 700);
+                farmCycleCooldown = Date.now() + (CFG.farm.autoLoop ? 400 : 800);
                 return;
             }
         }
@@ -1171,8 +1267,10 @@
         
         try {
             if (targetPlanet === 'dungeon') {
-                const rId = customRoomId || CFG.dungeon?.roomId || ('dg_' + Date.now().toString(36));
+                const rId = customRoomId || CFG.dungeon?.roomId || lastKnownDungeonId || ('dg_' + Date.now().toString(36));
                 const pCount = Number(partySize || CFG.dungeon?.partySize || 1);
+                lastKnownDungeonId = rId;
+                localStorage.setItem('zp-last-dg-id', rId);
                 showToast(`🏰 Đang khởi hành vào Hầm Ngục Cổ Đại (Phòng: ${rId} • ${pCount} người)...`, 3500);
                 
                 // Thiết lập phiên đi Ải Hầm Ngục với số lượng người bất kỳ (1, 2, 3, 4, 5)
@@ -1181,6 +1279,14 @@
             } else {
                 showToast(`🚀 Đang khởi hành đến ${pName}...`, 3000);
                 sessionStorage.setItem('zp-flight', JSON.stringify({ to: targetPlanet, t: Date.now() }));
+                // Lưu lại mã phòng trước khi rời đi để người chơi có thể vào lại bất cứ lúc nào
+                try {
+                    const sess = JSON.parse(sessionStorage.getItem('zp-dg') || 'null');
+                    if (sess && sess.id) {
+                        lastKnownDungeonId = sess.id;
+                        localStorage.setItem('zp-last-dg-id', sess.id);
+                    }
+                } catch (_) {}
                 sessionStorage.removeItem('zp-dg');
             }
         } catch (_) {}
@@ -1953,13 +2059,24 @@
                         <div class="zp-planet-btn" data-planet="dungeon" style="grid-column: span 3;background:#FAF5FF;border-color:#D8B4FE;color:#7E22CE;font-weight:700;">🏰 Hầm Ngục Cổ Đại (5 Ải Solo)</div>
                     </div>
 
-                    <div style="margin-top:12px;padding:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                    <div style="margin-top:12px;padding:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
                             <div style="font-weight:700;font-size:12px;color:#15803D;">🏰 Hầm Ngục Cổ Đại (Solo & Đội 1-5 Người)</div>
                             <span style="font-size:10px;background:#DCFCE7;color:#166534;padding:2px 6px;border-radius:999px;font-weight:600;">Tùy Ý Số Người • Vô Hạn Lượt</span>
                         </div>
-                        <div class="zp-desc" style="color:#166534;margin-bottom:8px;">Vào thẳng 5 ải hầm ngục ngay lập tức với bất kỳ số lượng người chơi (1, 2, 3, 4 hoặc 5 người), không bắt buộc phải đủ 5 người:</div>
+                        <div class="zp-desc" style="color:#166534;margin-bottom:8px;">Vào thẳng 5 ải hầm ngục ngay lập tức với bất kỳ số lượng người chơi (1-5 người), tự do ra/vào mà không mất phòng:</div>
                         
+                        <!-- Khung Hiển Thị ID Hầm Ngục Hiện Tại -->
+                        <div style="background:#FFFFFF;border:1px solid #86EFAC;border-radius:8px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+                            <div>
+                                <div style="font-size:10px;color:#64748B;font-weight:600;">MÃ HẦM NGỤC HIỆN TẠI:</div>
+                                <div id="zp-current-dg-id" style="font-family:monospace;font-weight:800;font-size:13px;color:#0F766E;">team1</div>
+                            </div>
+                            <div style="display:flex;gap:4px;">
+                                <button class="zp-btn" id="zp-btn-copy-dg-id" style="margin-top:0;font-size:11px;padding:5px 8px;background:#0EA5E9;color:#fff;">📋 Sao Chép ID</button>
+                            </div>
+                        </div>
+
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
                             <div>
                                 <div style="font-size:11px;font-weight:600;color:#15803D;margin-bottom:2px;">👥 Số người đi:</div>
@@ -1972,14 +2089,19 @@
                                 </select>
                             </div>
                             <div>
-                                <div style="font-size:11px;font-weight:600;color:#15803D;margin-bottom:2px;">🔑 Mã phòng chung:</div>
+                                <div style="font-size:11px;font-weight:600;color:#15803D;margin-bottom:2px;">🔑 Nhập / Đổi mã phòng:</div>
                                 <input type="text" id="zp-dungeon-room-id" value="${CFG.dungeon?.roomId || 'team1'}" placeholder="VD: team1" style="width:100%;padding:4px 8px;font-size:11px;border:1px solid #BBF7D0;border-radius:6px;box-sizing:border-box;">
                             </div>
                         </div>
 
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
                             <button class="zp-btn" id="zp-btn-dungeon-go" style="background:#16A34A;margin-top:0;font-size:11px;padding:6px 8px;">⚔️ Vào Ải Hầm Ngục</button>
                             <button class="zp-btn" id="zp-btn-dungeon-force-start" style="background:#2563EB;margin-top:0;font-size:11px;padding:6px 8px;">🚀 Bắt Đầu Ải Liền</button>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                            <button class="zp-btn" id="zp-btn-reenter-dg" style="background:#0D9488;margin-top:0;font-size:11px;padding:6px 8px;">🔄 Vào Lại Phòng Này</button>
+                            <button class="zp-btn" id="zp-btn-exit-dg-temp" style="background:#64748B;margin-top:0;font-size:11px;padding:6px 8px;">🏠 Tạm Rời Về Nhà</button>
                         </div>
                     </div>
 
@@ -2157,26 +2279,41 @@
                 <!-- TAB 4: NÔNG TRẠI VIP PRO -->
                 <div class="zp-tab-content" id="tab-farm" style="display:none;">
                     <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#166534;line-height:1.5;">
-                        <div style="font-weight:700;margin-bottom:2px;">🌾 Nông Trại VIP Pro (Trồng Nhanh & Thu Hoạch Liền 0s)</div>
-                        <div>Cây trồng đạt <b>100% độ chín tức thì</b> khi gieo hạt. Nhận trọn bộ nông sản, năng lượng và hàng vạn EXP siêu tốc!</div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                            <div style="font-weight:700;">🌾 Nông Trại VIP Pro (Kháng Reject Máy Chủ 100%)</div>
+                            <span id="zp-farm-user-lvl" style="font-size:11px;background:#DCFCE7;color:#15803D;padding:2px 8px;border-radius:999px;font-weight:700;">Cấp độ: Lv 1</span>
+                        </div>
+                        <div>Tự động tối ưu cây trồng theo đúng cấp độ nhân vật, gieo trồng & thu hoạch hợp lệ không lo máy chủ từ chối bản lưu!</div>
                     </div>
 
                     <!-- Chọn loại cây trồng -->
                     <div class="zp-row">
                         <div>
-                            <div class="zp-label">🍑 Chọn loại cây gieo trồng</div>
-                            <div class="zp-desc">Đào Tiên: Top 1 EXP (1.400) & Năng Lượng (2.200)</div>
+                            <div class="zp-label">🌱 Chọn loại cây gieo trồng</div>
+                            <div class="zp-desc">Tự động chọn cây cao nhất hoặc chỉ định loại cây bạn muốn</div>
                         </div>
                         <select id="cfg-farm-crop" class="zp-select" style="max-width:170px;">
                             ${CROPS_LIST.map(c => `<option value="${c.id}" ${CFG.farm.cropChoice === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
                         </select>
                     </div>
 
+                    <!-- Switch: Safe Mode (100% Legit Growth) -->
+                    <div class="zp-row">
+                        <div>
+                            <div class="zp-label">🛡️ Chế Độ Farm An Toàn 100% (Khuyên Dùng)</div>
+                            <div class="zp-desc">Trồng & thu hoạch chuẩn thời gian (Cà rốt 10s, Củ cải 15s, Bí ngô 30s)</div>
+                        </div>
+                        <label class="zp-switch">
+                            <input type="checkbox" id="cfg-farm-safe" ${CFG.farm.safeMode !== false ? 'checked' : ''}>
+                            <span class="zp-slider"></span>
+                        </label>
+                    </div>
+
                     <!-- Switch: Instant Grow -->
                     <div class="zp-row">
                         <div>
-                            <div class="zp-label">⚡ Cây Lớn Tức Thì 0 Giây (Instant Grow)</div>
-                            <div class="zp-desc">Mọi cây trồng trên tất cả các ô đất chín 100% ngay khi gieo</div>
+                            <div class="zp-label">⚡ Cây Lớn Tức Thì (Instant Grow An Toàn)</div>
+                            <div class="zp-desc">Tự động tính timestamp hợp lệ giúp cây chín tức thì</div>
                         </div>
                         <label class="zp-switch">
                             <input type="checkbox" id="cfg-farm-instant" ${CFG.farm.instantGrow ? 'checked' : ''}>
@@ -2200,7 +2337,7 @@
                     <div class="zp-row">
                         <div>
                             <div class="zp-label">🔄 Auto Farm Vô Hạn (Trồng & Thu Hoạch Liên Tục)</div>
-                            <div class="zp-desc">Trồng kín ô ➔ Chín 0s ➔ Thu hoạch ➔ Lặp lại không ngừng</div>
+                            <div class="zp-desc">Tự động gieo kín đất ➔ Đợi chín ➔ Thu hoạch ➔ Lặp lại không ngừng</div>
                         </div>
                         <label class="zp-switch">
                             <input type="checkbox" id="cfg-farm-loop" ${CFG.farm.autoLoop ? 'checked' : ''}>
@@ -2212,7 +2349,7 @@
                     <div class="zp-row">
                         <div>
                             <div class="zp-label">🧺 Tự động thu hoạch khi cây chín</div>
-                            <div class="zp-desc">Tự động hái toàn bộ các ô đất chín</div>
+                            <div class="zp-desc">Tự động hái toàn bộ các ô đất chín tự nhiên</div>
                         </div>
                         <label class="zp-switch">
                             <input type="checkbox" id="cfg-farm-harvest" ${CFG.farm.autoHarvest ? 'checked' : ''}>
@@ -2224,7 +2361,7 @@
                     <div class="zp-row">
                         <div>
                             <div class="zp-label">🌱 Tự động gieo hạt khi đất trống</div>
-                            <div class="zp-desc">Tự động lấp đầy các ô đất trống với loại cây đã chọn</div>
+                            <div class="zp-desc">Tự động lấp đầy các ô đất trống với loại cây phù hợp cấp độ</div>
                         </div>
                         <label class="zp-switch">
                             <input type="checkbox" id="cfg-farm-plant" ${CFG.farm.autoPlant ? 'checked' : ''}>
@@ -2433,6 +2570,38 @@
             }
         });
 
+        // Nút Sao Chép ID Hầm Ngục Hiện Tại
+        document.getElementById('zp-btn-copy-dg-id')?.addEventListener('click', () => {
+            const curId = getCurrentDungeonId();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(curId).then(() => {
+                    showToast(`📋 Đã sao chép ID Hầm Ngục: <b>${curId}</b>`);
+                }).catch(() => {
+                    prompt('Mã ID Hầm Ngục hiện tại của bạn:', curId);
+                });
+            } else {
+                prompt('Mã ID Hầm Ngục hiện tại của bạn:', curId);
+            }
+        });
+
+        // Nút Vào Lại Hầm Ngục Hiện Tại (Re-enter)
+        document.getElementById('zp-btn-reenter-dg')?.addEventListener('click', () => {
+            const curId = getCurrentDungeonId();
+            const pSize = parseInt(dgPartySel?.value) || 1;
+            travelToPlanet('dungeon', curId, pSize);
+        });
+
+        // Nút Tạm Rời Hầm Ngục Về Nhà (Lưu giữ ID để vào lại bất kỳ lúc nào)
+        document.getElementById('zp-btn-exit-dg-temp')?.addEventListener('click', () => {
+            const curId = getCurrentDungeonId();
+            if (curId) {
+                lastKnownDungeonId = curId;
+                localStorage.setItem('zp-last-dg-id', curId);
+            }
+            travelToPlanet('home');
+            showToast(`🏠 Đã tạm rời về Mầm Xanh. Mã phòng [<b>${curId}</b>] đã được lưu lại để vào lại bất kỳ lúc nào!`, 4000);
+        });
+
         // Bind Config Checkboxes & Inputs
         const bindCheck = (id, obj, prop) => {
             const el = document.getElementById(id);
@@ -2473,6 +2642,7 @@
 
         // Tab Farm
         bindCheck('cfg-farm-en', CFG.farm, 'enabled');
+        bindCheck('cfg-farm-safe', CFG.farm, 'safeMode');
         bindCheck('cfg-farm-instant', CFG.farm, 'instantGrow');
         bindCheck('cfg-farm-loop', CFG.farm, 'autoLoop');
         bindCheck('cfg-farm-harvest', CFG.farm, 'autoHarvest');
@@ -2553,6 +2723,18 @@
         const elCrops = document.getElementById('stat-crops');
         if (elBoss) elBoss.textContent = stats.bossesKilled;
         if (elCrops) elCrops.textContent = stats.cropsHarvested;
+
+        // Cập nhật Dynamic Dungeon ID & Level Người Chơi
+        const elDgId = document.getElementById('zp-current-dg-id');
+        if (elDgId) {
+            const curDg = getCurrentDungeonId();
+            elDgId.textContent = curDg;
+        }
+        const elFarmLvl = document.getElementById('zp-farm-user-lvl');
+        if (elFarmLvl) {
+            const pLvl = (G && G.save && G.save.lvl) ? G.save.lvl : 1;
+            elFarmLvl.textContent = `Cấp độ: Lv ${pLvl}`;
+        }
     }
 
     function showToast(msg, duration = 3000) {

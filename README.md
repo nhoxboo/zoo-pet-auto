@@ -1,26 +1,37 @@
-# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.3.3
+# 🐾 Zoo Pet - All-in-One Auto Pro Tool v3.4.0
 
 Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web game **Zoo Pet** (https://zoo-pet.store/).
 
 ---
 
-## 🌟 Bản Cập Nhật Lớn v3.3.3 (Khắc Phục Lỗi Tải Game .clone() & Tối Ưu Hóa Hook Kết Nối)
+## 🌟 Bản Cập Nhật Lớn v3.4.0 (Nông Trại VIP Pro 0s & Hầm Ngục Tùy Ý Số Lượng Người 1-5)
 
-* **🛡️ Sửa Dứt Điểm Lỗi "Lỗi tải game: Cannot read properties of undefined (reading 'clone')":**
-  - Đã loại bỏ hoàn toàn các can thiệp vào `Object.prototype`, đảm bảo hệ thống Three.js của game và các mô hình 3D (.glb) tải $100\%$ mượt mà không bị lỗi sao chép thuộc tính.
-* **⚡ Native Main-World Regex Hook & Window.game Setter:**
-  - Patch `RegExp.prototype.test` và bẫy setter trên `window.game` tại Main World, đảm bảo `Pb = true` và bắt dính `window.game = $` ngay khi game vừa nạp xong map.
-* **🎁 Tự Động Lụm Sạch Đồ Khi Đánh Quái & Boss:**
-  - Tích hợp Nam Châm hút đồ tự động ngay trong chu trình chiến đấu `runCombatEngine()`.
-  - Quét và hút sạch cả 3 nguồn rơi đồ: `drops.items` (vật phẩm), `drops.bags` (hũ/túi đồ), và `drops.world` (vật phẩm rơi từ máy chủ).
-  - Tự động mở khóa `item.lock = false` và cập nhật tuổi thọ `item.age > 0.6s` để nhân vật hấp thụ ngay lập tức vào túi đồ mà không bị rơi rớt lại phía sau.
-* **⚔️ Tiêu Diệt Lần Lượt 100% TẤT CẢ Boss Trên Map:**
-  - Nhận diện toàn bộ 68 loại Boss trong game (`Df`), quét sạch từng Boss một trên toàn bộ bản đồ trước khi chuyển sang giai đoạn nhặt đồ.
-* **🏰 Hầm Ngục Cổ Đại Solo 1 Người & Vô Hạn Lượt:**
-  - Chống văng map (`Anti-dgGone`) vĩnh viễn cho đến khi phá đảo 5 Ải.
-* **🎣 Cơ Chế Kéo Cần Câu Cá Mượt Mà:**
-  - Đầy đủ hoạt ảnh quăng cần, giật cá, uốn cần kéo cá và cá nhảy lên bờ.
-* **👑 Trọn Bộ VIP Cheats:**
+* **🌾 Nông Trại VIP Pro (Trồng Nhanh & Thu Hoạch Liền 0 Giây):**
+  - **⚡ Cây Lớn Tức Thì 0s (Instant Grow):** Mọi cây trồng trên tất cả các ô đất chín $100\%$ ngay khi gieo hạt (`plot.state.t0 = 0`), không cần chờ hàng giờ sinh trưởng.
+  - **🔄 Auto Farm Vô Hạn (Infinite Loop):** Tự động gieo trồng kín ô $\to$ Cây chín tức thì $\to$ Thu hoạch sạch $\to$ Tiếp tục vòng lặp mới không ngừng nghỉ, farm hàng vạn nông sản và EXP siêu tốc.
+  - **🍑 Danh Mục Nông Sản VIP Không Cần Hạt Giống:** Tận dụng triệt để các loại cây cao cấp không tiêu hao hạt giống trong túi:
+    - **🍑 Đào Tiên Bất Tử:** $+1.400$ EXP, $+2.200$ Năng Lượng (Top 1 Game).
+    - **🍒 Vải Thiều Đỏ Rực:** $+1.100$ EXP, $+1.800$ Năng Lượng ($+15\%$ Crit, $+20\%$ Haste).
+    - **🍈 Sầu Riêng Gai Góc:** $+950$ EXP, $+1.500$ Năng Lượng ($+25$ Giáp).
+    - **🥥 Dừa Xiêm Mát Lành:** $+800$ EXP, $+1.300$ Năng Lượng (Hồi 400 Máu).
+    - **🍍 Dứa Vương Miện:** $+750$ EXP, $+1.200$ Năng Lượng ($+25\%$ Sát thương).
+    - **🥭 Xoài Cát, 🍇 Nho Tím, 🍎 Táo Đỏ, 🍉 Dưa Cầu Vồng, ⭐ Nấm Sao, v.v.**
+  - **🚀 Nút Hành Động 1-Click:**
+    - `🌱 Trồng Kín Ô Đất`: Lấp đầy mọi ô đất trống bằng loại cây đã chọn.
+    - `🧺 Thu Hoạch Toàn Bộ`: Thu hoạch toàn bộ ô đất đang có cây chín.
+    - `🚀 1-Click Chu Trình`: Tự động Thu hoạch sạch $\to$ Trồng kín $\to$ Thu hoạch tiếp trong 0.6s.
+
+* **🏰 Hầm Ngục Cổ Đại Đi Đội & Solo Tùy Ý (1, 2, 3, 4 hoặc 5 Người):**
+  - **👥 Không Bắt Buộc Đủ 5 Người:** Hỗ trợ đi Ải với bất kỳ số lượng thành viên nào: 1 người (Solo), 2 người (Đôi bạn), 3 người, 4 người, hoặc 5 người đầy đủ.
+  - **🔑 Mã Phòng Chung:** Nhập mã phòng đội (ví dụ: `team1`, `nam123`) để anh Nam và bạn bè cùng vào chung một phòng hầm ngục và chiến đấu cùng nhau.
+  - **🚀 Bắt Đầu Ải Liền:** Nút bấm kích hoạt mở Ải 1 ngay lập tức khi cả nhóm đã vào phòng chờ, không cần chờ 20 giây đếm ngược.
+  - **🛡️ Anti-dgGone & Vô Hạn Lượt:** Vượt qua giới hạn 2 lượt/ngày và triệt tiêu lỗi văng về Mầm Xanh khi vào hầm ngục.
+
+* **⚔️ Tiêu Diệt Lần Lượt 100% Boss & Hút Sạch Đồ Rơi:**
+  - Nhận diện toàn bộ 68 loại Boss trong game (`Df`), diệt sạch Boss trên map rồi mới đổi hành tinh.
+  - Nam Châm hút sạch cả 3 nguồn đồ rơi (`drops.items`, `drops.bags`, `drops.world`) vào túi.
+
+* **🎣 Auto Câu Cá Kéo Cần Hoạt Ảnh Chuẩn Xác & VIP Cheats Toàn Diện:**
   - Bất Tử Toàn Diện (Kháng độc, nham thạch, gai).
   - Tăng Điểm Kinh Nghiệm EXP ($2\times \to 50\times$).
   - One-Hit Sát Thương & Không Thời Gian Hồi Chiêu.
@@ -31,17 +42,18 @@ Tool Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-Detection** cho web ga
 
 | Module | Tính Năng | Mô Tả |
 | :--- | :--- | :--- |
-| **Kết Nối** | **⚡ Main-World Hook** | Bắt dính Game Engine 100% không lỗi nạp 3D và không xung đột Three.js |
+| **Nông Trại** | **⚡ Trồng & Thu Hoạch 0s** | Cây lớn tức thì 0 giây, tự động gieo trồng và thu hoạch vô hạn |
+| **Nông Trại** | **🍑 Nông Sản VIP Top 1** | Đào Tiên, Vải Thiều, Sầu Riêng, Dừa Xiêm (+1.400 EXP / cây) |
+| **Du Hành & Đi Ải** | **🏰 Hầm Ngục 1 - 5 Người** | Đi ải tự do 1, 2, 3, 4 hoặc 5 người, mã phòng chung, mở ải tức thì |
+| **Du Hành & Đi Ải** | **🚀 Chuyển Nhanh 9 Hành Tinh** | Dịch chuyển tức thì đến bất kỳ hành tinh nào chỉ với 1 click |
 | **Chiến Đấu** | **⚔️ Auto Đánh & Săn Boss** | Đánh quái / Boss toàn map và tự động hút sạch đồ rơi vào túi |
 | **Thu Thập** | **🎁 Hút Sạch Đồ & Rương** | Mở khóa và hút toàn bộ vật phẩm, hũ báu vật rơi ngay lập tức |
-| **Du Hành & Đi Ải** | **🏰 Hầm Ngục Cổ Đại Solo** | Vào 5 Ải hầm ngục 1 mình ngay lập tức, chống văng map, không giới hạn lượt |
-| **Du Hành & Đi Ải** | **🚀 Chuyển Nhanh 9 Hành Tinh** | Dịch chuyển tức thì đến bất kỳ hành tinh nào chỉ với 1 click |
 | **Câu Cá** | **🎣 Auto Câu Cá Mọi Hồ** | Tự tìm hồ nước, quăng câu, giật cá và kéo cần mượt mà chống đứt dây |
 | **VIP Cheats** | **🛡️ Bất Tử Toàn Diện** | Miễn nhiễm $100\%$ sát thương quái, độc, lửa, dung nham và gai |
 | **VIP Cheats** | **⭐ Nhân EXP ($1\times \to 50\times$)** | Tăng hệ số nhận kinh nghiệm giúp thăng cấp siêu tốc |
 | **VIP Cheats** | **🧲 Nam Châm Hút Đồ** | Hút toàn bộ rương, túi quà, đá sao và vật phẩm rơi về vị trí nhân vật |
 | **Nhiệm Vụ** | **📜 Auto Nhận & Trả Q** | Tự động hoàn thành nhiệm vụ hằng ngày không gửi packet ảo |
-| **Hệ Thống** | **🔄 Nút Kết Nối Lại 5s** | Quét kiên trì 5 giây kết nối lại tức thì không cần reload map |
+| **Kết Nối** | **⚡ Main-World Hook** | Bắt dính Game Engine 100% không lỗi nạp 3D và không xung đột Three.js |
 
 ---
 

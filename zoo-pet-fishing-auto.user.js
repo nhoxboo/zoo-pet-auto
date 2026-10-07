@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - Auto Fishing Pro (Tự Động Câu Cá VIP)
 // @namespace    https://zoo-pet.store/
-// @version      1.1.0
-// @description  Module chuyên dụng Tự Động Câu Cá Đỉnh Cao, Du Hành Nhanh 9 Hành Tinh & Nhập ID Hầm Ngục Cổ Đại cho Zoo Pet. Phím tắt F2. Bản quyền: Hoài Nam.
+// @version      1.2.0
+// @description  Module chuyên dụng Tự Động Câu Cá VIP, Trạng Thái Kết Nối Game Engine, Du Hành Nhanh 9 Hành Tinh & Nhập ID Hầm Ngục Cổ Đại cho Zoo Pet. Phím tắt F2. Bản quyền: Hoài Nam.
 // @author       Hoài Nam
 // @copyright    Bản quyền © Hoài Nam - All Rights Reserved
 // @match        https://*.cloudfront.net/*
@@ -149,7 +149,7 @@
         return localStorage.getItem('zp-last-dg-id') || 'team1';
     }
 
-    // --- HÀM CHUYỂN HÀNH TINH NHANH & ĐI ẢI HẦM NGỤC ---
+    // --- HÀM CHUYỂN HÀNH TINH NHANH & ĐI ẢI HẦM NGỤC (CHUẨN 100% CẢ 9 HÀNH TINH) ---
     async function travelToPlanet(targetPlanet, customRoomId, partySize) {
         if (!targetPlanet) return;
         const pName = PLANET_DATA[targetPlanet]?.name || targetPlanet;
@@ -179,6 +179,16 @@
             }
         } catch (_) {}
 
+        // Ghi trực tiếp hành tinh vào localStorage để Game Engine đọc chuẩn xác
+        try {
+            const rawSave = localStorage.getItem('zoo-pet-save-v2');
+            if (rawSave) {
+                const parsed = JSON.parse(rawSave);
+                parsed.planet = targetPlanet;
+                localStorage.setItem('zoo-pet-save-v2', JSON.stringify(parsed));
+            }
+        } catch (_) {}
+
         if (G && G.save) {
             G.save.planet = targetPlanet;
             if (typeof G.persist === 'function') {
@@ -191,7 +201,10 @@
         }
 
         setTimeout(() => {
-            location.href = location.pathname;
+            // Chuyển hướng kèm theo query parameter ?planet=... để Game Engine luôn đọc chính xác hành tinh đích
+            const url = new URL(location.href);
+            url.searchParams.set('planet', targetPlanet);
+            location.href = url.toString();
         }, 500);
     }
 
@@ -491,6 +504,15 @@
                     </div>
                 </div>
                 <button id="zp-fishing-close" style="background: rgba(255,255,255,0.2); border: none; color: #FFFFFF; width: 24px; height: 24px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+            </div>
+
+            <!-- Thanh Trạng Thái Kết Nối Game Engine -->
+            <div id="zp-engine-conn-bar" style="padding: 6px 14px; background: #FEF2F2; border-bottom: 1px solid #FECACA; display: flex; align-items: center; justify-content: space-between; font-size: 11px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span id="zp-conn-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #EF4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);"></span>
+                    <span id="zp-conn-text" style="font-weight: 700; color: #991B1B;">Chưa kết nối Game Engine</span>
+                </div>
+                <span id="zp-conn-player-info" style="font-size: 10px; color: #7F1D1D; font-weight: 600;">Vui lòng mở game</span>
             </div>
 
             <!-- Tab Switcher Bar -->
@@ -877,8 +899,63 @@
         if (elRare) elRare.textContent = stats.rareCaught;
         if (elLiveDg) elLiveDg.textContent = getCurrentDungeonId();
 
+        const G = getGame();
+
+        // Cập nhật thanh trạng thái kết nối Game Engine
+        const connBar = document.getElementById('zp-engine-conn-bar');
+        const connDot = document.getElementById('zp-conn-dot');
+        const connText = document.getElementById('zp-conn-text');
+        const connPlayer = document.getElementById('zp-conn-player-info');
+        const floatBtn = document.getElementById('zp-fishing-float');
+
+        if (G && G.player) {
+            if (connBar) {
+                connBar.style.background = '#F0FDF4';
+                connBar.style.borderBottom = '1px solid #BBF7D0';
+            }
+            if (connDot) {
+                connDot.style.background = '#22C55E';
+                connDot.style.boxShadow = '0 0 8px rgba(34, 197, 94, 0.8)';
+            }
+            if (connText) {
+                connText.textContent = '🟢 Game Engine: ĐÃ KẾT NỐI';
+                connText.style.color = '#166534';
+            }
+            if (connPlayer) {
+                const pName = G.save?.name || 'Người chơi';
+                const pLvl = G.save?.lvl || 1;
+                const curP = PLANET_DATA[G.save?.planet]?.name || (G.save?.planet || 'Mầm Xanh');
+                connPlayer.textContent = `👤 ${pName} (Lv.${pLvl}) • 📍 ${curP.split(' ')[0]}`;
+                connPlayer.style.color = '#15803D';
+            }
+            if (floatBtn) {
+                floatBtn.style.border = '2px solid #22C55E';
+                floatBtn.title = 'Zoo Pet Fishing Pro (Đã kết nối Game Engine - Bấm F2 hoặc chạm để mở)';
+            }
+        } else {
+            if (connBar) {
+                connBar.style.background = '#FEF2F2';
+                connBar.style.borderBottom = '1px solid #FECACA';
+            }
+            if (connDot) {
+                connDot.style.background = '#EF4444';
+                connDot.style.boxShadow = '0 0 6px rgba(239, 68, 68, 0.6)';
+            }
+            if (connText) {
+                connText.textContent = '🔴 Game Engine: CHƯA KẾT NỐI';
+                connText.style.color = '#991B1B';
+            }
+            if (connPlayer) {
+                connPlayer.textContent = 'Vui lòng mở game...';
+                connPlayer.style.color = '#7F1D1D';
+            }
+            if (floatBtn) {
+                floatBtn.style.border = 'none';
+                floatBtn.title = 'Zoo Pet Fishing Pro (Đang chờ Game Engine - Bấm F2 hoặc chạm để mở)';
+            }
+        }
+
         if (elStatus) {
-            const G = getGame();
             if (!G || !G.fishing) {
                 elStatus.textContent = 'Chưa vào game';
                 elStatus.style.color = '#94A3B8';

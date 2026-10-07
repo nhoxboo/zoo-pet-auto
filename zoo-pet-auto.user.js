@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.4.1
+// @version      3.4.2
 // @description  Tool Auto toàn diện, An Toàn 100% Anti-Detection cho Zoo Pet: Nông Trại VIP Pro (Trồng Nhanh & Thu Hoạch An Toàn Kháng Reject Máy Chủ, Tự Động Theo Cấp Độ, Cày EXP Vô Hạn), Quản Lý ID Hầm Ngục & Ra Vào Tùy Ý (1-5 Người), Tự Động Kết Nối MAIN WORLD 100%, Lụm Sạch Đồ & Rương Sau Khi Đánh Quái/Boss, Săn Sạch Boss Mới Chuyển Map, Chống Văng Hầm Ngục Solo, Auto Câu Cá Chuẩn Kéo Cần, Bất Tử Toàn Diện, Nhân EXP Siêu Tốc.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
@@ -1291,6 +1291,16 @@
             }
         } catch (_) {}
 
+        // Ghi trực tiếp hành tinh vào localStorage để Game Engine đọc chuẩn xác
+        try {
+            const rawSave = localStorage.getItem('zoo-pet-save-v2');
+            if (rawSave) {
+                const parsed = JSON.parse(rawSave);
+                parsed.planet = targetPlanet;
+                localStorage.setItem('zoo-pet-save-v2', JSON.stringify(parsed));
+            }
+        } catch (_) {}
+
         if (G && G.save) {
             G.save.planet = targetPlanet;
             if (typeof G.persist === 'function') G.persist();
@@ -1301,7 +1311,9 @@
         }
 
         setTimeout(() => {
-            location.href = location.pathname;
+            const url = new URL(location.href);
+            url.searchParams.set('planet', targetPlanet);
+            location.href = url.toString();
         }, 500);
     }
 

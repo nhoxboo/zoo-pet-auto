@@ -12,9 +12,8 @@ Bộ công cụ Userscript Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-
 
 ### 🎣 Tính Năng Chuyên Sâu Của Auto Fishing Pro:
 * **🚶 Tự Tìm Hồ & Di Chuyển:** Tự động định vị hồ nước gần nhất trên mọi hành tinh, tự động bước tới mép bờ và dừng đúng vị trí để quăng cần.
-* **⚡ Cá Cắn Câu Siêu Tốc (Quick Bite):** Tự động thu hút đàn cá và kích hoạt cá cắn câu ngay khi phao chạm nước, không cần chờ đợi.
 * **🎯 Điều Tiết Lực Căng Chống Đứt Dây (Tension Regulator):** Tự động giữ cần và kéo cá liên tục khi an toàn; tự động nhả nhịp thông minh khi độ căng dây $\ge 85\%$ để chống đứt dây tuyệt đối.
-* **🚀 Kéo Cá Siêu Tốc (Ultra Reel):** Rút ngắn thời gian kéo cá lên bờ với đầy đủ hiệu ứng bọt nước, uốn cong cần và cá bay vào túi $100\%$.
+* **🐟 Kéo Cần & Hoạt Ảnh Tự Nhiên 100%:** Giữ nguyên nhịp cắn câu và tiến trình kéo cá tự nhiên của game, uốn cong cần, bọt sóng và cá bay vào túi chuẩn xác chống phát hiện.
 * **✨ Triệu Hồi Cá Bí Ẩn / Huyền Thoại (`callMystery`):** Tăng tối đa tỷ lệ xuất hiện cá Hiếm & Huyền Thoại (Cá Rồng Vàng, Cá Voi Con, Kraken, Cá Cầu Vồng...).
 * **🍀 Tự Động Buff May Mắn (+Luck):** Gia tăng phẩm chất cá câu được.
 * **🛡️ Bất Tử Khi Câu Cá:** Tự động duy trì trạng thái bất tử, không bị quái vật xung quanh quấy rầy hay đánh chết trong lúc cắm câu qua đêm.

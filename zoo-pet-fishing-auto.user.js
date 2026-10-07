@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - Auto Fishing Pro (Tự Động Câu Cá VIP)
 // @namespace    https://zoo-pet.store/
-// @version      1.0.0
-// @description  Module chuyên dụng Tự Động Câu Cá Đỉnh Cao cho Zoo Pet: Tự tìm hồ nước, quăng cần, cắn câu siêu tốc, kéo cần chuẩn xác chống đứt dây, triệu hồi cá huyền thoại, bất tử khi câu. Phím tắt F2. Bản quyền: Hoài Nam.
+// @version      1.0.1
+// @description  Module chuyên dụng Tự Động Câu Cá Đỉnh Cao cho Zoo Pet: Tự tìm hồ nước, quăng cần, kéo cần chuẩn xác chống đứt dây, triệu hồi cá huyền thoại, bất tử khi câu. Phím tắt F2. Bản quyền: Hoài Nam.
 // @author       Hoài Nam
 // @copyright    Bản quyền © Hoài Nam - All Rights Reserved
 // @match        https://*.cloudfront.net/*
@@ -92,10 +92,8 @@
     const DEFAULT_CFG = {
         enabled: false,           // Bật/Tắt Auto Câu Cá tổng
         autoWalk: true,           // Tự tìm hồ nước & đi tới bờ hồ gần nhất
-        quickBite: true,          // Cá cắn câu siêu tốc khi phao chạm nước
         autoReel: true,           // Tự động giữ cần kéo cá
         tensionControl: true,     // Tự động nhả nhịp chống đứt dây khi quá căng
-        ultraSpeed: false,        // Kéo cá siêu tốc (Tiết kiệm thời gian)
         summonMystery: true,      // Triệu hồi bóng cá bí ẩn / khổng lồ
         luckBuff: true,           // Kích hoạt buff may mắn (+Luck)
         safeGodmode: true,        // Bất tử khi câu cá (Quái không cắn chết)
@@ -321,23 +319,7 @@
                 }
             }
 
-            // Giai đoạn chờ cá: Kích hoạt cá cắn câu siêu tốc
-            if (CFG.quickBite) {
-                if (fishing.phase === 'wait' || fishing.phase === 'approach' || fishing.phase === 'nibble') {
-                    fishing.waitT = 0;
-                    if (!fishing.interest && typeof fishing.attract === 'function') {
-                        try { fishing.attract(); } catch (_) {}
-                    }
-                    if (fishing.interest) {
-                        if (typeof fishing.startBite === 'function' && fishing.phase !== 'bite') {
-                            try { fishing.startBite(fishing.interest); } catch (_) {}
-                        }
-                        fishing.phase = 'bite';
-                    }
-                }
-            }
-
-            // Giai đoạn cá đớp mồi (Bite) -> Giật cần (Hook)
+            // Giai đoạn cá đớp mồi tự nhiên (Bite) -> Tự động giật cần (Hook)
             if (fishing.phase === 'bite') {
                 if (typeof fishing.hook === 'function') {
                     try { fishing.hook(); } catch (_) {}
@@ -347,7 +329,7 @@
                 return;
             }
 
-            // Giai đoạn kéo cá (Hooked / Reeling) -> Kiểm soát độ căng dây
+            // Giai đoạn kéo cá (Hooked / Reeling) -> Kiểm soát độ căng dây chuẩn xác
             if (fishing.phase === 'hooked' && CFG.autoReel) {
                 const reelBtn = document.querySelector('#reel');
                 if (reelBtn) reelBtn.classList.add('down');
@@ -364,13 +346,6 @@
                         try { fishing.press(); } catch (_) {}
                     }
                     fishing.holding = true;
-                }
-
-                // Chế độ kéo cá siêu tốc
-                if (CFG.ultraSpeed) {
-                    fishing.holding = true;
-                    fishing.progress = Math.min(1, (fishing.progress || 0) + 0.06);
-                    fishing.tension = Math.min(0.45, fishing.tension || 0);
                 }
 
                 // Khi tiến trình kéo đạt 100% -> Hoàn thành câu cá
@@ -489,33 +464,11 @@
 
                 <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <div>
-                        <div style="font-weight: 600; font-size: 11.5px;">⚡ Cá cắn câu siêu tốc</div>
-                        <div style="font-size: 10px; color: #64748B;">Thu hút cá và cắn câu ngay khi phao chạm nước</div>
-                    </div>
-                    <label class="zp-fish-switch">
-                        <input type="checkbox" id="cfg-fish-bite" ${CFG.quickBite ? 'checked' : ''}>
-                        <span class="zp-fish-slider"></span>
-                    </label>
-                </div>
-
-                <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div>
                         <div style="font-weight: 600; font-size: 11.5px;">🎯 Điều tiết lực căng chống đứt dây</div>
                         <div style="font-size: 10px; color: #64748B;">Tự động nhả nhịp khi lực căng >= 85%</div>
                     </div>
                     <label class="zp-fish-switch">
                         <input type="checkbox" id="cfg-fish-tension" ${CFG.tensionControl ? 'checked' : ''}>
-                        <span class="zp-fish-slider"></span>
-                    </label>
-                </div>
-
-                <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div>
-                        <div style="font-weight: 600; font-size: 11.5px;">🚀 Kéo cá siêu tốc (Ultra Reel)</div>
-                        <div style="font-size: 10px; color: #64748B;">Tăng tốc tiến trình kéo cá lên bờ</div>
-                    </div>
-                    <label class="zp-fish-switch">
-                        <input type="checkbox" id="cfg-fish-ultra" ${CFG.ultraSpeed ? 'checked' : ''}>
                         <span class="zp-fish-slider"></span>
                     </label>
                 </div>
@@ -644,9 +597,7 @@
 
         bindCheck('cfg-fish-en', 'enabled');
         bindCheck('cfg-fish-walk', 'autoWalk');
-        bindCheck('cfg-fish-bite', 'quickBite');
         bindCheck('cfg-fish-tension', 'tensionControl');
-        bindCheck('cfg-fish-ultra', 'ultraSpeed');
         bindCheck('cfg-fish-mystery', 'summonMystery');
         bindCheck('cfg-fish-luck', 'luckBuff');
         bindCheck('cfg-fish-godmode', 'safeGodmode');

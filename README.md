@@ -17,6 +17,8 @@ Bộ công cụ Userscript Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-
 * **✨ Triệu Hồi Cá Bí Ẩn / Huyền Thoại (`callMystery`):** Tăng tối đa tỷ lệ xuất hiện cá Hiếm & Huyền Thoại (Cá Rồng Vàng, Cá Voi Con, Kraken, Cá Cầu Vồng...).
 * **🍀 Tự Động Buff May Mắn (+Luck):** Gia tăng phẩm chất cá câu được.
 * **🛡️ Bất Tử Khi Câu Cá:** Tự động duy trì trạng thái bất tử, không bị quái vật xung quanh quấy rầy hay đánh chết trong lúc cắm câu qua đêm.
+* **🚀 Du Hành Nhanh 9 Hành Tinh:** 1-Click dịch chuyển tức thì giữa 9 hành tinh (Mầm Xanh, Sa Mạc, Băng Giá, Núi Lửa, Đáy Biển, Đảo Trên Mây, Trạm Vũ Trụ, Vùng Đất Độc, Cyber) để tìm các loài cá đặc thù.
+* **🏰 Quản Lý ID Hầm Ngục & Ra/Vào Tự Do (1-5 Người):** Nhập ID phòng tùy ý, hiển thị Live Room ID, nút Copy ID, Vào lại phòng này và Tạm rời về nhà giữ ID.
 * **📊 Bảng Thống Kê & Toast Thông Báo:** Đếm số lượng cá đã câu, danh sách cá hiếm và thông báo nổi khi giật được cá huyền thoại.
 
 ---

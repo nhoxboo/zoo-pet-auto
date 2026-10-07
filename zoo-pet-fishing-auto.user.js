@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Zoo Pet - Auto Fishing Pro (Tự Động Câu Cá VIP)
 // @namespace    https://zoo-pet.store/
-// @version      1.0.1
-// @description  Module chuyên dụng Tự Động Câu Cá Đỉnh Cao cho Zoo Pet: Tự tìm hồ nước, quăng cần, kéo cần chuẩn xác chống đứt dây, triệu hồi cá huyền thoại, bất tử khi câu. Phím tắt F2. Bản quyền: Hoài Nam.
+// @version      1.1.0
+// @description  Module chuyên dụng Tự Động Câu Cá Đỉnh Cao, Du Hành Nhanh 9 Hành Tinh & Nhập ID Hầm Ngục Cổ Đại cho Zoo Pet. Phím tắt F2. Bản quyền: Hoài Nam.
 // @author       Hoài Nam
 // @copyright    Bản quyền © Hoài Nam - All Rights Reserved
 // @match        https://*.cloudfront.net/*
@@ -119,6 +119,81 @@
     }
 
     loadConfig();
+
+    // --- DANH SÁCH 9 HÀNH TINH & HẦM NGỤC TRONG ZOO PET ---
+    const PLANET_DATA = {
+        home: { name: 'Mầm Xanh (Home)', icon: '🌱', desc: 'Nông trại, làng mạc & hồ cá' },
+        desert: { name: 'Sa Mạc Cát Vàng', icon: '🏜️', desc: 'Ốc đảo sa mạc & cá nhiệt đới' },
+        ice: { name: 'Băng Giá Vĩnh Cửu', icon: '❄️', desc: 'Hồ băng & cá chó băng tuyết' },
+        volcano: { name: 'Núi Lửa Rực Cháy', icon: '🌋', desc: 'Dung nham & cá lửa nguyên sinh' },
+        underwater: { name: 'Đáy Biển Sâu', icon: '🌊', desc: 'Đại dương vô tận & Kraken' },
+        sky: { name: 'Đảo Trên Mây', icon: '☁️', desc: 'Hồ trên mây & cá phát sáng' },
+        space: { name: 'Trạm Vũ Trụ', icon: '🚀', desc: 'Trọng lực 0 & sinh vật không gian' },
+        toxic: { name: 'Vùng Đất Độc Hại', icon: '☣️', desc: 'Đầm lầy độc & quái vật biến dị' },
+        cyber: { name: 'Thành Phố Cyber', icon: '🤖', desc: 'Đô thị tương lai & cá cơ khí' },
+        dungeon: { name: 'Hầm Ngục Cổ Đại', icon: '🏰', desc: 'Phụ bản Boss & Rương kho báu' }
+    };
+
+    let lastKnownDungeonId = localStorage.getItem('zp-last-dg-id') || 'team1';
+
+    function getCurrentDungeonId() {
+        try {
+            const raw = sessionStorage.getItem('zp-dg');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && parsed.id) return parsed.id;
+            }
+        } catch (_) {}
+        const G = getGame();
+        if (G && G.planet && G.planet.roomId) return G.planet.roomId;
+        return localStorage.getItem('zp-last-dg-id') || 'team1';
+    }
+
+    // --- HÀM CHUYỂN HÀNH TINH NHANH & ĐI ẢI HẦM NGỤC ---
+    async function travelToPlanet(targetPlanet, customRoomId, partySize) {
+        if (!targetPlanet) return;
+        const pName = PLANET_DATA[targetPlanet]?.name || targetPlanet;
+        const G = getGame();
+
+        try {
+            if (targetPlanet === 'dungeon') {
+                const rId = (customRoomId || lastKnownDungeonId || 'team1').trim();
+                const pCount = Number(partySize || 1);
+                lastKnownDungeonId = rId;
+                localStorage.setItem('zp-last-dg-id', rId);
+                showToast(`🏰 Đang khởi hành vào Hầm Ngục (Phòng: <b>${rId}</b> • <b>${pCount} người</b>)...`, 3500);
+
+                sessionStorage.setItem('zp-dg', JSON.stringify({ id: rId, n: pCount, t: Date.now() }));
+                sessionStorage.setItem('zp-flight', JSON.stringify({ to: 'dungeon', t: Date.now() }));
+            } else {
+                showToast(`🚀 Đang chuyển dịch tới <b>${pName}</b>...`, 3000);
+                sessionStorage.setItem('zp-flight', JSON.stringify({ to: targetPlanet, t: Date.now() }));
+                try {
+                    const sess = JSON.parse(sessionStorage.getItem('zp-dg') || 'null');
+                    if (sess && sess.id) {
+                        lastKnownDungeonId = sess.id;
+                        localStorage.setItem('zp-last-dg-id', sess.id);
+                    }
+                } catch (_) {}
+                sessionStorage.removeItem('zp-dg');
+            }
+        } catch (_) {}
+
+        if (G && G.save) {
+            G.save.planet = targetPlanet;
+            if (typeof G.persist === 'function') {
+                try { G.persist(); } catch (_) {}
+            }
+            if (G.cloud && typeof G.cloud.flushNow === 'function') {
+                await G.cloud.flushNow().catch(() => {});
+            }
+            G.noSave = true;
+        }
+
+        setTimeout(() => {
+            location.href = location.pathname;
+        }, 500);
+    }
 
     // Thống kê phiên câu cá
     const stats = {
@@ -418,98 +493,207 @@
                 <button id="zp-fishing-close" style="background: rgba(255,255,255,0.2); border: none; color: #FFFFFF; width: 24px; height: 24px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
             </div>
 
-            <!-- Bảng thống kê nhanh -->
-            <div style="padding: 10px 14px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 6px 10px; text-align: center;">
-                    <div style="font-size: 10px; color: #64748B; font-weight: 600;">TỔNG CÁ ĐÃ CÂU</div>
-                    <div id="zp-stat-fish" style="font-size: 16px; font-weight: 700; color: #0284C7;">0</div>
+            <!-- Tab Switcher Bar -->
+            <div style="display: flex; background: #F1F5F9; border-bottom: 1px solid #E2E8F0; padding: 4px 6px; gap: 4px;">
+                <button id="zp-tab-btn-fish" style="flex: 1; padding: 6px 2px; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; background: #FFFFFF; color: #2563EB; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">🎣 Câu Cá</button>
+                <button id="zp-tab-btn-planet" style="flex: 1; padding: 6px 2px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; background: transparent; color: #64748B;">🚀 Du Hành</button>
+                <button id="zp-tab-btn-dungeon" style="flex: 1; padding: 6px 2px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; background: transparent; color: #64748B;">🏰 Hầm Ngục</button>
+            </div>
+
+            <!-- ============ TAB 1: CÂU CÁ PRO ============ -->
+            <div id="zp-tab-content-fish" style="display: block;">
+                <!-- Bảng thống kê nhanh -->
+                <div style="padding: 10px 14px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 6px 10px; text-align: center;">
+                        <div style="font-size: 10px; color: #64748B; font-weight: 600;">TỔNG CÁ ĐÃ CÂU</div>
+                        <div id="zp-stat-fish" style="font-size: 16px; font-weight: 700; color: #0284C7;">0</div>
+                    </div>
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 6px 10px; text-align: center;">
+                        <div style="font-size: 10px; color: #64748B; font-weight: 600;">CÁ HIẾM / HUYỀN THOẠI</div>
+                        <div id="zp-stat-rare" style="font-size: 16px; font-weight: 700; color: #EAB308;">0</div>
+                    </div>
                 </div>
-                <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 6px 10px; text-align: center;">
-                    <div style="font-size: 10px; color: #64748B; font-weight: 600;">CÁ HIẾM / HUYỀN THOẠI</div>
-                    <div id="zp-stat-rare" style="font-size: 16px; font-weight: 700; color: #EAB308;">0</div>
+
+                <!-- Trạng thái câu hiện tại -->
+                <div style="padding: 6px 14px; background: #F1F5F9; border-bottom: 1px solid #E2E8F0; font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #64748B;">Trạng thái câu:</span>
+                    <span id="zp-fishing-status" style="font-weight: 600; color: #2563EB;">Đang chờ lệnh...</span>
+                </div>
+
+                <!-- Thân danh sách tính năng câu cá -->
+                <div style="padding: 12px 14px; max-height: 360px; overflow-y: auto;">
+                    <!-- Master Switch -->
+                    <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:8px 10px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px;">
+                        <div>
+                            <div style="font-weight: 700; font-size: 12px; color: #1E40AF;">🎣 BẬT AUTO CÂU CÁ</div>
+                            <div style="font-size: 10px; color: #3B82F6;">Tự động toàn bộ chu trình câu cá</div>
+                        </div>
+                        <label class="zp-fish-switch">
+                            <input type="checkbox" id="cfg-fish-en" ${CFG.enabled ? 'checked' : ''}>
+                            <span class="zp-fish-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Các tùy chọn chi tiết -->
+                    <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 11.5px;">🚶 Tự tìm hồ & đi tới mép nước</div>
+                            <div style="font-size: 10px; color: #64748B;">Tự động chạy đến hồ gần nhất</div>
+                        </div>
+                        <label class="zp-fish-switch">
+                            <input type="checkbox" id="cfg-fish-walk" ${CFG.autoWalk ? 'checked' : ''}>
+                            <span class="zp-fish-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 11.5px;">🎯 Điều tiết lực căng chống đứt dây</div>
+                            <div style="font-size: 10px; color: #64748B;">Tự động nhả nhịp khi lực căng >= 85%</div>
+                        </div>
+                        <label class="zp-fish-switch">
+                            <input type="checkbox" id="cfg-fish-tension" ${CFG.tensionControl ? 'checked' : ''}>
+                            <span class="zp-fish-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 11.5px;">✨ Triệu hồi cá bí ẩn / khổng lồ</div>
+                            <div style="font-size: 10px; color: #64748B;">Tăng tối đa tỷ lệ gặp cá hiếm & vàng</div>
+                        </div>
+                        <label class="zp-fish-switch">
+                            <input type="checkbox" id="cfg-fish-mystery" ${CFG.summonMystery ? 'checked' : ''}>
+                            <span class="zp-fish-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 11.5px;">🍀 Tự động buff May Mắn (+Luck)</div>
+                            <div style="font-size: 10px; color: #64748B;">Tăng phẩm chất cá câu được</div>
+                        </div>
+                        <label class="zp-fish-switch">
+                            <input type="checkbox" id="cfg-fish-luck" ${CFG.luckBuff ? 'checked' : ''}>
+                            <span class="zp-fish-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 11.5px;">🛡️ Bất tử khi câu cá</div>
+                            <div style="font-size: 10px; color: #64748B;">Không bị quái vật cắn chết khi cắm câu</div>
+                        </div>
+                        <label class="zp-fish-switch">
+                            <input type="checkbox" id="cfg-fish-godmode" ${CFG.safeGodmode ? 'checked' : ''}>
+                            <span class="zp-fish-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Nút hành động nhanh -->
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 6px;">
+                        <button id="zp-btn-cast-now" style="background: #16A34A; color: #FFFFFF; border: none; padding: 8px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
+                            🎣 Quăng Cần Ngay Lập Tức
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Trạng thái câu hiện tại -->
-            <div style="padding: 6px 14px; background: #F1F5F9; border-bottom: 1px solid #E2E8F0; font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #64748B;">Trạng thái câu:</span>
-                <span id="zp-fishing-status" style="font-weight: 600; color: #2563EB;">Đang chờ lệnh...</span>
+            <!-- ============ TAB 2: DU HÀNH HÀNH TINH ============ -->
+            <div id="zp-tab-content-planet" style="display: none; padding: 12px 14px; max-height: 380px; overflow-y: auto;">
+                <div style="font-size: 11px; color: #64748B; margin-bottom: 10px; font-weight: 600;">
+                    🚀 Chọn hành tinh muốn dịch chuyển tới tức thì:
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <button class="zp-planet-btn" data-planet="home" style="padding: 10px 8px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; text-align: left; cursor: pointer;">
+                        <div style="font-size: 16px;">🌱</div>
+                        <div style="font-weight: 700; font-size: 11px; color: #166534;">Mầm Xanh</div>
+                        <div style="font-size: 9.5px; color: #15803D;">Nông trại & Hồ cá</div>
+                    </button>
+                    <button class="zp-planet-btn" data-planet="desert" style="padding: 10px 8px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; text-align: left; cursor: pointer;">
+                        <div style="font-size: 16px;">🏜️</div>
+                        <div style="font-weight: 700; font-size: 11px; color: #92400E;">Sa Mạc Cát</div>
+                        <div style="font-size: 9.5px; color: #B45309;">Ốc đảo nhiệt đới</div>
+                    </button>
+                    <button class="zp-planet-btn" data-planet="ice" style="padding: 10px 8px; background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: 8px; text-align: left; cursor: pointer;">
+                        <div style="font-size: 16px;">❄️</div>
+                        <div style="font-weight: 700; font-size: 11px; color: #075985;">Băng Giá</div>
+                        <div style="font-size: 9.5px; color: #0284C7;">Hồ cá băng tuyết</div>
+                    </button>
+                    <button class="zp-planet-btn" data-planet="volcano" style="padding: 10px 8px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; text-align: left; cursor: pointer;">
+                        <div style="font-size: 16px;">🌋</div>
+                        <div style="font-weight: 700; font-size: 11px; color: #991B1B;">Núi Lửa</div>
+                        <div style="font-size: 9.5px; color: #DC2626;">Dung nham rực cháy</div>
+                    </button>
+                    <button class="zp-planet-btn" data-planet="underwater" style="padding: 10px 8px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; text-align: left; cursor: pointer;">
+                        <div style="font-size: 16px;">🌊</div>
+                        <div style="font-weight: 700; font-size: 11px; color: #1E40AF;">Đáy Biển Sâu</div>
+                        <div style="font-size: 9.5px; color: #2563EB;">Đại dương & Thủy quái</div>
+                    </button>
+                    <button class="zp-planet-btn" data-planet="sky" style="padding: 10px 8px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; text-align: left; cursor: pointer;">
+                        <div style="font-size: 16px;">☁️</div>
+                        <div style="font-weight: 700; font-size: 11px; color: #334155;">Đảo Trên Mây</div>
+                        <div style="font-size: 9.5px; color: #64748B;">Hồ mây lơ lửng</div>
+                    </button>
+                    <button class="zp-planet-btn" data-planet="space" style="padding: 10px 8px; background: #FAF5FF; border: 1px solid #E9D5FF; border-radius: 8px; text-align: left; cursor: pointer;">
+                        <div style="font-size: 16px;">🚀</div>
+                        <div style="font-weight: 700; font-size: 11px; color: #6B21A8;">Trạm Vũ Trụ</div>
+                        <div style="font-size: 9.5px; color: #9333EA;">Không trọng lực</div>
+                    </button>
+                    <button class="zp-planet-btn" data-planet="toxic" style="padding: 10px 8px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; text-align: left; cursor: pointer;">
+                        <div style="font-size: 16px;">☣️</div>
+                        <div style="font-weight: 700; font-size: 11px; color: #065F46;">Vùng Độc Hại</div>
+                        <div style="font-size: 9.5px; color: #059669;">Đầm lầy đột biến</div>
+                    </button>
+                    <button class="zp-planet-btn" data-planet="cyber" style="padding: 10px 8px; background: #FDF4FF; border: 1px solid #F5D0FE; border-radius: 8px; text-align: left; cursor: pointer; grid-column: span 2;">
+                        <div style="font-size: 16px;">🤖</div>
+                        <div style="font-weight: 700; font-size: 11px; color: #86198F;">Thành Phố Cyber</div>
+                        <div style="font-size: 9.5px; color: #C026D3;">Đô thị tương lai & Sinh vật cơ khí</div>
+                    </button>
+                </div>
             </div>
 
-            <!-- Thân danh sách tính năng -->
-            <div style="padding: 12px 14px; max-height: 380px; overflow-y: auto;">
-                <!-- Master Switch -->
-                <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:8px 10px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px;">
-                    <div>
-                        <div style="font-weight: 700; font-size: 12px; color: #1E40AF;">🎣 BẬT AUTO CÂU CÁ</div>
-                        <div style="font-size: 10px; color: #3B82F6;">Tự động toàn bộ chu trình câu cá</div>
+            <!-- ============ TAB 3: HẦM NGỤC (NHẬP ID) ============ -->
+            <div id="zp-tab-content-dungeon" style="display: none; padding: 12px 14px; max-height: 380px; overflow-y: auto;">
+                <!-- Banner Live Room ID -->
+                <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px;">
+                    <div style="font-size: 10px; color: #3B82F6; font-weight: 600;">MÃ PHÒNG HẦM NGỤC ĐANG LƯU:</div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+                        <span id="zp-fish-live-dg-id" style="font-weight: 800; font-size: 13px; color: #1E40AF; font-family: monospace;">${getCurrentDungeonId()}</span>
+                        <button id="zp-fish-btn-copy-id" style="background: #2563EB; color: #FFFFFF; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer;">📋 Copy ID</button>
                     </div>
-                    <label class="zp-fish-switch">
-                        <input type="checkbox" id="cfg-fish-en" ${CFG.enabled ? 'checked' : ''}>
-                        <span class="zp-fish-slider"></span>
-                    </label>
                 </div>
 
-                <!-- Các tùy chọn chi tiết -->
-                <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div>
-                        <div style="font-weight: 600; font-size: 11.5px;">🚶 Tự tìm hồ & đi tới mép nước</div>
-                        <div style="font-size: 10px; color: #64748B;">Tự động chạy đến hồ gần nhất</div>
-                    </div>
-                    <label class="zp-fish-switch">
-                        <input type="checkbox" id="cfg-fish-walk" ${CFG.autoWalk ? 'checked' : ''}>
-                        <span class="zp-fish-slider"></span>
-                    </label>
+                <!-- Nhập Room ID tùy ý -->
+                <div style="margin-bottom: 8px;">
+                    <label style="font-size: 11px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px;">Nhập Mã Phòng (Room ID) muốn vào:</label>
+                    <input type="text" id="zp-fish-dg-room-input" placeholder="Ví dụ: team1, boss1, vip99..." value="${lastKnownDungeonId}" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 12px; font-family: monospace; outline: none;">
                 </div>
 
-                <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div>
-                        <div style="font-weight: 600; font-size: 11.5px;">🎯 Điều tiết lực căng chống đứt dây</div>
-                        <div style="font-size: 10px; color: #64748B;">Tự động nhả nhịp khi lực căng >= 85%</div>
-                    </div>
-                    <label class="zp-fish-switch">
-                        <input type="checkbox" id="cfg-fish-tension" ${CFG.tensionControl ? 'checked' : ''}>
-                        <span class="zp-fish-slider"></span>
-                    </label>
+                <!-- Chọn số người -->
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 11px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px;">Số lượng người tham gia:</label>
+                    <select id="zp-fish-dg-size-select" style="width: 100%; padding: 7px 8px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 11.5px; background: #FFFFFF; outline: none;">
+                        <option value="1">👤 1 Người (Solo Hầm Ngục Kháng Kick)</option>
+                        <option value="2">👥 2 Người (Đội 2 Thành Viên)</option>
+                        <option value="3">👥 3 Người (Đội 3 Thành Viên)</option>
+                        <option value="4">👥 4 Người (Đội 4 Thành Viên)</option>
+                        <option value="5">👥 5 Người (Đội Tối Đa 5 Thành Viên)</option>
+                    </select>
                 </div>
 
-                <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div>
-                        <div style="font-weight: 600; font-size: 11.5px;">✨ Triệu hồi cá bí ẩn / khổng lồ</div>
-                        <div style="font-size: 10px; color: #64748B;">Tăng tối đa tỷ lệ gặp cá hiếm & vàng</div>
-                    </div>
-                    <label class="zp-fish-switch">
-                        <input type="checkbox" id="cfg-fish-mystery" ${CFG.summonMystery ? 'checked' : ''}>
-                        <span class="zp-fish-slider"></span>
-                    </label>
-                </div>
+                <!-- Nút Vào Hầm Ngục -->
+                <button id="zp-fish-btn-enter-dungeon" style="width: 100%; background: #16A34A; color: #FFFFFF; border: none; padding: 9px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; margin-bottom: 6px; box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);">
+                    🏰 VÀO HẦM NGỤC VỚI ID NÀY
+                </button>
 
-                <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div>
-                        <div style="font-weight: 600; font-size: 11.5px;">🍀 Tự động buff May Mắn (+Luck)</div>
-                        <div style="font-size: 10px; color: #64748B;">Tăng phẩm chất cá câu được</div>
-                    </div>
-                    <label class="zp-fish-switch">
-                        <input type="checkbox" id="cfg-fish-luck" ${CFG.luckBuff ? 'checked' : ''}>
-                        <span class="zp-fish-slider"></span>
-                    </label>
-                </div>
-
-                <div class="zp-fish-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <div>
-                        <div style="font-weight: 600; font-size: 11.5px;">🛡️ Bất tử khi câu cá</div>
-                        <div style="font-size: 10px; color: #64748B;">Không bị quái vật cắn chết khi cắm câu</div>
-                    </div>
-                    <label class="zp-fish-switch">
-                        <input type="checkbox" id="cfg-fish-godmode" ${CFG.safeGodmode ? 'checked' : ''}>
-                        <span class="zp-fish-slider"></span>
-                    </label>
-                </div>
-
-                <!-- Nút hành động nhanh -->
-                <div style="display: grid; grid-template-columns: 1fr; gap: 6px;">
-                    <button id="zp-btn-cast-now" style="background: #16A34A; color: #FFFFFF; border: none; padding: 8px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
-                        🎣 Quăng Cần Ngay Lập Tức
+                <!-- Các nút phụ trợ -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <button id="zp-fish-btn-reenter-dungeon" style="background: #0284C7; color: #FFFFFF; border: none; padding: 7px 4px; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer;">
+                        🔄 Vào Lại Phòng Này
+                    </button>
+                    <button id="zp-fish-btn-exit-to-home" style="background: #F59E0B; color: #FFFFFF; border: none; padding: 7px 4px; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer;">
+                        🏠 Tạm Về Nhà (Giữ ID)
                     </button>
                 </div>
             </div>
@@ -602,6 +786,75 @@
         bindCheck('cfg-fish-luck', 'luckBuff');
         bindCheck('cfg-fish-godmode', 'safeGodmode');
 
+        // Xử lý chuyển đổi Tab
+        const tabs = [
+            { btn: 'zp-tab-btn-fish', content: 'zp-tab-content-fish' },
+            { btn: 'zp-tab-btn-planet', content: 'zp-tab-content-planet' },
+            { btn: 'zp-tab-btn-dungeon', content: 'zp-tab-content-dungeon' }
+        ];
+
+        tabs.forEach(t => {
+            const btnEl = document.getElementById(t.btn);
+            if (btnEl) {
+                btnEl.addEventListener('click', () => {
+                    tabs.forEach(other => {
+                        const b = document.getElementById(other.btn);
+                        const c = document.getElementById(other.content);
+                        if (other.btn === t.btn) {
+                            if (b) {
+                                b.style.background = '#FFFFFF';
+                                b.style.color = '#2563EB';
+                                b.style.fontWeight = '700';
+                                b.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
+                            }
+                            if (c) c.style.display = 'block';
+                        } else {
+                            if (b) {
+                                b.style.background = 'transparent';
+                                b.style.color = '#64748B';
+                                b.style.fontWeight = '600';
+                                b.style.boxShadow = 'none';
+                            }
+                            if (c) c.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+
+        // Xử lý nút dịch chuyển 9 hành tinh
+        document.querySelectorAll('.zp-planet-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const pId = btn.getAttribute('data-planet');
+                if (pId) travelToPlanet(pId);
+            });
+        });
+
+        // Xử lý Tab Hầm Ngục
+        document.getElementById('zp-fish-btn-copy-id')?.addEventListener('click', () => {
+            const curId = getCurrentDungeonId();
+            navigator.clipboard.writeText(curId).then(() => {
+                showToast(`📋 Đã sao chép mã phòng: <b>${curId}</b>`);
+            }).catch(() => {
+                showToast(`📋 Mã phòng của bạn: <b>${curId}</b>`);
+            });
+        });
+
+        document.getElementById('zp-fish-btn-enter-dungeon')?.addEventListener('click', () => {
+            const inputVal = document.getElementById('zp-fish-dg-room-input')?.value || '';
+            const sizeVal = document.getElementById('zp-fish-dg-size-select')?.value || '1';
+            travelToPlanet('dungeon', inputVal, sizeVal);
+        });
+
+        document.getElementById('zp-fish-btn-reenter-dungeon')?.addEventListener('click', () => {
+            const sizeVal = document.getElementById('zp-fish-dg-size-select')?.value || '1';
+            travelToPlanet('dungeon', lastKnownDungeonId, sizeVal);
+        });
+
+        document.getElementById('zp-fish-btn-exit-to-home')?.addEventListener('click', () => {
+            travelToPlanet('home');
+        });
+
         // Nút quăng cần ngay
         document.getElementById('zp-btn-cast-now')?.addEventListener('click', () => {
             const G = getGame();
@@ -618,9 +871,11 @@
         const elFish = document.getElementById('zp-stat-fish');
         const elRare = document.getElementById('zp-stat-rare');
         const elStatus = document.getElementById('zp-fishing-status');
+        const elLiveDg = document.getElementById('zp-fish-live-dg-id');
 
         if (elFish) elFish.textContent = stats.fishCaught;
         if (elRare) elRare.textContent = stats.rareCaught;
+        if (elLiveDg) elLiveDg.textContent = getCurrentDungeonId();
 
         if (elStatus) {
             const G = getGame();

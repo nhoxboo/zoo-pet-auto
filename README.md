@@ -23,9 +23,20 @@ Bộ công cụ Userscript Auto & VIP Cheats toàn diện, **An Toàn 100% Anti-
 
 ---
 
-## 🌟 2. Bản Đầy Đủ: Zoo Pet All-in-One Auto Pro Tool v3.4.1
+## 🌟 2. Bản Đầy Đủ: Zoo Pet All-in-One Auto Pro Tool v3.5.0
 *Tệp Userscript:* `zoo-pet-auto.user.js`  
 *Link cài đặt:* 👉 **[https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js](https://raw.githubusercontent.com/nhoxboo/zoo-pet-auto/main/zoo-pet-auto.user.js)**
+
+### 🎒 Kho Item & Biến Đổi Vật Phẩm Trong Túi (Item Swapper & Spawner 227+ Items)
+* **⚡ Biến Đổi Item Trong Túi (Item Swapper):** Chọn ô chứa vật phẩm rác bất kỳ trong túi đồ (Ủng cũ, khúc gỗ, đá vụn...) và biến đổi ngay tức thì thành bất kỳ món đồ VIP mong muốn (Cá Rồng Vàng, Búa Sấm Sét, Pet Colossus, Ngọc Huyền Thoại...) kèm số lượng tùy chọn (1 - 99).
+* **📦 Tra Cứu Toàn Bộ 227+ Items Trong Game:** Tìm kiếm theo tên hoặc ID theo thời gian thực; hỗ trợ bộ lọc nhanh 10 danh mục: ⚔️ Vũ khí, 👑 Mũ, 🛡️ Giáp, 🐲 Pet, 🐟 Cá, 💎 Nguyên liệu, 🌾 Nông sản, 🎭 Cải trang, 🏡 Trang trí.
+* **🎁 Nhận Trực Tiếp Vào Túi (1-Click Spawner):** Nút `Nhận x1` hoặc `Nhận x99` trên từng thẻ vật phẩm để nạp thẳng vào túi đồ (tự tìm ô trống hoặc thả chân khi đầy túi).
+* **✨ Mặc Ngay Lên Người (Direct Equip):** 1-Click trang bị tức thì Vũ khí / Mũ / Giáp Huyền Thoại lên người nhân vật mà không cần tìm kiếm thủ công.
+
+### 🔨 Tăng Tỉ Lệ Rèn Đồ 100% (Thần Rèn Bất Bại) & Cường Hóa +15 MAX Thần Tốc
+* **🔥 Tỉ Lệ Rèn 100% Không Bao Giờ Xịt:** Can thiệp logic Lò Rèn Cổ giúp mọi lần nâng cấp vũ khí tại lò rèn luôn thành công $100\%$, không lo mất nguyên liệu hay tụt cấp.
+* **⚡ Cường Hóa +15 MAX Tức Thì:** 1-Click nâng thẳng vũ khí đang cầm lên cấp tối đa **+15 MAX** (tăng tối đa hệ số sát thương nhân vật) mà không tốn bất kỳ nguyên liệu hay tiền vàng nào.
+* **🛠️ Tùy Chỉnh Cấp Rèn Linh Hoạt:** Chọn cấp độ bất kỳ từ +1 đến +15 cho vũ khí.
 
 ### 🌾 Nông Trại VIP Pro (Kháng Reject Máy Chủ 100% & Tự Động Theo Cấp Độ)
 * **🌱 Thuật toán Auto Cây Trồng Thông Minh:** Tự động kiểm tra cấp độ nhân vật trong thời gian thực (`G.save.lvl`). Nếu chọn chế độ `Tự Động`, tool sẽ tự động gieo loại cây có EXP và Năng Lượng cao nhất mà nhân vật có thể trồng.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Zoo Pet - All-in-One Auto Pro Tool
 // @namespace    https://zoo-pet.store/
-// @version      3.5.0
+// @version      3.5.1
 // @description  Tool Auto toàn diện cho Zoo Pet: Kho 227+ Vật Phẩm Toàn Game, Biến Đổi Item Trong Túi (Item Swapper), Nhận & Mặc Trực Tiếp Mọi Món Đồ VIP, Tỉ Lệ Rèn Đồ 100% (Thần Rèn Bất Bại), Cường Hóa +15 MAX Thần Tốc, Nông Trại VIP Pro, Săn Boss, Hầm Ngục & Auto Câu Cá.
 // @author       Beso & Antigravity
 // @match        https://*.cloudfront.net/*
@@ -2323,6 +2323,92 @@
                     </div>
                 </div>
 
+
+                <!-- TAB: KHO VẬT PHẨM & BIẾN ĐỔI ITEM (227+ ITEMS) -->
+                <div class="zp-tab-content" id="tab-items" style="display:none;">
+                    <!-- Phần 1: Cường Hóa Rèn Vũ Khí +15 MAX -->
+                    <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:10px;margin-bottom:10px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                            <div style="font-weight:700;font-size:12px;color:#92400E;">🔥 Cường Hóa & Rèn Vũ Khí Thần Tốc</div>
+                            <span style="font-size:10px;background:#FDE68A;color:#78350F;padding:2px 6px;border-radius:999px;font-weight:700;">Thành Công 100%</span>
+                        </div>
+                        <div class="zp-desc" style="color:#B45309;margin-bottom:8px;">Nâng cấp tối đa hệ số sát thương vũ khí đang cầm (+15 MAX) không tốn nguyên liệu:</div>
+                        <div style="display:flex;gap:6px;">
+                            <button id="zp-btn-forge-max-items" class="zp-btn" style="margin-top:0;background:linear-gradient(135deg,#F59E0B,#D97706);font-size:11px;font-weight:700;flex:1;">
+                                ⚡ Cường Hóa +15 MAX Vũ Khí Đang Cầm
+                            </button>
+                            <select id="zp-select-forge-lv-items" class="zp-select" style="width:75px;font-size:11px;">
+                                <option value="15">+15 (MAX)</option>
+                                <option value="14">+14</option>
+                                <option value="13">+13</option>
+                                <option value="12">+12</option>
+                                <option value="10">+10</option>
+                                <option value="5">+5</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Phần 2: Biến Đổi Ô Đồ Trong Túi (Item Swapper) -->
+                    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px;margin-bottom:12px;">
+                        <div style="font-weight:700;font-size:12px;color:#166534;margin-bottom:2px;display:flex;align-items:center;gap:6px;">
+                            <span>⚡ Biến Đổi Vật Phẩm Trong Túi (Item Swapper)</span>
+                        </div>
+                        <div class="zp-desc" style="color:#15803D;margin-bottom:8px;">Chọn ô đồ rác (ủng cũ, khúc gỗ...) và biến đổi thành bất kỳ món VIP nào bạn muốn:</div>
+                        
+                        <div style="margin-bottom:6px;">
+                            <label style="font-size:11px;font-weight:600;color:#334155;">1. Chọn ô trong túi cần đổi:</label>
+                            <div style="display:flex;gap:4px;margin-top:2px;">
+                                <select id="zp-item-slot-select" class="zp-select" style="flex:1;font-size:11px;"></select>
+                                <button id="zp-btn-refresh-slots" title="Cập nhật lại danh sách túi đồ" class="zp-btn zp-btn-secondary" style="margin-top:0;width:32px;padding:0;">🔄</button>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:6px;">
+                            <label style="font-size:11px;font-weight:600;color:#334155;">2. Món đích muốn biến thành:</label>
+                            <input type="text" id="zp-target-item-input" placeholder="Nhập ID hoặc bấm [🔄 Chọn đổi] ở bảng dưới..." style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #CBD5E1;border-radius:6px;font-size:11px;margin-top:2px;">
+                        </div>
+
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <div style="width:85px;">
+                                <label style="font-size:10px;font-weight:600;color:#64748B;">Số lượng:</label>
+                                <input type="number" id="zp-target-count-input" value="1" min="1" max="99" style="width:100%;box-sizing:border-box;padding:5px;border:1px solid #CBD5E1;border-radius:6px;font-size:11px;">
+                            </div>
+                            <button id="zp-btn-swap-now" class="zp-btn" style="flex:1;margin-top:14px;background:#16A34A;font-weight:700;">
+                                ⚡ Biến Đổi Ô Này Ngay
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Phần 3: Danh Mục & Tra Cứu Toàn Bộ 227+ Items -->
+                    <div>
+                        <div style="font-weight:700;font-size:12px;color:#0284C7;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;">
+                            <span>📦 Tra Cứu & Nhận Trực Tiếp (227+ Món)</span>
+                            <span id="zp-item-count-badge" style="font-size:10px;background:#E0F2FE;color:#0369A1;padding:2px 6px;border-radius:9999px;font-weight:600;">227 món</span>
+                        </div>
+                        
+                        <!-- Ô tìm kiếm -->
+                        <input type="text" id="zp-item-search" placeholder="🔍 Tìm theo tên hoặc ID (vd: Búa, Sừng, Cá rồng, Pet...)" style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #CBD5E1;border-radius:8px;font-size:11px;margin-bottom:6px;">
+
+                        <!-- Bộ lọc phân loại -->
+                        <div style="display:flex;gap:3px;overflow-x:auto;padding-bottom:4px;margin-bottom:8px;" id="zp-item-filter-chips">
+                            <button class="zp-filter-chip active" data-cat="all" style="background:#0284C7;color:#fff;border:none;border-radius:9999px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;font-weight:600;">Tất cả (227)</button>
+                            <button class="zp-filter-chip" data-cat="weapon" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;border-radius:9999px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">⚔️ Vũ khí</button>
+                            <button class="zp-filter-chip" data-cat="hat" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;border-radius:9999px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">👑 Mũ</button>
+                            <button class="zp-filter-chip" data-cat="armor" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;border-radius:9999px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">🛡️ Giáp</button>
+                            <button class="zp-filter-chip" data-cat="pet" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;border-radius:9999px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">🐲 Pet</button>
+                            <button class="zp-filter-chip" data-cat="fish" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;border-radius:9999px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">🐟 Cá</button>
+                            <button class="zp-filter-chip" data-cat="material" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;border-radius:9999px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">💎 Nguyên liệu</button>
+                            <button class="zp-filter-chip" data-cat="crop" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;border-radius:9999px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">🌾 Nông sản</button>
+                            <button class="zp-filter-chip" data-cat="disguise" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;border-radius:9999px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">🎭 Cải trang</button>
+                            <button class="zp-filter-chip" data-cat="decor" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;border-radius:9999px;padding:3px 8px;font-size:10px;cursor:pointer;white-space:nowrap;">🏡 Trang trí</button>
+                        </div>
+
+                        <!-- Danh sách item cards -->
+                        <div id="zp-item-list-container" style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:2px;">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- TAB 2: SĂN BOSS & DU HÀNH TỰ ĐỘNG -->
                 <div class="zp-tab-content" id="tab-boss" style="display:none;">
                     <div class="zp-row">
@@ -2918,6 +3004,184 @@
                 });
             });
         }
+
+
+        // --- MODULE KHO ITEM & BIẾN ĐỔI VẬT PHẨM (227+ ITEMS) ---
+        // Bind Switch Forge 100% (Tab Cheats)
+        bindCheck('cfg-forge100', CFG.cheats, 'forge100');
+
+        // Nút Cường Hóa Vũ Khí +15 MAX (ở Tab Cheats và Tab Items)
+        const handleForgeMax = (selectId) => {
+            const lv = document.getElementById(selectId)?.value || 15;
+            instantUpgradeWeapon(lv);
+        };
+        document.getElementById('zp-btn-forge-max')?.addEventListener('click', () => handleForgeMax('zp-select-forge-lv'));
+        document.getElementById('zp-btn-forge-max-items')?.addEventListener('click', () => handleForgeMax('zp-select-forge-lv-items'));
+
+        // Nút refresh slots túi đồ
+        document.getElementById('zp-btn-refresh-slots')?.addEventListener('click', () => {
+            refreshBagSlotsDropdown();
+            showToast('🔄 Đã làm mới danh sách túi đồ!');
+        });
+
+        // Nút Biến Đổi Slot
+        document.getElementById('zp-btn-swap-now')?.addEventListener('click', () => {
+            const slotIdx = document.getElementById('zp-item-slot-select')?.value;
+            const targetId = document.getElementById('zp-target-item-input')?.value?.trim();
+            const count = document.getElementById('zp-target-count-input')?.value || 1;
+
+            if (slotIdx === '' || slotIdx === undefined) {
+                showToast('⚠️ Vui lòng chọn ô đồ cần biến đổi!');
+                return;
+            }
+            if (!targetId) {
+                showToast('⚠️ Vui lòng nhập hoặc chọn ID vật phẩm đích!');
+                return;
+            }
+            swapBagSlot(slotIdx, targetId, count);
+        });
+
+        // Xử lý tìm kiếm và bộ lọc Item
+        let currentItemCategory = 'all';
+        function renderItemsListUI() {
+            const container = document.getElementById('zp-item-list-container');
+            if (!container) return;
+            const query = (document.getElementById('zp-item-search')?.value || '').toLowerCase().trim();
+
+            let matched = [];
+            for (let id in ALL_GAME_ITEMS) {
+                const item = ALL_GAME_ITEMS[id];
+                if (currentItemCategory !== 'all' && item.type !== currentItemCategory) continue;
+                if (query) {
+                    const matchName = (item.name || '').toLowerCase().includes(query);
+                    const matchId = (item.id || '').toLowerCase().includes(query);
+                    const matchDesc = (item.desc || '').toLowerCase().includes(query);
+                    if (!matchName && !matchId && !matchDesc) continue;
+                }
+                matched.push(item);
+            }
+
+            const badge = document.getElementById('zp-item-count-badge');
+            if (badge) badge.textContent = `${matched.length} món`;
+
+            if (!matched.length) {
+                container.innerHTML = '<div style="text-align:center;padding:16px;color:#94A3B8;font-size:11px;">Không tìm thấy vật phẩm nào phù hợp.</div>';
+                return;
+            }
+
+            let html = '';
+            matched.slice(0, 100).forEach(item => {
+                let badgeColor = '#E2E8F0';
+                let badgeText = item.type || 'item';
+                let borderStyle = '1px solid #E2E8F0';
+                let bgStyle = '#FFFFFF';
+
+                if (item.legend) {
+                    badgeColor = '#FEF08A';
+                    badgeText = '👑 HUYỀN THOẠI';
+                    borderStyle = '1px solid #FDE047';
+                    bgStyle = '#FEFCE8';
+                } else if (item.rare) {
+                    badgeColor = '#E9D5FF';
+                    badgeText = '⭐ HIẾM';
+                    borderStyle = '1px solid #D8B4FE';
+                    bgStyle = '#FAF5FF';
+                }
+
+                let stats = [];
+                if (item.atk) stats.push(`⚔️ Atk +${item.atk}`);
+                if (item.def) stats.push(`🛡️ Def +${item.def}`);
+                if (item.heal) stats.push(`❤️ Hồi ${item.heal} HP`);
+                const statsStr = stats.length ? `<div style="font-size:10px;font-weight:700;color:#0284C7;margin-top:2px;">${stats.join(' • ')}</div>` : '';
+
+                const isEquipable = (item.type === 'weapon' || item.type === 'hat' || item.type === 'armor');
+
+                html += `
+                    <div style="background:${bgStyle};border:${borderStyle};border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:4px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;">
+                            <div>
+                                <span style="font-weight:700;font-size:11px;color:#1E293B;">${item.name}</span>
+                                <span style="font-size:9px;color:#64748B;font-family:monospace;margin-left:4px;">(${item.id})</span>
+                            </div>
+                            <span style="font-size:9px;background:${badgeColor};padding:1px 5px;border-radius:4px;font-weight:600;">${badgeText}</span>
+                        </div>
+                        ${item.desc ? `<div style="font-size:10px;color:#64748B;line-height:1.3;">${item.desc}</div>` : ''}
+                        ${statsStr}
+                        <div style="display:flex;gap:4px;margin-top:4px;">
+                            <button class="zp-btn-give-item" data-id="${item.id}" data-n="1" style="flex:1;background:#0284C7;color:#fff;border:none;border-radius:6px;padding:4px 6px;font-size:10px;font-weight:600;cursor:pointer;">🎁 Nhận x1</button>
+                            <button class="zp-btn-give-item" data-id="${item.id}" data-n="99" style="background:#0369A1;color:#fff;border:none;border-radius:6px;padding:4px 6px;font-size:10px;font-weight:600;cursor:pointer;">🎁 x99</button>
+                            ${isEquipable ? `<button class="zp-btn-equip-item" data-id="${item.id}" style="background:#F59E0B;color:#fff;border:none;border-radius:6px;padding:4px 6px;font-size:10px;font-weight:600;cursor:pointer;">✨ Mặc</button>` : ''}
+                            <button class="zp-btn-pick-swap" data-id="${item.id}" title="Chọn món này làm mục tiêu biến đổi" style="background:#F1F5F9;color:#334155;border:1px solid #CBD5E1;border-radius:6px;padding:4px 6px;font-size:10px;cursor:pointer;">🔄 Chọn đổi</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Bind click events cho từng nút trong list
+            container.querySelectorAll('.zp-btn-give-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    const n = btn.getAttribute('data-n');
+                    giveItemDirectly(id, n);
+                });
+            });
+
+            container.querySelectorAll('.zp-btn-equip-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    equipItemDirectly(id);
+                });
+            });
+
+            container.querySelectorAll('.zp-btn-pick-swap').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    const inp = document.getElementById('zp-target-item-input');
+                    if (inp) {
+                        inp.value = id;
+                        inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        showToast(`🎯 Đã chọn món mục tiêu: <b>${ALL_GAME_ITEMS[id]?.name || id}</b>`);
+                    }
+                });
+            });
+        }
+
+        // Search event listener
+        document.getElementById('zp-item-search')?.addEventListener('input', () => {
+            renderItemsListUI();
+        });
+
+        // Category filter chips
+        document.querySelectorAll('.zp-filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.zp-filter-chip').forEach(c => {
+                    c.classList.remove('active');
+                    c.style.background = '#F1F5F9';
+                    c.style.color = '#475569';
+                    c.style.fontWeight = 'normal';
+                });
+                chip.classList.add('active');
+                chip.style.background = '#0284C7';
+                chip.style.color = '#FFFFFF';
+                chip.style.fontWeight = '600';
+                currentItemCategory = chip.getAttribute('data-cat') || 'all';
+                renderItemsListUI();
+            });
+        });
+
+        // Render sẵn và cập nhật mỗi khi bấm mở tab Kho Item
+        document.querySelector('.zp-tab[data-tab="items"]')?.addEventListener('click', () => {
+            refreshBagSlotsDropdown();
+            renderItemsListUI();
+        });
+
+        // Khởi tạo render lần đầu
+        setTimeout(() => {
+            renderItemsListUI();
+            refreshBagSlotsDropdown();
+        }, 500);
 
         // Kéo thả menu (Drag & Drop)
         makeDraggable(panel, document.getElementById('zp-drag-handle'));
